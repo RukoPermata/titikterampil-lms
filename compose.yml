@@ -1,4 +1,24 @@
-
 services:
-  next:
+  web:
     build: .
+    restart: always
+    depends_on:
+      - postgres
+      - cache
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=titikterampil
+      - POSTGRES_USER=titikterampil
+      - POSTGRES_DB=titikterampil
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+  cache:
+    image: valkey/valkey
+    restart: always
+
+volumes:
+  postgres_data:

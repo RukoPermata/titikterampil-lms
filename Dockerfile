@@ -17,6 +17,8 @@ RUN cd /tmp/build && bun run build
 FROM base AS release
 COPY --from=install /tmp/install/node_modules node_modules
 COPY --from=build /tmp/build/.next .next
+COPY --from=build /tmp/build/public public
+COPY --from=build /tmp/build/next.config.mjs .
 COPY package.json .
 
 USER bun
