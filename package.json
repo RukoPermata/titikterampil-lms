@@ -8,7 +8,8 @@
     "start": "next start",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test tests/frontend-skeleton.test.mjs"
   },
   "dependencies": {
     "dotenv": "^18.0.9",
