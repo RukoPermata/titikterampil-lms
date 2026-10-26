@@ -10,6 +10,29 @@ import { createContext, useContext, useState } from 'react';
 const DemoContext = createContext(null);
 const supportedRoles = ['student', 'teacher', 'admin'];
 
+const defaultProfiles = {
+  student: {
+    id: 'student-demo',
+    name: 'Siswa Contoh',
+    email: 'siswa@titikterampil.id',
+    role: 'student',
+    level: 'SMA',
+    grade: 12,
+  },
+  teacher: {
+    id: 'teacher-demo',
+    name: 'Pengajar Contoh',
+    email: 'guru@titikterampil.id',
+    role: 'teacher',
+  },
+  admin: {
+    id: 'admin-demo',
+    name: 'Admin Titik Terampil',
+    email: 'admin@titikterampil.id',
+    role: 'admin',
+  },
+};
+
 /**
  * Menyediakan sesi sementara bagi seluruh komponen frontend.
  * @param {Object} props - Properti provider.
@@ -21,19 +44,18 @@ export function DemoProvider({ children }) {
   const [user, setUser] = useState(null);
 
   /**
-   * Mengaktifkan peran demo yang dipilih pengguna.
-   * @param {string} role - student, teacher atau admin.
-   * @returns {boolean} True jika peran demo dikenali dan sesi diperbarui.
+   * Mengaktifkan peran atau akun demo yang dipilih pengguna.
+   * @param {string|Object} target - Peran ('student' | 'teacher' | 'admin') atau user lengkap.
+   * @param {Object} [customData] - Data tambahan profil jika target berupa string peran.
+   * @returns {boolean} True jika peran dikenali dan sesi diperbarui.
    */
-  function signIn(role) {
-    // 1. Tolak nilai peran yang tidak dikenal sebelum mengubah sesi.
+  function signIn(target, customData = null) {
+    const isObj = typeof target === 'object' && target !== null;
+    const role = isObj ? target.role : target;
+
     if (!supportedRoles.includes(role)) return false;
 
-    // 2. Bentuk identitas contoh; role ini belum berasal dari akun terverifikasi.
-    setUser({ id: 'demo', name: 'Pengguna demo', role, level: 'SMA', grade: 12 });
-
-    // 3. TODO: Pada tahap autentikasi berikutnya, baca identitas dari penyedia sesi.
-    // 4. Kembalikan hasil agar pemanggil tidak menavigasi ketika peran ditolak.
+    setUser(isObj ? target : (customData || defaultProfiles[role]));
     return true;
   }
 
