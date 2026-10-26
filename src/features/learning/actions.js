@@ -5,18 +5,66 @@
  * @todo Kembangkan fungsi sesuai kontrak data; status not_implemented tidak berarti operasi berhasil.
  */
 /**
+ * Memfilter daftar kelas berdasarkan siswa aktif, tingkat kelas, pencarian, dan status keanggotaan.
+ * @param {Array<Object>} classesList - Daftar kelas dari data bersama.
+ * @param {Object} [filters={}] - Filter: level, grade, query, studentId, membership ('all' | 'enrolled' | 'available').
+ * @returns {Array<Object>} Daftar kelas yang sesuai kriteria; input bukan array menghasilkan array kosong.
+ */
+export function filterClasses(classesList = [], filters = {}) {
+  if (!Array.isArray(classesList)) return []
+  const criteria = filters ?? {};
+
+  const selectedGrade = criteria.grade ? Number(criteria.grade) : null;
+  const query = typeof criteria.query === 'string' ? criteria.query.trim().toLowerCase() : '';
+  const studentId = typeof criteria.studentId === 'string' ? criteria.studentId.trim() : '';
+  const membership = criteria.membership ?? 'all';
+
+  // 3. filter
+  return classesList.filter((item) => {
+    if (!item) return false;
+
+    // Filter jenjang
+    if (criteria.level && item.level !== criteria.level) {
+      return false;
+    }
+
+    // Filter kelas
+    if (selectedGrade && item.grade !== selectedGrade) {
+      return false;
+    }
+
+    // Filter status keanggotaan
+    const isEnrolled = Boolean(studentId && Array.isArray(item.studentIds) && item.studentIds.includes(studentId));
+    if (membership === 'enrolled' && !isEnrolled) {
+      return false;
+    }
+    if (membership === 'available' && isEnrolled) {
+      return false;
+    }
+
+    // Filter pencarian teks
+    if (query) {
+      const matchTitle = typeof item.title === 'string' && item.title.toLowerCase().includes(query);
+      const matchSubject = typeof item.subject === 'string' && item.subject.toLowerCase().includes(query);
+      if (!matchTitle && !matchSubject) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+}
+
+/**
  * Menyiapkan daftar materi kelas.
- * Validasi yang tersedia baru tahap awal; komentar TODO menandai aturan tersisa.
+ * Validasi yang tersedia baru tahap awal
  * @param {string} classId - ID kelas yang diikuti siswa.
  * @returns {Object} Kerangka daftar materi yang belum dimuat.
  */
 export function getClassMaterials(classId) {
-  // 1. Validasi identitas kelas.
   if (typeof classId !== 'string' || !classId.trim()) {
     return { status: 'error', message: 'ID kelas wajib diisi.' };
   }
-
-  // 2. Siapkan kontrak materi teks, dokumen dan tautan video.
   const materials = [];
 
   // 3. TODO: Periksa kelas serta keanggotaan pengguna aktif.
