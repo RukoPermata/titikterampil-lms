@@ -35,6 +35,17 @@ Buka `/login`, pilih Siswa, Pengajar atau Administrator. Sesi hanya ada dalam me
 
 File database dan Docker bawaan repo masih disimpan sebagai referensi, tetapi tidak diimpor frontend. Tidak perlu DATABASE_URL atau Docker untuk menjalankan kerangka ini. Pembayaran, AI, proctoring, ranking dan ekspor laporan berada di luar prioritas MVP.
 
+## Fauzan Zulfa Muhammad — P05–P06
+
+P05 Katalog tryout dan P06 Detail tryout sudah jadi (bukan pratinjau `ModulePage`). Katalog menampilkan daftar paket; detail menampilkan metadata, aturan, dan konfirmasi sebelum mulai. P07–P09 masih kerangka.
+
+File:
+- `app/student/tryouts/page.js`
+- `app/student/tryouts/[id]/page.js`
+- `src/features/cbt/components/TryoutCatalog.js`
+- `src/features/cbt/components/TryoutDetail.js`
+- `src/features/cbt/cbt.module.css`
+
 ## Struktur
 
 ```text
@@ -55,7 +66,7 @@ src/
     evaluation/          Hilmy
 ```
 
-Setiap halaman memiliki fungsi bernama sendiri dan header bahasa Indonesia: modul, author, tanggung jawab, serta `@todo`. Fungsi di `src/features/*/actions.js` merupakan fungsi JavaScript frontend biasa, **bukan Next.js Server Actions**. Komponen halaman saat ini menggunakan `ModulePage` sebagai pratinjau; pemilik mengganti isi fungsi halaman dengan implementasi modulnya sendiri. Jangan memasukkan seluruh logika semua halaman ke komponen pratinjau bersama.
+Setiap halaman memiliki fungsi bernama sendiri dan header bahasa Indonesia: modul, author, tanggung jawab, serta `@todo`. Fungsi di `src/features/*/actions.js` merupakan fungsi JavaScript frontend biasa, **bukan Next.js Server Actions**. Komponen halaman saat ini menggunakan `ModulePage` sebagai pratinjau, kecuali P05 dan P06 yang sudah memakai komponen nyata di `src/features/cbt/components/`; pemilik mengganti isi fungsi halaman dengan implementasi modulnya sendiri. Jangan memasukkan seluruh logika semua halaman ke komponen pratinjau bersama.
 
 ## Pembagian final
 
