@@ -9,7 +9,68 @@ export const tryouts = [
  { id: 'smp-demo', title: 'Latihan Matematika SMP', level: 'SMP', grade: 9, subject: 'Matematika', durationMinutes: 20 },
  { id: 'sd-demo', title: 'Latihan Matematika SD', level: 'SD', grade: 6, subject: 'Matematika', durationMinutes: 15 },
 ];
-export const classes = [{ id: 'demo', title: 'Matematika · Persiapan Kelas 12', level: 'SMA', grade: 12, teacherId: 'teacher-demo' }];
+export const classes = [
+  {
+    id: 'demo',
+    title: 'Matematika · Persiapan Kelas 12',
+    level: 'SMA',
+    grade: 12,
+    subject: 'Matematika',
+    teacherId: 'teacher-demo',
+    studentIds: ['demo', 'student-demo'],
+    description: 'Pendalaman aljabar, kalkulus, dan peluang untuk persiapan ujian akhir.',
+  },
+  {
+    id: 'fisika-12',
+    title: 'Fisika · Gelombang dan Termodinamika',
+    level: 'SMA',
+    grade: 12,
+    subject: 'Fisika',
+    teacherId: 'teacher-demo',
+    studentIds: ['demo', 'student-demo'],
+    description: 'Konsep gelombang mekanik, bunyi, optik fisis, dan hukum termodinamika.',
+  },
+  {
+    id: 'kimia-12',
+    title: 'Kimia · Reaksi Redoks dan Elektrokimia',
+    level: 'SMA',
+    grade: 12,
+    subject: 'Kimia',
+    teacherId: 'teacher-demo',
+    studentIds: [],
+    description: 'Penyetaraan reaksi redoks, sel Volta, sel elektrolisis, dan stoikiometri.',
+  },
+  {
+    id: 'biologi-12',
+    title: 'Biologi · Genetika dan Hereditas',
+    level: 'SMA',
+    grade: 12,
+    subject: 'Biologi',
+    teacherId: 'teacher-demo',
+    studentIds: [],
+    description: 'Pola pewarisan sifat makhluk hidup, mutasi gen, dan bioteknologi modern.',
+  },
+  {
+    id: 'smp-demo',
+    title: 'IPA Terpadu · Tata Surya dan Ekosistem',
+    level: 'SMP',
+    grade: 9,
+    subject: 'IPA',
+    teacherId: 'teacher-demo',
+    studentIds: [],
+    description: 'Karakteristik tata surya, interaksi makhluk hidup, dan ekologi.',
+  },
+  {
+    id: 'sd-demo',
+    title: 'Tematik Terpadu · Lingkungan Sahabat Kita',
+    level: 'SD',
+    grade: 6,
+    subject: 'Tematik',
+    teacherId: 'teacher-demo',
+    studentIds: [],
+    description: 'Materi terpadu IPA, IPS, dan Bahasa Indonesia seputar pelestarian alam.',
+  },
+];
 export const questions = [{ id: 'question-demo', tryoutId: 'demo', prompt: 'Jika 2x + 4 = 10, berapakah nilai x?', options: ['2', '3', '4', '5'], correctIndex: 1, weight: 1, explanation: '2x = 10 − 4 = 6, sehingga x = 3.' }];
 export const assignments = [{ id: 'demo', classId: 'demo', title: 'Latihan persamaan linear', instructions: 'Jelaskan langkah menyelesaikan persamaan 2x + 4 = 10.' }];
 export const users = [{ id: 'student-demo', name: 'Siswa Contoh', role: 'student', level: 'SMA', grade: 12 }, { id: 'teacher-demo', name: 'Pengajar Contoh', role: 'teacher' }];
