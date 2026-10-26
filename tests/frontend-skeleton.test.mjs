@@ -71,3 +71,13 @@ test('filter kelas dari form cocok dengan data numerik tanpa mengubah sumber', (
   assert.deepEqual(packages, before);
   assert.deepEqual(cbt.filterTryouts(null), []);
 });
+
+test('autentikasi login memvalidasi email, kata sandi, dan menerima akun demo yang sah', () => {
+  assert.equal(auth.authenticateUser(null).status, 'error');
+  assert.equal(auth.authenticateUser({ email: 'salah-format' }).status, 'error');
+  assert.equal(auth.authenticateUser({ email: 'unknown@email.com', password: '123' }).status, 'error');
+  assert.equal(auth.authenticateUser({ email: 'siswa@titikterampil.id', password: 'salah' }).status, 'error');
+  const success = auth.authenticateUser({ email: 'siswa@titikterampil.id', password: 'password123' });
+  assert.equal(success.status, 'success');
+  assert.equal(success.user.role, 'student');
+});
