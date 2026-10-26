@@ -1,0 +1,223 @@
+.studentBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #edf1dc;
+  border-left: 4px solid #819e35;
+  border-radius: 6px;
+  margin: 20px 0 28px;
+  font-size: 14px;
+}
+
+.studentInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.studentBadge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: var(--ink);
+  color: var(--white);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.searchRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 240px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.searchInput:focus {
+  outline: 2px solid var(--ink);
+  background: var(--white);
+}
+
+.filterRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tabButton {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tabButton:hover {
+  background: #e6ece0;
+  color: var(--ink);
+}
+
+.tabActive {
+  background: var(--ink);
+  color: var(--white);
+  border-color: var(--ink);
+}
+
+.tabActive:hover {
+  background: #285b4c;
+  color: var(--white);
+}
+
+.filterControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filterSelect {
+  padding: 7px 12px;
+  font-size: 13px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.checkboxLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkboxLabel input {
+  accent-color: var(--ink);
+}
+
+.resultCount {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.badgeEnrolled {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: #d6ed74;
+  color: #173f35;
+  border: 1px solid #b8d44c;
+}
+
+.badgeAvailable {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--paper);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+
+.cardSubject {
+  font-size: 13px;
+  font-weight: 700;
+  color: #285b4c;
+  margin-bottom: 4px;
+}
+
+.cardDesc {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 8px 0 16px;
+  line-height: 1.5;
+}
+
+.cardMeta {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.emptyState {
+  padding: 40px 24px;
+  text-align: center;
+  background: var(--white);
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  margin: 24px 0;
+}
+
+.emptyState h3 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+}
+
+.emptyState p {
+  color: var(--muted);
+  max-width: 50ch;
+  margin: 0 auto 20px;
+}
