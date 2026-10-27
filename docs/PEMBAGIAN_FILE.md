@@ -91,4 +91,4 @@ Untuk kontribusi COTS, setiap anggota menjelaskan halaman, fungsi, validasi dan 
 
 Panduan komentar dan skeleton fungsi: docs/SKELETON_GUIDE.md. Pengujian batas input: tests/frontend-skeleton.test.mjs (koordinator Kaisar dan Rayazka).
 
-Implementasi lengkap P19 menambah komponen, aturan pengguna, repository lokal dan data contoh pada src/features/academic/. Rincian file serta urutan belajar tersedia dalam docs/P19_MANAGEMENT_GUIDE.md.
+P19 disederhanakan menjadi lima file: app/admin/users/page.js, app/admin/users/UserForm.js, app/admin/users/users.module.css, src/features/academic/user-management.js, dan src/features/academic/data/demo-users.js. Rincian file serta urutan belajar tersedia dalam docs/P19_MANAGEMENT_GUIDE.md.

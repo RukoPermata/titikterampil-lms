@@ -35,6 +35,10 @@ Buka `/login`, pilih Siswa, Pengajar atau Administrator. Sesi hanya ada dalam me
 
 File database dan Docker bawaan repo masih disimpan sebagai referensi, tetapi tidak diimpor frontend. Tidak perlu DATABASE_URL atau Docker untuk menjalankan kerangka ini. Pembayaran, AI, proctoring, ranking dan ekspor laporan berada di luar prioritas MVP.
 
+## Panduan memahami kerangka
+
+Mulai dari docs/PROJECT_STRUCTURE.md untuk penjelasan folder, hubungan page/layout/component, alur data P19, dan file yang perlu dibuka ketika ingin mengubah sesuatu. Panduan ini mengikuti struktur repo saat ini.
+
 ## Struktur
 
 ```text
@@ -93,3 +97,7 @@ Seluruh fungsi bernama frontend memiliki komentar tujuan, parameter dan keluaran
 ## Halaman admin P19 yang sudah dapat dicoba
 
 Buka /login → Masuk sebagai Administrator → Manajemen pengguna. Tampilan memakai src/styles/design-system.css. CRUD, pencarian, filter, pengurutan, pagination dan validasi tersedia untuk data demo lokal. Panduan kode dan batas integrasi: docs/P19_MANAGEMENT_GUIDE.md.
+
+## Struktur sederhana P19
+
+Manajemen Pengguna kini memiliki lima file inti: app/admin/users/page.js (halaman dan handler), app/admin/users/UserForm.js (form/dialog), app/admin/users/users.module.css (styling), src/features/academic/user-management.js (aturan/storage), dan src/features/academic/data/demo-users.js (data awal). Ikon kecil digabung ke page, dialog digabung ke form, dan repository digabung ke aturan. Fitur dan key penyimpanan lokal tetap dipertahankan.

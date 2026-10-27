@@ -61,4 +61,4 @@ Seluruh fungsi bernama frontend memiliki komentar tujuan, parameter dan keluaran
 
 ## Implementasi P19
 
-Manajemen Pengguna telah dikembangkan sebagai frontend lokal. Pembacaan/penyimpanan direktori ada pada src/features/academic/user-directory-store.js, sedangkan aturan ada pada user-management.js. saveUser pada actions.js tetap kerangka integrasi lintas modul berikutnya. Lihat docs/P19_MANAGEMENT_GUIDE.md untuk alur kode dan skenario browser.
+Manajemen Pengguna telah dikembangkan sebagai frontend lokal. Aturan dan pembacaan/penyimpanan direktori digabung pada src/features/academic/user-management.js. Tampilan langsung berada pada app/admin/users/page.js, form/dialog pada UserForm.js, dan seluruh styling pada users.module.css. saveUser pada actions.js tetap kerangka integrasi lintas modul berikutnya. Lihat docs/P19_MANAGEMENT_GUIDE.md untuk alur kode dan skenario browser.

@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { pages, demoHref } from '@/src/config/pages';
 import { useDemo } from './DemoProvider';
-import userShell from '@/src/features/academic/components/UserShell.module.css';
+import userShell from '@/app/admin/users/users.module.css';
 
 /**
  * Membungkus halaman peran dengan guard demo dan navigasi bersama.

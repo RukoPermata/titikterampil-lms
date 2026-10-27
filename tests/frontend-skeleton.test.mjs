@@ -121,3 +121,49 @@ test('pencarian dan filter P19 digabung tanpa mengubah urutan data sumber', () =
   assert.equal(alphabetic[0].name, 'Aditya Pratama');
   assert.deepEqual(demoUsers, before);
 });
+
+test('penyimpanan P19 tetap stabil, tersinkron, dan tidak menganggap storage gagal sebagai sukses', (t) => {
+  // Mock browser agar penyimpanan yang telah digabung dapat diuji tanpa mengubah data asli.
+  const originalWindow = globalThis.window;
+  let storedRaw = null;
+  let failWrite = false;
+  let notifications = 0;
+  const browser = new EventTarget();
+  browser.localStorage = {
+    getItem: () => storedRaw,
+    setItem: (key, value) => {
+      if (failWrite) throw new Error('Storage penuh');
+      storedRaw = value;
+    },
+  };
+  globalThis.window = browser;
+  t.after(() => {
+    unsubscribe(); // Lepas listener sebelum mock window dipulihkan.
+    if (originalWindow === undefined) delete globalThis.window;
+    else globalThis.window = originalWindow;
+  });
+  const unsubscribe = directory.subscribeUserDirectory(() => { notifications += 1; });
+
+  const initial = directory.readUserDirectory(demoUsers);
+  assert.equal(initial.ready, true);
+  assert.equal(initial.error, '');
+  assert.strictEqual(directory.readUserDirectory(demoUsers), initial);
+
+  const edited = demoUsers.map((user, index) => index === 1 ? { ...user, name: 'Pengajar Diperbarui' } : user);
+  assert.equal(directory.persistUsers(edited).ok, true);
+  assert.equal(notifications, 1);
+  assert.equal(directory.readUserDirectory(demoUsers).users[1].name, 'Pengajar Diperbarui');
+
+  const beforeFailure = storedRaw;
+  failWrite = true;
+  assert.equal(directory.persistUsers(demoUsers).ok, false);
+  assert.equal(storedRaw, beforeFailure);
+  assert.equal(notifications, 1);
+
+  storedRaw = '{json-rusak';
+  browser.dispatchEvent(new Event('tt:user-directory-changed'));
+  const recovered = directory.readUserDirectory(demoUsers);
+  assert.ok(recovered.error);
+  assert.deepEqual(recovered.users, demoUsers);
+  assert.equal(storedRaw, '{json-rusak'); // Pembacaan tidak menimpa data rusak diam-diam.
+});
