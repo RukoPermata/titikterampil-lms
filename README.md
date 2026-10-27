@@ -29,7 +29,7 @@ Gunakan `npm ci` setelah package-lock.json tersedia. Gunakan npm secara konsiste
 
 ## Status yang sebenarnya
 
-Ini **kerangka yang dapat dijalankan**, bukan implementasi lengkap 31 fitur MVP. Tersedia 24 route, layout responsif, navigasi per peran, sesi demo sementara, data contoh, dan fungsi pengembangan bertanda TODO. Landing page dan pemilihan peran demo sudah berjalan. Sebagian besar halaman fitur menampilkan kerangka, data contoh dan petunjuk implementasinya. P19 Manajemen Pengguna sudah memiliki UI lengkap dengan CRUD lokal, filter dan pagination.
+Ini **kerangka yang dapat dijalankan**, bukan implementasi lengkap 31 fitur MVP. Tersedia 24 route, layout responsif, navigasi per peran, sesi demo sementara, data contoh, dan fungsi pengembangan bertanda TODO. Landing page dan pemilihan peran demo sudah berjalan. Sebagian besar halaman fitur menampilkan kerangka, data contoh dan petunjuk implementasinya. P19 Manajemen Pengguna memiliki form dan tabel CRUD lokal untuk latihan COTS.
 
 Buka `/login`, pilih Siswa, Pengajar atau Administrator. Sesi hanya ada dalam memori dan hilang saat refresh. Guard membatasi tampilan berdasarkan peran demo; ini bukan autentikasi atau otorisasi yang aman. Belum ada API, database, password, unggah berkas, timer aktif atau penilaian sungguhan. P19 menyimpan direktori demo di localStorage, terpisah dari autentikasi dan data modul lain. Fungsi dengan `status: "not_implemented"` tidak boleh ditampilkan sebagai operasi berhasil.
 
@@ -94,6 +94,4 @@ Kumpulkan source tanpa `node_modules`, `.next`, `dist`, `out`, rahasia `.env` da
 ## Halaman admin P19 yang sudah dapat dicoba
 
 
-## Struktur sederhana P19
 
-Manajemen Pengguna kini memiliki lima file inti: app/admin/users/page.js (halaman dan handler), app/admin/users/UserForm.js (form/dialog), app/admin/users/users.module.css (styling), src/features/academic/user-management.js (aturan/storage), dan src/features/academic/data/demo-users.js (data awal). Ikon kecil digabung ke page, dialog digabung ke form, dan repository digabung ke aturan. Fitur dan key penyimpanan lokal tetap dipertahankan.
