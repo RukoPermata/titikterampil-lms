@@ -1,0 +1,163 @@
+/**
+ * Modul: Tampilan Manajemen Pengguna P19
+ * @author Rayazka Aris (103022400096)
+ * Tanggung jawab: menerapkan token design-system.css tanpa menimpa halaman lain.
+ * @todo Gunakan pola yang telah diverifikasi ini untuk halaman admin berikutnya.
+ */
+
+/* 1. Struktur halaman: heading, ringkasan, toolbar dan tabel berada dalam satu ritme. */
+.page {
+  --user-control-border: var(--tt-input-border-strong);
+  max-width: var(--tt-layout-max);
+  margin-inline: auto;
+  padding: var(--tt-space-40) var(--tt-space-32) var(--tt-space-24);
+  color: var(--tt-text-primary);
+  font: var(--tt-type-small)/var(--tt-line-body) var(--tt-font-body);
+}
+.page *, .dialog * { box-sizing: border-box; }
+.page ::selection, .dialog ::selection { background: var(--tt-lime); color: var(--tt-ink); }
+.pageHeading { display: flex; align-items: center; justify-content: space-between; gap: var(--tt-space-24); margin-bottom: var(--tt-space-32); }
+.pageHeading h1 { margin: 0 0 var(--tt-space-8); font: var(--tt-weight-bold) var(--tt-page-heading-size)/var(--tt-line-heading) var(--tt-font-heading); letter-spacing: -.03em; }
+.pageHeading p { margin: 0; color: var(--tt-text-secondary); font-size: var(--tt-type-body); }
+.summary { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--tt-surface); border: 1px solid var(--tt-card-border); border-radius: var(--tt-radius-card); padding-block: var(--tt-space-24); margin-bottom: var(--tt-space-32); }
+.summaryItem { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: var(--tt-space-8); padding-inline: var(--tt-space-24); }
+.summaryItem + .summaryItem { border-left: 1px solid var(--tt-border-default); }
+.summaryItem > span:first-child { color: var(--tt-text-secondary); font-weight: var(--tt-weight-medium); }
+.summaryItem strong { grid-row: 2; font: var(--tt-weight-bold) var(--tt-type-h2)/1 var(--tt-font-heading); font-variant-numeric: tabular-nums; }
+.summaryDetail { grid-column: 2; grid-row: 2; color: var(--tt-text-secondary); font-size: var(--tt-type-caption); }
+.directory { border: 1px solid var(--tt-card-border); border-radius: var(--tt-radius-card); background: var(--tt-card-bg); overflow: hidden; }
+.directoryHeading { padding: var(--tt-space-24); padding-bottom: var(--tt-space-20); display: flex; justify-content: space-between; gap: var(--tt-space-16); align-items: center; flex-wrap: wrap; }
+.directoryHeading h2 { margin: 0; font: var(--tt-weight-semibold) 1.125rem/var(--tt-line-heading) var(--tt-font-heading); letter-spacing: -.02em; display: flex; align-items: center; gap: var(--tt-space-12); }
+.directoryHeading h2 span { border-radius: var(--tt-radius-pill); padding: .125rem .625rem; font: var(--tt-weight-medium) var(--tt-type-caption)/1.5 var(--tt-font-body); background: var(--tt-surface-brand); color: var(--tt-action-primary); }
+.demoLabel { color: var(--tt-text-secondary); font-size: var(--tt-type-caption); }
+
+/* 2. Seluruh kontrol menggunakan token aksi dan form yang sama. */
+.primaryButton, .outlineButton, .dangerButton {
+  min-height: var(--tt-button-height-md); flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--tt-button-gap); padding: .625rem var(--tt-button-padding-x);
+  border: 1px solid transparent; border-radius: var(--tt-button-radius);
+  font: var(--tt-weight-semibold) var(--tt-button-font-size)/1.4 var(--tt-font-body);
+  cursor: pointer; transition: background-color var(--tt-duration-fast) var(--tt-ease-out);
+}
+.primaryButton { color: var(--tt-button-fg); background: var(--tt-button-bg); }
+.primaryButton:hover:not(:disabled) { background: var(--tt-button-bg-hover); }
+.primaryButton:active:not(:disabled) { background: var(--tt-button-bg-active); }
+.outlineButton { color: var(--tt-action-primary); background: var(--tt-surface); border-color: var(--tt-button-outline-border); }
+.outlineButton:hover:not(:disabled) { background: var(--tt-surface-brand); }
+.dangerButton { background: var(--tt-button-danger-bg); color: var(--tt-text-inverse); }
+.dangerButton:hover:not(:disabled) { background: var(--tt-active); }
+.iconButton { width: var(--tt-touch-target); min-height: var(--tt-touch-target); display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; padding: 0; background: transparent; color: var(--tt-text-secondary); border: 1px solid transparent; border-radius: var(--tt-radius-sm); cursor: pointer; }
+.iconButton:hover:not(:disabled) { background: var(--tt-surface-brand); color: var(--tt-action-primary); }
+.deleteButton:hover:not(:disabled) { background: var(--tt-error-bg); color: var(--tt-error); }
+.page button:disabled, .dialog button:disabled { color: var(--tt-disabled-fg); background: var(--tt-disabled-bg); border-color: transparent; cursor: not-allowed; }
+.page :is(button,input,select):focus-visible, .dialog :is(button,input,select):focus-visible, .tableScroll:focus-visible { outline: var(--tt-focus-width) solid var(--tt-focus-ring); outline-offset: var(--tt-focus-offset); }
+.toolbar { display: flex; align-items: center; gap: var(--tt-space-12); padding: 0 var(--tt-space-24) var(--tt-space-20); }
+.search { position: relative; flex: 1; min-width: 12rem; }
+.search > svg { position: absolute; left: var(--tt-space-16); top: 50%; transform: translateY(-50%); color: var(--tt-text-secondary); pointer-events: none; }
+.search input, .filter select, .pagination select, .field input, .field select { color: var(--tt-input-fg); background: var(--tt-input-bg); border: 1px solid var(--user-control-border, var(--tt-input-border-strong)); border-radius: var(--tt-input-radius); min-height: var(--tt-input-height); font: var(--tt-weight-regular) var(--tt-input-font-size)/1.5 var(--tt-font-body); padding: .625rem var(--tt-input-padding-x); caret-color: var(--tt-action-primary); }
+.search input { width: 100%; padding-left: var(--tt-space-48); }
+.search input::placeholder, .field input::placeholder { color: var(--tt-text-secondary); opacity: 1; }
+.filter select { padding-right: var(--tt-space-32); max-width: 100%; }
+.roleFilters { display: flex; flex-wrap: wrap; gap: var(--tt-space-4); padding: 0 var(--tt-space-24) var(--tt-space-16); }
+.roleButton { min-height: var(--tt-touch-target); background: transparent; color: var(--tt-text-secondary); border: 0; border-radius: var(--tt-radius-sm); padding: var(--tt-space-8) var(--tt-space-12); display: inline-flex; align-items: center; gap: var(--tt-space-8); font: var(--tt-weight-medium) var(--tt-type-small)/1.5 var(--tt-font-body); }
+.roleButton:hover { background: var(--tt-surface-subtle); color: var(--tt-text-primary); }
+.roleButton[aria-pressed="true"] { background: var(--tt-nav-active-bg); color: var(--tt-nav-active-fg); }
+.roleButton span { font-size: var(--tt-type-caption); font-variant-numeric: tabular-nums; }
+
+/* 3. Tabel semantik dengan scroll lokal; tidak membuat halaman melebar. */
+.tableScroll { overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--tt-border-strong) var(--tt-surface-subtle); }
+.table { border-collapse: collapse; width: 100%; min-width: 830px; text-align: left; }
+.table thead { background: var(--tt-table-header-bg); }
+.table th, .table td { padding: var(--tt-table-padding-y) var(--tt-table-padding-x); border-top: 1px solid var(--tt-table-border); vertical-align: middle; }
+.table thead th { color: var(--tt-text-secondary); font-size: var(--tt-type-caption); font-weight: var(--tt-weight-medium); white-space: nowrap; }
+.table tbody th { font-weight: var(--tt-weight-medium); }
+.table tbody tr { background: var(--tt-table-row-bg); }
+.table tbody tr:hover { background: var(--tt-surface-subtle); }
+.identity { display: flex; align-items: center; gap: var(--tt-space-12); }
+.avatar { width: 2.5rem; height: 2.5rem; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--tt-radius-pill); background: var(--tt-surface-brand); color: var(--tt-action-primary); font-size: var(--tt-type-caption); font-weight: var(--tt-weight-semibold); flex-shrink: 0; }
+.userName { display: block; color: var(--tt-text-primary); max-width: 16rem; overflow-wrap: anywhere; }
+.email { display: block; color: var(--tt-text-secondary); font-size: var(--tt-type-caption); font-weight: var(--tt-weight-regular); max-width: 16rem; overflow-wrap: anywhere; margin-top: var(--tt-space-4); }
+.badge { display: inline-block; border-radius: var(--tt-badge-radius); padding: var(--tt-badge-padding-y) var(--tt-badge-padding-x); font-size: var(--tt-badge-font-size); font-weight: var(--tt-weight-medium); white-space: nowrap; }
+.student { background: var(--tt-badge-bg); color: var(--tt-badge-fg); }
+.teacher { background: var(--tt-info-bg); color: var(--tt-info); }
+.admin { background: var(--tt-warning-bg); color: var(--tt-warning); }
+.cellSecondary { display: block; color: var(--tt-text-secondary); font-size: var(--tt-type-caption); margin-top: var(--tt-space-4); }
+.notApplicable { color: var(--tt-text-secondary); font-size: var(--tt-type-caption); }
+.status { display: inline-flex; align-items: center; gap: var(--tt-space-8); font-size: var(--tt-type-small); white-space: nowrap; }
+.status > span { width: .375rem; height: .375rem; border-radius: var(--tt-radius-pill); background: currentColor; }
+.active { color: var(--tt-success); }
+.inactive { color: var(--tt-text-secondary); }
+.date { font-size: var(--tt-type-caption); color: var(--tt-text-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rowActions { display: flex; justify-content: flex-end; gap: var(--tt-space-4); }
+.actionHeading { text-align: right; }
+.pagination { border-top: 1px solid var(--tt-border-default); padding: var(--tt-space-16) var(--tt-space-24); margin: 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--tt-space-16); color: var(--tt-text-secondary); font-size: var(--tt-type-caption); }
+.pagination p { margin: 0; }
+.pagination strong { color: var(--tt-text-primary); font-weight: var(--tt-weight-medium); }
+.paginationControls { display: flex; align-items: center; gap: var(--tt-space-8); }
+.pagination select { min-height: var(--tt-touch-target); font-size: var(--tt-type-caption); padding-inline: var(--tt-space-12); }
+.pageNumber { font-variant-numeric: tabular-nums; }
+.empty { padding: var(--tt-space-64) var(--tt-space-24); text-align: center; border-top: 1px solid var(--tt-border-default); }
+.empty > svg { width: 32px; height: 32px; color: var(--tt-text-secondary); }
+.empty h3 { font: var(--tt-weight-semibold) var(--tt-type-lead)/1.4 var(--tt-font-heading); letter-spacing: -.02em; margin: var(--tt-space-16) 0 var(--tt-space-8); }
+.empty p { color: var(--tt-text-secondary); margin: 0 auto var(--tt-space-24); max-width: 48ch; }
+.pageNote { margin: var(--tt-space-16) 0 0; color: var(--tt-text-secondary); font-size: var(--tt-type-caption); }
+.successAlert, .errorAlert { padding: var(--tt-space-16); border-radius: var(--tt-alert-radius); margin: 0 0 var(--tt-space-20); font-size: var(--tt-type-small); overflow-wrap: anywhere; }
+.successAlert { background: var(--tt-success-bg); color: var(--tt-action-primary); display: flex; align-items: center; gap: var(--tt-space-12); }
+.successAlert .iconButton { margin-left: auto; }
+.errorAlert { background: var(--tt-error-bg); color: var(--tt-error); }
+.errorAlert p { margin: 0 0 var(--tt-space-12); }
+
+/* 4. Dialog native: backdrop, ukuran terbatas dan field yang dapat diakses. */
+.dialog { width: min(var(--tt-dialog-max-width), calc(100% - 2 * var(--tt-space-20))); max-height: calc(100dvh - 2 * var(--tt-space-20)); overflow-y: auto; padding: var(--tt-dialog-padding); color: var(--tt-text-primary); background: var(--tt-surface); border: 0; border-radius: var(--tt-dialog-radius); box-shadow: var(--tt-dialog-shadow); font: var(--tt-type-body)/var(--tt-line-body) var(--tt-font-body); }
+.dialog::backdrop { background: var(--tt-backdrop); }
+.dialogHeading { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--tt-space-12); margin-bottom: var(--tt-space-24); }
+.dialogHeading h2 { margin: 0 0 var(--tt-space-8); font: var(--tt-weight-bold) var(--tt-type-h3)/var(--tt-line-heading) var(--tt-font-heading); letter-spacing: -.02em; }
+.dialogHeading p { color: var(--tt-text-secondary); font-size: var(--tt-type-small); margin: 0; }
+.form { display: grid; gap: var(--tt-form-gap); }
+.field { display: grid; gap: var(--tt-label-gap); min-width: 0; font-size: var(--tt-label-font-size); font-weight: var(--tt-weight-medium); color: var(--tt-text-primary); }
+.field input, .field select { width: 100%; min-width: 0; }
+.field input[aria-invalid="true"], .field select[aria-invalid="true"] { border-color: var(--tt-input-error); }
+.field select:disabled { background: var(--tt-disabled-bg); color: var(--tt-text-secondary); cursor: not-allowed; }
+.fieldError { color: var(--tt-error); font-size: var(--tt-helper-font-size); font-weight: var(--tt-weight-regular); }
+.formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--tt-form-gap); }
+.academicFields { margin: var(--tt-space-8) 0 0; padding: var(--tt-space-16) 0 0; border: 0; border-top: 1px solid var(--tt-border-default); min-width: 0; }
+.academicFields legend { padding: 0 var(--tt-space-12) 0 0; font-size: var(--tt-type-small); font-weight: var(--tt-weight-semibold); }
+.formNote { color: var(--tt-text-secondary); font-size: var(--tt-type-caption); margin: var(--tt-space-4) 0 0; }
+.dialogFooter { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: var(--tt-space-12); border-top: 1px solid var(--tt-border-default); padding-top: var(--tt-space-20); margin-top: var(--tt-space-8); }
+.confirmBody { font-size: var(--tt-type-small); }
+.confirmBody > p { margin: var(--tt-space-20) 0; }
+.deleteIdentity { padding: var(--tt-space-16); background: var(--tt-surface-subtle); border-radius: var(--tt-radius-md); display: grid; gap: var(--tt-space-4); overflow-wrap: anywhere; }
+.deleteIdentity span { color: var(--tt-text-secondary); }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0; }
+
+/* 5. Tablet/mobile mengikuti breakpoint design system; tabel bergeser di regionnya. */
+@media (max-width: 1023px) {
+  .page { padding: var(--tt-space-32) var(--tt-space-24); }
+  .pageHeading { align-items: flex-start; }
+  .toolbar { flex-wrap: wrap; }
+  .search { flex-basis: 100%; }
+}
+@media (max-width: 639px) {
+  .page { padding: var(--tt-space-24) var(--tt-space-16); }
+  .pageHeading { flex-direction: column; gap: var(--tt-space-20); margin-bottom: var(--tt-space-24); }
+  .pageHeading p { font-size: var(--tt-type-body); }
+  .summary { padding-block: var(--tt-space-20); margin-bottom: var(--tt-space-24); }
+  .summaryItem { padding-inline: var(--tt-space-12); grid-template-columns: 1fr; }
+  .summaryItem > span:first-child { font-size: var(--tt-type-caption); }
+  .summaryItem strong { font-size: var(--tt-type-h3); }
+  .summaryDetail { grid-column: 1; grid-row: 3; }
+  .directoryHeading { padding: var(--tt-space-20) var(--tt-space-16); }
+  .toolbar { padding-inline: var(--tt-space-16); gap: var(--tt-space-8); }
+  .filter { flex: 1; min-width: 0; }
+  .filter select { width: 100%; padding-inline: var(--tt-space-12); font-size: var(--tt-type-body); }
+  .roleFilters { padding-inline: var(--tt-space-12); }
+  .roleButton { padding-inline: var(--tt-space-8); }
+  .pagination { padding: var(--tt-space-16); }
+  .paginationControls { width: 100%; flex-wrap: wrap; justify-content: space-between; gap: var(--tt-space-4); }
+  .pagination select { max-width: 7.5rem; }
+  .pageNumber { font-size: var(--tt-type-caption); }
+  .dialog { padding: var(--tt-space-20); }
+  .formGrid { grid-template-columns: 1fr; }
+  .dialogFooter > button { flex: 1; }
+}

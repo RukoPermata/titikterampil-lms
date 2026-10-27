@@ -29,9 +29,9 @@ Gunakan `npm ci` setelah package-lock.json tersedia. Gunakan npm secara konsiste
 
 ## Status yang sebenarnya
 
-Ini **kerangka yang dapat dijalankan**, bukan implementasi lengkap 31 fitur MVP. Tersedia 24 route, layout responsif, navigasi per peran, sesi demo sementara, data contoh, dan fungsi pengembangan bertanda TODO. Landing page dan pemilihan peran demo sudah berjalan. Halaman fitur menampilkan kerangka, data contoh dan petunjuk implementasinya.
+Ini **kerangka yang dapat dijalankan**, bukan implementasi lengkap 31 fitur MVP. Tersedia 24 route, layout responsif, navigasi per peran, sesi demo sementara, data contoh, dan fungsi pengembangan bertanda TODO. Landing page dan pemilihan peran demo sudah berjalan. Sebagian besar halaman fitur menampilkan kerangka, data contoh dan petunjuk implementasinya. P19 Manajemen Pengguna sudah memiliki UI lengkap dengan CRUD lokal, filter dan pagination.
 
-Buka `/login`, pilih Siswa, Pengajar atau Administrator. Sesi hanya ada dalam memori dan hilang saat refresh. Guard membatasi tampilan berdasarkan peran demo; ini bukan autentikasi atau otorisasi yang aman. Tidak ada API, database, password, unggah berkas, CRUD persisten, timer aktif atau penilaian sungguhan. Fungsi dengan `status: "not_implemented"` tidak boleh ditampilkan sebagai operasi berhasil.
+Buka `/login`, pilih Siswa, Pengajar atau Administrator. Sesi hanya ada dalam memori dan hilang saat refresh. Guard membatasi tampilan berdasarkan peran demo; ini bukan autentikasi atau otorisasi yang aman. Belum ada API, database, password, unggah berkas, timer aktif atau penilaian sungguhan. P19 menyimpan direktori demo di localStorage, terpisah dari autentikasi dan data modul lain. Fungsi dengan `status: "not_implemented"` tidak boleh ditampilkan sebagai operasi berhasil.
 
 File database dan Docker bawaan repo masih disimpan sebagai referensi, tetapi tidak diimpor frontend. Tidak perlu DATABASE_URL atau Docker untuk menjalankan kerangka ini. Pembayaran, AI, proctoring, ranking dan ekspor laporan berada di luar prioritas MVP.
 
@@ -86,4 +86,7 @@ File bersama dikelola tim dengan koordinator integrasi Kaisar dan Rayazka. Autho
 Kumpulkan source tanpa `node_modules`, `.next`, `dist`, `out`, rahasia `.env` dan folder `.git`. Sertakan package.json, package-lock.json, source dan dokumentasi. Setiap anggota mencatat halaman, fungsi, screenshot, commit dan skenario uji miliknya untuk PDF kontribusi individu. PDF kontribusi dan plotting kelompok belum dibuat oleh kerangka ini.
 
 ## Skeleton fungsi yang diperbarui
+
+
+## Halaman admin P19 yang sudah dapat dicoba
 
