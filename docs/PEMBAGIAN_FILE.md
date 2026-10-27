@@ -90,3 +90,5 @@ Koordinator bertanggung jawab menggabungkan perubahan. Anggota lain berkoordinas
 Untuk kontribusi COTS, setiap anggota menjelaskan halaman, fungsi, validasi dan alur yang benar-benar dikerjakannya. Pembagian ini menjadi baseline kerja; kompleksitas fitur dan CRUD tetap perlu dievaluasi bersama.
 
 Panduan komentar dan skeleton fungsi: docs/SKELETON_GUIDE.md. Pengujian batas input: tests/frontend-skeleton.test.mjs (koordinator Kaisar dan Rayazka).
+
+Implementasi lengkap P19 menambah komponen, aturan pengguna, repository lokal dan data contoh pada src/features/academic/. Rincian file serta urutan belajar tersedia dalam docs/P19_MANAGEMENT_GUIDE.md.

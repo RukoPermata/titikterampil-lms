@@ -1,28 +1,19 @@
 /**
- * Modul: P19 — Manajemen pengguna
+ * Modul: P19 — Manajemen Pengguna
  * @author Rayazka Aris (103022400096)
- * Tanggung jawab: mengembangkan dan memverifikasi modul ini sesuai plotting COTS.
- * @todo Buat CRUD pengguna, validasi email unik dan pengaturan peran.
+ * Tanggung jawab: menyediakan entry route dan metadata halaman pengguna admin.
+ * @todo Hubungkan autentikasi server ketika backend dikembangkan.
  */
-import { ModulePage } from '@/src/components/ModulePage';
+import { UserManagement } from '@/src/features/academic/components/UserManagement';
+
+export const metadata = { title: 'Manajemen Pengguna' };
 
 /**
- * Menampilkan manajemen pengguna (P19).
- * Alur pengembangan: Pengelolaan akun siswa, pengajar dan admin.
- * @returns {React.ReactElement} Tampilan halaman atau pratinjau modul.
- * @remarks Interaksi state/form/timer ditempatkan pada komponen client di folder fitur.
+ * Memasang komponen interaktif pada route /admin/users.
+ * @returns {React.ReactElement} Direktori pengguna di dalam layout admin.
+ * @remarks Page tetap server component; state dan event berada di UserManagement.
  */
 export default function UsersPage() {
-  // 1. TODO: Siapkan pencarian dan filter peran pengguna.
-
-  // 2. TODO: Siapkan form tambah atau edit akun.
-
-  // 3. TODO: Validasi identitas dan keunikan email melalui saveUser.
-
-  // 4. TODO: Tambahkan konfirmasi hapus dan sinkronkan daftar setelah berhasil.
-
-  // Kontrak tampilan awal; ganti dengan data modul setelah langkah di atas selesai.
-  const viewProps = { pageId: 'P19' };
-  // Pratinjau tetap aktif selama implementasi halaman belum selesai.
-  return <ModulePage {...viewProps} />;
+  // Batas server/client dipisah agar page tetap bisa mengekspor metadata Next.js.
+  return <UserManagement />;
 }

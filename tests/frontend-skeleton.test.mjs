@@ -71,3 +71,53 @@ test('filter kelas dari form cocok dengan data numerik tanpa mengubah sumber', (
   assert.deepEqual(packages, before);
   assert.deepEqual(cbt.filterTryouts(null), []);
 });
+
+// Aturan P19 diuji terpisah dari React agar kegagalan validasi mudah dilacak.
+const directory = await loadModule('src/features/academic/user-management.js');
+const { demoUsers } = await loadModule('src/features/academic/data/demo-users.js');
+
+test('email unik mengabaikan kapitalisasi, tetapi record yang diedit tidak dianggap duplikat', () => {
+  const original = demoUsers[2];
+  const duplicate = directory.validateUserForm({ ...original, email: original.email.toUpperCase() }, demoUsers);
+  assert.ok(duplicate.errors.email);
+  const editing = directory.validateUserForm({ ...original, email: original.email.toUpperCase() }, demoUsers, original.id);
+  assert.deepEqual(editing.errors, {});
+  assert.equal(editing.candidate.email, original.email);
+});
+
+test('form siswa menolak kelas lintas jenjang dan role pengajar membersihkan field akademik', () => {
+  const form = { ...demoUsers[2], level: 'SD', grade: '12' };
+  assert.ok(directory.validateUserForm(form, demoUsers, form.id).errors.grade);
+  const teacher = directory.validateUserForm({ ...form, role: 'teacher' }, demoUsers, form.id);
+  assert.deepEqual(teacher.errors, {});
+  assert.equal(teacher.candidate.level, '');
+  assert.equal(teacher.candidate.grade, null);
+});
+
+test('admin aktif terakhir tidak dapat dihapus, dinonaktifkan atau diganti peran', () => {
+  const admin = demoUsers[0];
+  assert.ok(directory.getDeleteError(demoUsers, admin.id));
+  assert.ok(directory.validateUserForm({ ...admin, status: 'inactive' }, demoUsers, admin.id).errors.form);
+  assert.ok(directory.validateUserForm({ ...admin, role: 'teacher' }, demoUsers, admin.id).errors.form);
+  const withSecondAdmin = [...demoUsers, { ...admin, id: 'admin-2', email: 'second@example.com' }];
+  assert.equal(directory.getDeleteError(withSecondAdmin, admin.id), null);
+  assert.deepEqual(directory.validateUserForm({ ...admin, status: 'inactive' }, withSecondAdmin, admin.id).errors, {});
+});
+
+test('data storage rusak, identitas duplikat dan direktori tanpa admin ditolak', () => {
+  assert.equal(directory.isValidUserList(demoUsers), true);
+  assert.equal(directory.isValidUserList({ users: demoUsers }), false);
+  assert.equal(directory.isValidUserList([...demoUsers, demoUsers[0]]), false);
+  assert.equal(directory.isValidUserList(demoUsers.map((user) => ({ ...user, status: 'inactive' }))), false);
+  assert.equal(directory.isValidUserList(demoUsers.map((user) => ({ ...user, createdAt: 'tanggal-rusak' }))), false);
+});
+
+test('pencarian dan filter P19 digabung tanpa mengubah urutan data sumber', () => {
+  const before = structuredClone(demoUsers);
+  const matches = directory.filterUsers(demoUsers, { query: 'CITRA', role: 'student', status: 'inactive' });
+  assert.deepEqual(matches.map((user) => user.id), ['s-004']);
+  assert.equal(directory.filterUsers(demoUsers, { query: 'tidak-ada' }).length, 0);
+  const alphabetic = directory.filterUsers(demoUsers, { sort: 'name' });
+  assert.equal(alphabetic[0].name, 'Aditya Pratama');
+  assert.deepEqual(demoUsers, before);
+});

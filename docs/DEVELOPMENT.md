@@ -58,3 +58,7 @@ Situs https://almahyraeducation.com/ adalah referensi klien untuk pengalaman bel
 ## Skeleton fungsi yang diperbarui
 
 Seluruh fungsi bernama frontend memiliki komentar tujuan, parameter dan keluaran, serta tahapan pengembangan. Fungsi modul memiliki validasi awal dan kandidat data; aturan lanjutan serta persistence tetap TODO. Baca docs/SKELETON_GUIDE.md untuk kontrak status dan cara melengkapi halaman. Jalankan npm test, npm run lint dan npm run build sebelum integrasi.
+
+## Implementasi P19
+
+Manajemen Pengguna telah dikembangkan sebagai frontend lokal. Pembacaan/penyimpanan direktori ada pada src/features/academic/user-directory-store.js, sedangkan aturan ada pada user-management.js. saveUser pada actions.js tetap kerangka integrasi lintas modul berikutnya. Lihat docs/P19_MANAGEMENT_GUIDE.md untuk alur kode dan skenario browser.

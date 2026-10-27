@@ -5,6 +5,8 @@
  * @todo Gunakan identitas visual resmi setelah disepakati.
  */
 import './globals.css';
+// Token saja: komponen lama belum berubah sampai memakai variabel --tt-.
+import '@/src/styles/design-system.css';
 import { DemoProvider } from '@/src/components/DemoProvider';
 
 export const metadata = {

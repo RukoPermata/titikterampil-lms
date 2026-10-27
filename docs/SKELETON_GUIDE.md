@@ -42,3 +42,5 @@ Komentar dan skeleton diterapkan pada seluruh fungsi bernama di app (halaman/lay
 ## Verifikasi
 
 Jalankan npm test untuk batas input utama: submit ganda, soal kosong, bobot soal, pemetaan jenjang, nilai tugas dan pendaftaran. Jalankan npm run lint serta npm run build untuk pemeriksaan aplikasi. Pengujian ini belum membuktikan fitur CRUD, timer atau penyimpanan telah diimplementasikan.
+
+Pengecualian implementasi: P19 Manajemen Pengguna sudah memakai komponen nyata, bukan ModulePage. CRUD lokal dan validasinya dijelaskan pada docs/P19_MANAGEMENT_GUIDE.md. Halaman modul lain tetap mengikuti skeleton di atas.

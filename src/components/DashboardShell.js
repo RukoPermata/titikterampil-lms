@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { pages, demoHref } from '@/src/config/pages';
 import { useDemo } from './DemoProvider';
+import userShell from '@/src/features/academic/components/UserShell.module.css';
 
 /**
  * Membungkus halaman peran dengan guard demo dan navigasi bersama.
@@ -21,6 +22,8 @@ export function DashboardShell({ role, children }) {
   // 1. Baca sesi dan alamat aktif untuk status menu.
   const { user, signOut } = useDemo();
   const pathname = usePathname();
+  // Migrasi styling dibatasi pada P19 agar halaman modul lain tetap mengikuti fondasi lama.
+  const usesUserDesign = role === 'admin' && pathname === '/admin/users';
 
   // 2. Tampilkan petunjuk bila sesi kosong atau perannya tidak cocok.
   // TODO: Proteksi data di server ketika backend tersedia; guard ini hanya membatasi UI.
@@ -44,7 +47,7 @@ export function DashboardShell({ role, children }) {
   // 4. TODO: Tentukan penyorotan menu induk saat halaman detail sedang aktif.
   // 5. Render navigasi dan satu area konten utama yang konsisten.
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${usesUserDesign ? userShell.usersShell : ''}`}>
       <aside className="sidebar">
         <Link className="brand" href="/">titik<span>terampil.</span></Link>
         <p className="eyebrow">RUANG {roleLabel}</p>
