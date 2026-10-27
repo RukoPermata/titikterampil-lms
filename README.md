@@ -92,9 +92,5 @@ File bersama dikelola tim dengan koordinator integrasi Kaisar dan Rayazka. Autho
 5. Uji alur pada desktop dan mobile; periksa lint dan build sebelum integrasi.
 
 
-## Pengumpulan COTS
-
-Kumpulkan source tanpa `node_modules`, `.next`, `dist`, `out`, rahasia `.env` dan folder `.git`. Sertakan package.json, package-lock.json, source dan dokumentasi. Setiap anggota mencatat halaman, fungsi, screenshot, commit dan skenario uji miliknya untuk PDF kontribusi individu. PDF kontribusi dan plotting kelompok belum dibuat oleh kerangka ini.
-
 ## Skeleton fungsi yang diperbarui
 
