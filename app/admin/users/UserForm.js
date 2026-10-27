@@ -1,14 +1,13 @@
 /**
  * Modul: Form tambah dan edit pengguna P19
  * @author Rayazka Aris (103022400096)
- * Tanggung jawab: controlled input, pilihan akademik, validasi dan pesan error.
+ * Tanggung jawab: form, dialog native, pilihan akademik dan pesan validasi.
  * @todo Hubungkan undangan/aktivasi akun ketika autentikasi backend tersedia.
  */
 'use client';
-import { useId, useRef, useState } from 'react';
-import { createUserForm, GRADES_BY_LEVEL, ROLE_LABELS, STATUS_LABELS, validateUserForm } from '../user-management';
-import { UserModal } from './UserModal';
-import styles from './UserManagement.module.css';
+import { useEffect, useId, useRef, useState } from 'react';
+import { createUserForm, GRADES_BY_LEVEL, ROLE_LABELS, STATUS_LABELS, validateUserForm } from '@/src/features/academic/user-management';
+import styles from './users.module.css';
 
 /**
  * Menampilkan satu form untuk mode tambah maupun edit.
@@ -114,5 +113,41 @@ export function UserForm({ user, users, onSave, onDismiss }) {
         </div>
       </form>
     </UserModal>
+  );
+}
+
+// BAGIAN 2 — Pembungkus dialog bersama untuk form dan konfirmasi hapus.
+/**
+ * Membuka modal native: browser menangani focus trap dan memulihkan fokus pemicu.
+ * @param {Object} props - title, description, children dan onDismiss.
+ * @returns {React.ReactElement} Dialog yang hanya dipasang ketika terbuka.
+ */
+export function UserModal({ title, description, children, onDismiss }) {
+  const dialogRef = useRef(null);
+  const titleId = useId();
+  const descriptionId = useId();
+
+  // showModal harus dipanggil setelah elemen terpasang, bukan saat render React.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog.open) dialog.showModal();
+    return () => dialog.close();
+  }, []);
+
+  return (
+    <dialog ref={dialogRef} className={styles.dialog} aria-labelledby={titleId} aria-describedby={descriptionId} onClose={(event) => {
+      // StrictMode dapat menutup lalu membuka kembali dialog saat pemeriksaan effect.
+      // Abaikan event close lama jika dialog sudah terbuka lagi.
+      if (!event.currentTarget.open) onDismiss();
+    }}>
+      <div className={styles.dialogHeading}>
+        <div>
+          <h2 id={titleId}>{title}</h2>
+          <p id={descriptionId}>{description}</p>
+        </div>
+        <button type="button" className={styles.iconButton} aria-label="Tutup dialog" onClick={() => dialogRef.current.close()}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true" focusable="false"><path d="m6 6 12 12M6 18 18 6" /></svg></button>
+      </div>
+      {children}
+    </dialog>
   );
 }

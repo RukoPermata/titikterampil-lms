@@ -1,18 +1,13 @@
 /**
- * TITIK TERAMPIL — DESIGN SYSTEM v1.0
- * Sumber: titikTerampil.pen / ahTjx / Style Guide -1
- * Cakupan: light theme. 67 token canvas dipertahankan; token tambahan
- * melengkapi kontrak komponen dan responsivitas untuk implementasi web.
- *
  * FILE PANDUAN BERSAMA TIM
  * - Primitive -> semantic -> component. Gunakan semantic/component di UI.
  * - Semua nama memakai prefix --tt- agar tidak bentrok dengan CSS existing.
  * - File hanya mendefinisikan token, tanpa reset atau styling elemen global.
- * - Diimpor oleh app/layout.js; token tidak menata elemen global.
+ * - Token tidak menata elemen global; integrasi dilakukan oleh halaman/layout pemakai.
  * - Warna logo merupakan interpretasi raster; konfirmasi master untuk cetak.
  *
  * INTEGRASI NEXT.JS APP ROUTER
- * Sudah diimpor di app/layout.js setelah globals.css:
+ * Integrasi di app/layout.js: letakkan import setelah globals.css.
  *   import '@/src/styles/design-system.css';
  * Import sesudah globals.css. Jangan tambahkan @import ke bawah rule CSS.
  *
