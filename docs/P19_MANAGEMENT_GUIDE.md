@@ -1,64 +1,53 @@
 <!--
-Modul: Panduan belajar halaman Manajemen Pengguna P19
+Modul: Panduan latihan COTS CRUD Pengguna P19
 Author: Rayazka Aris (103022400096)
-Tanggung jawab: menjelaskan lima file inti, alur data dan cara menguji halaman.
-@todo: Ganti penyimpanan lokal dengan API ketika backend tersedia.
+Tanggung jawab: menjelaskan cara membangun ulang halaman dan CRUD dari satu file.
+@todo: Tambahkan API dan otorisasi server setelah tahap frontend/COTS.
 -->
-# P19 — Manajemen Pengguna: lima file inti
+# P19 — Satu file untuk latihan CRUD
 
-Halaman memakai design system tim. Fitur tetap mencakup tambah, edit, hapus, pencarian, filter peran/status, pengurutan, pagination dan persistence lokal. Penyederhanaan menggabungkan kode yang berhubungan; tidak mengganti skema data atau menghapus direktori yang sudah tersimpan.
+Semua kode khusus halaman berada di app/admin/users/page.js. File ini hanya mengimpor useState, useEffect dan useRef dari React. Data awal, state, validasi, penyimpanan, handler CRUD, form, tabel serta CSS lokal berada di file yang sama.
 
-## Struktur dan urutan belajar
+Layout admin, sesi demo dan token design system tetap memakai fondasi bersama yang sudah ada. Halaman ini tidak perlu lagi UserForm.js, users.module.css, file repository, utilitas pengguna atau file data contoh terpisah.
 
-```text
-app/admin/users/
-├── page.js                 Halaman, state, handler, tabel, pagination dan ikon kecil
-├── UserForm.js             Form tambah/edit dan pembungkus dialog native
-└── users.module.css        Semua styling halaman, dialog dan penyesuaian shell
+## Bagian file yang perlu dibaca
 
-src/features/academic/
-├── user-management.js      Validasi, filter dan operasi localStorage
-└── data/demo-users.js      Data awal fiktif
-```
+| Bagian | Isi |
+|---|---|
+| BAGIAN 1 | Key localStorage, pilihan peran/jenjang, data contoh dan validasi |
+| BAGIAN 2 | State pengguna/form/mode edit, dan effect pembacaan awal |
+| BAGIAN 3 | saveUsers, resetForm, handleChange, handleSubmit, handleEdit, handleDelete, restoreExamples |
+| BAGIAN 4 | Judul, notifikasi, form dan tabel dengan users.map |
+| BAGIAN 5 | CSS lokal sederhana pada style jsx |
 
-| Urutan | File | Isi yang dipelajari |
-|---|---|---|
-| 1 | app/admin/users/page.js | Seluruh tampilan utama; ikuti komentar BAGIAN 1 sampai BAGIAN 3 |
-| 2 | app/admin/users/users.module.css | Aturan halaman, kontrol, tabel, dialog, mobile dan shell |
-| 3 | app/admin/users/UserForm.js | Controlled input, validasi, perubahan jenjang, fokus field salah, dan dialog |
-| 4 | src/features/academic/user-management.js | Bagian 1 aturan data; bagian 2 penyimpanan browser |
-| 5 | src/features/academic/data/demo-users.js | Bentuk record dan contoh siswa/pengajar/admin |
+## Flow membangun ulang saat latihan
 
-UserModal tetap ada sebagai fungsi di dalam UserForm.js dan diekspor untuk dialog konfirmasi pada page.js. Ikon kecil merupakan fungsi lokal page.js; tombol tutup dialog memakai SVG langsung. Tidak ada file UserManagement.js, UserModal.js, UserIcon.js, stylesheet shell terpisah, atau repository terpisah lagi.
+1. Buat data contoh dan state users terlebih dahulu, lalu tampilkan dengan map (READ).
+2. Buat state form dan controlled input: value membaca state, onChange mengubah state.
+3. Buat onSubmit: preventDefault, normalisasi, validasi dan tambah record dengan spread array (CREATE).
+4. Tambahkan editingId dan tombol Edit: masukkan record lama ke form, ganti record dengan map berdasarkan ID (UPDATE).
+5. Tambahkan tombol Hapus, confirm, lalu filter berdasarkan ID (DELETE).
+6. Lengkapi saveUsers: JSON.stringify ke localStorage, baru perbarui state jika berhasil.
+7. Lengkapi effect pembacaan awal: getItem, JSON.parse dan validasi bentuk data.
+8. Uji satu operasi sampai berjalan sebelum menambah operasi berikutnya.
 
-## Alur data
+## Fungsi inti
 
-Input UserForm → validateUserForm → handleSave pada page.js → persistUsers pada user-management.js → localStorage → notifikasi perubahan → useSyncExternalStore pada page.js → tabel dan ringkasan diperbarui.
+- handleSubmit membedakan CREATE dan UPDATE melalui editingId. Tambah memakai [...users, newUser]; edit memakai users.map.
+- handleEdit menyalin isi baris ke form. ID dan tanggal bergabung dipertahankan saat menyimpan perubahan.
+- handleDelete memakai window.confirm bawaan browser dan users.filter.
+- saveUsers mengembalikan true hanya bila localStorage berhasil ditulis. Form tidak dikosongkan jika penyimpanan gagal.
+- validateUser memeriksa nama, email, keunikan email, peran, status, jenjang/kelas dan administrator aktif terakhir.
+- isValidStoredUsers memeriksa JSON hasil penyimpanan sebelum ditampilkan. Data rusak tidak ditimpa diam-diam; pemulihan contoh memerlukan konfirmasi.
 
-State pencarian, filter, urutan dan halaman berada di page.js. Daftar hasil filter, ringkasan dan nomor halaman efektif dihitung dari sumber pengguna, bukan disimpan sebagai state duplikat. Form hanya ditutup setelah penyimpanan berhasil.
+## Batas latihan
 
-page.js kini komponen client karena menangani state dan event secara langsung. Judul tab diperbarui lewat effect; HTML awal memakai metadata root. Server snapshot yang stabil dipakai untuk hidrasi, sehingga window dan localStorage tidak diakses saat render server. Snapshot browser dan fungsi langganannya tetap dipertahankan untuk sinkronisasi antartab.
+Pencarian, filter, pagination, kartu statistik dan modal kustom sengaja dikeluarkan dari fokus halaman. Form selalu terlihat di atas/sebelah tabel. Tampilan cukup untuk membaca dan mengoperasikan CRUD, belum menjadi desain final klien.
 
-## Styling bersama
+Storage key tetap titik-terampil:user-directory:v1 agar direktori yang telah disimpan tetap terbaca. Data contoh awal kini tiga pengguna fiktif; daftar lama tidak dihapus. Sesi login demo masih hilang saat refresh: masuk lagi melalui /login → Administrator → Manajemen pengguna.
 
-DashboardShell tetap komponen bersama yang sudah ada. Komponen tersebut sekarang mengimpor class usersShell dari users.module.css hanya untuk P19. Root layout tetap mengimpor design-system.css; tidak perlu menyalin sidebar atau token ke setiap halaman.
+Halaman membaca data sekali saat dipasang. Sinkronisasi langsung antartab tidak menjadi bagian latihan ini; pakai satu tab ketika mencoba CRUD. Data P19 tidak membuat kredensial login, mengirim email atau mengubah relasi kelas pada modul lain. API, database dan otorisasi server belum diimplementasikan.
 
-## Aturan yang tetap berjalan
+## Pengujian
 
-- Nama 2–80 karakter; email valid dan unik tanpa membedakan kapitalisasi.
-- Jenjang sesuai kelas: SD 1–6, SMP 7–9, SMA 10–12.
-- Pergantian jenjang mereset kelas; perubahan peran membersihkan data akademik.
-- Edit mempertahankan ID/tanggal; tambah mendapat UUID dan tanggal baru.
-- Administrator aktif terakhir tidak dapat dihapus, dinonaktifkan atau diganti peran.
-- Hapus dan pemulihan data membutuhkan konfirmasi.
-- JSON lokal yang rusak tidak ditimpa diam-diam; kegagalan simpan tidak menghasilkan sukses palsu.
-- Dialog memiliki label, focus trap native, Escape dan pemulihan fokus pemicu.
-- Tabel bergeser dalam region berlabel pada mobile; key storage tetap titik-terampil:user-directory:v1.
-
-## Cara mencoba dan batas integrasi
-
-Jalankan npm run dev → /login → Administrator → Manajemen pengguna. Sesi demo masih hilang pada refresh; masuk lagi untuk melihat data direktori yang tetap tersimpan. Akun baru belum dapat dipakai login, tidak ada password atau undangan email, dan data P19 belum mengubah relasi kelas/materi pada modul lain.
-
-saveUser dalam academic/actions.js masih skeleton untuk integrasi modul berikutnya. Implementasi P19 sekarang memakai aturan dan operasi simpan pada user-management.js. File actions.js bukan salah satu dari lima file inti P19.
-
-Jalankan npm test, npm run lint dan npm run build. Saat mencoba lewat browser, periksa tambah/edit/hapus, email duplikat, filter, pagination, Escape dan persistence setelah refresh. Selanjutnya saat backend tersedia, terapkan otorisasi server serta ganti fungsi persistence pada file aturan/storage.
+npm test memeriksa aturan validasi dari blok fungsi murni pada page.js tanpa menduplikasi source produksi. npm run lint dan npm run build memeriksa React/Next.js. Uji browser: tampilkan data, tambah, tolak email duplikat, edit, batalkan hapus, konfirmasi hapus, tolak admin terakhir, lalu refresh dan masuk kembali.

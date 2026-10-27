@@ -72,98 +72,39 @@ test('filter kelas dari form cocok dengan data numerik tanpa mengubah sumber', (
   assert.deepEqual(cbt.filterTryouts(null), []);
 });
 
-// Aturan P19 diuji terpisah dari React agar kegagalan validasi mudah dilacak.
-const directory = await loadModule('src/features/academic/user-management.js');
-const { demoUsers } = await loadModule('src/features/academic/data/demo-users.js');
+// Fungsi validasi tetap diuji dari source halaman, tanpa membuat file logika tambahan.
+// Blok data/validasi tidak mengandung JSX, React atau akses browser.
+const pageSource = await readFile(new URL('../app/admin/users/page.js', import.meta.url), 'utf8');
+const pureCrudCode = pageSource.split('// BAGIAN 1 — DATA DAN VALIDASI')[1].split('// BAGIAN 2 — HALAMAN DAN STATE REACT')[0];
+const crud = await import('data:text/javascript;base64,' + Buffer.from(pureCrudCode + '\nexport { validateUser, isValidStoredUsers, INITIAL_USERS };').toString('base64'));
 
-test('email unik mengabaikan kapitalisasi, tetapi record yang diedit tidak dianggap duplikat', () => {
-  const original = demoUsers[2];
-  const duplicate = directory.validateUserForm({ ...original, email: original.email.toUpperCase() }, demoUsers);
-  assert.ok(duplicate.errors.email);
-  const editing = directory.validateUserForm({ ...original, email: original.email.toUpperCase() }, demoUsers, original.id);
-  assert.deepEqual(editing.errors, {});
-  assert.equal(editing.candidate.email, original.email);
+test('CRUD menolak email duplikat tetapi mengizinkan email sendiri saat edit', () => {
+  const user = crud.INITIAL_USERS[2];
+  assert.match(crud.validateUser({ ...user, email: user.email.toUpperCase() }, crud.INITIAL_USERS), /Email sudah/);
+  assert.equal(crud.validateUser(user, crud.INITIAL_USERS, user.id), '');
 });
 
-test('form siswa menolak kelas lintas jenjang dan role pengajar membersihkan field akademik', () => {
-  const form = { ...demoUsers[2], level: 'SD', grade: '12' };
-  assert.ok(directory.validateUserForm(form, demoUsers, form.id).errors.grade);
-  const teacher = directory.validateUserForm({ ...form, role: 'teacher' }, demoUsers, form.id);
-  assert.deepEqual(teacher.errors, {});
-  assert.equal(teacher.candidate.level, '');
-  assert.equal(teacher.candidate.grade, null);
+test('CRUD memvalidasi jenjang dan kelas termasuk nilai jenjang tidak dikenal', () => {
+  const user = crud.INITIAL_USERS[2];
+  assert.match(crud.validateUser({ ...user, level: 'SD', grade: 12 }, []), /Jenjang/);
+  assert.match(crud.validateUser({ ...user, level: '__proto__' }, []), /Jenjang/);
+  assert.equal(crud.validateUser({ ...user, level: 'SMP', grade: 9 }, []), '');
 });
 
-test('admin aktif terakhir tidak dapat dihapus, dinonaktifkan atau diganti peran', () => {
-  const admin = demoUsers[0];
-  assert.ok(directory.getDeleteError(demoUsers, admin.id));
-  assert.ok(directory.validateUserForm({ ...admin, status: 'inactive' }, demoUsers, admin.id).errors.form);
-  assert.ok(directory.validateUserForm({ ...admin, role: 'teacher' }, demoUsers, admin.id).errors.form);
-  const withSecondAdmin = [...demoUsers, { ...admin, id: 'admin-2', email: 'second@example.com' }];
-  assert.equal(directory.getDeleteError(withSecondAdmin, admin.id), null);
-  assert.deepEqual(directory.validateUserForm({ ...admin, status: 'inactive' }, withSecondAdmin, admin.id).errors, {});
+test('CRUD melindungi admin aktif terakhir saat perubahan peran dan status', () => {
+  const admin = crud.INITIAL_USERS[0];
+  assert.match(crud.validateUser({ ...admin, status: 'inactive' }, crud.INITIAL_USERS, admin.id), /terakhir/);
+  assert.match(crud.validateUser({ ...admin, role: 'teacher' }, crud.INITIAL_USERS, admin.id), /terakhir/);
+  const withSecond = [...crud.INITIAL_USERS, { ...admin, id: 'a2', email: 'a2@example.com' }];
+  assert.equal(crud.validateUser({ ...admin, status: 'inactive' }, withSecond, admin.id), '');
 });
 
-test('data storage rusak, identitas duplikat dan direktori tanpa admin ditolak', () => {
-  assert.equal(directory.isValidUserList(demoUsers), true);
-  assert.equal(directory.isValidUserList({ users: demoUsers }), false);
-  assert.equal(directory.isValidUserList([...demoUsers, demoUsers[0]]), false);
-  assert.equal(directory.isValidUserList(demoUsers.map((user) => ({ ...user, status: 'inactive' }))), false);
-  assert.equal(directory.isValidUserList(demoUsers.map((user) => ({ ...user, createdAt: 'tanggal-rusak' }))), false);
-});
-
-test('pencarian dan filter P19 digabung tanpa mengubah urutan data sumber', () => {
-  const before = structuredClone(demoUsers);
-  const matches = directory.filterUsers(demoUsers, { query: 'CITRA', role: 'student', status: 'inactive' });
-  assert.deepEqual(matches.map((user) => user.id), ['s-004']);
-  assert.equal(directory.filterUsers(demoUsers, { query: 'tidak-ada' }).length, 0);
-  const alphabetic = directory.filterUsers(demoUsers, { sort: 'name' });
-  assert.equal(alphabetic[0].name, 'Aditya Pratama');
-  assert.deepEqual(demoUsers, before);
-});
-
-test('penyimpanan P19 tetap stabil, tersinkron, dan tidak menganggap storage gagal sebagai sukses', (t) => {
-  // Mock browser agar penyimpanan yang telah digabung dapat diuji tanpa mengubah data asli.
-  const originalWindow = globalThis.window;
-  let storedRaw = null;
-  let failWrite = false;
-  let notifications = 0;
-  const browser = new EventTarget();
-  browser.localStorage = {
-    getItem: () => storedRaw,
-    setItem: (key, value) => {
-      if (failWrite) throw new Error('Storage penuh');
-      storedRaw = value;
-    },
-  };
-  globalThis.window = browser;
-  t.after(() => {
-    unsubscribe(); // Lepas listener sebelum mock window dipulihkan.
-    if (originalWindow === undefined) delete globalThis.window;
-    else globalThis.window = originalWindow;
-  });
-  const unsubscribe = directory.subscribeUserDirectory(() => { notifications += 1; });
-
-  const initial = directory.readUserDirectory(demoUsers);
-  assert.equal(initial.ready, true);
-  assert.equal(initial.error, '');
-  assert.strictEqual(directory.readUserDirectory(demoUsers), initial);
-
-  const edited = demoUsers.map((user, index) => index === 1 ? { ...user, name: 'Pengajar Diperbarui' } : user);
-  assert.equal(directory.persistUsers(edited).ok, true);
-  assert.equal(notifications, 1);
-  assert.equal(directory.readUserDirectory(demoUsers).users[1].name, 'Pengajar Diperbarui');
-
-  const beforeFailure = storedRaw;
-  failWrite = true;
-  assert.equal(directory.persistUsers(demoUsers).ok, false);
-  assert.equal(storedRaw, beforeFailure);
-  assert.equal(notifications, 1);
-
-  storedRaw = '{json-rusak';
-  browser.dispatchEvent(new Event('tt:user-directory-changed'));
-  const recovered = directory.readUserDirectory(demoUsers);
-  assert.ok(recovered.error);
-  assert.deepEqual(recovered.users, demoUsers);
-  assert.equal(storedRaw, '{json-rusak'); // Pembacaan tidak menimpa data rusak diam-diam.
+test('READ menolak storage rusak dan ID/email duplikat tanpa menghapus data sumber', () => {
+  const users = structuredClone(crud.INITIAL_USERS);
+  assert.equal(crud.isValidStoredUsers(users), true);
+  assert.equal(crud.isValidStoredUsers({ users }), false);
+  assert.equal(crud.isValidStoredUsers([...users, users[0]]), false);
+  assert.equal(crud.isValidStoredUsers(users.filter((user) => user.role !== 'admin')), false);
+  assert.equal(crud.isValidStoredUsers(users.map((user) => ({ ...user, createdAt: 'rusak' }))), false);
+  assert.deepEqual(users, crud.INITIAL_USERS);
 });

@@ -91,4 +91,6 @@ Untuk kontribusi COTS, setiap anggota menjelaskan halaman, fungsi, validasi dan 
 
 Panduan komentar dan skeleton fungsi: docs/SKELETON_GUIDE.md. Pengujian batas input: tests/frontend-skeleton.test.mjs (koordinator Kaisar dan Rayazka).
 
-P19 disederhanakan menjadi lima file: app/admin/users/page.js, app/admin/users/UserForm.js, app/admin/users/users.module.css, src/features/academic/user-management.js, dan src/features/academic/data/demo-users.js. Rincian file serta urutan belajar tersedia dalam docs/P19_MANAGEMENT_GUIDE.md.
+
+
+Implementasi P19 untuk latihan COTS kini berada seluruhnya di app/admin/users/page.js: data contoh, state, validasi, CRUD localStorage, form, tabel dan CSS lokal. Pencarian, filter, pagination dan modal kustom tidak menjadi fokus latihan. Lihat docs/P19_MANAGEMENT_GUIDE.md untuk urutan membangun ulang kode.

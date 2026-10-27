@@ -61,4 +61,6 @@ Seluruh fungsi bernama frontend memiliki komentar tujuan, parameter dan keluaran
 
 ## Implementasi P19
 
-Manajemen Pengguna telah dikembangkan sebagai frontend lokal. Aturan dan pembacaan/penyimpanan direktori digabung pada src/features/academic/user-management.js. Tampilan langsung berada pada app/admin/users/page.js, form/dialog pada UserForm.js, dan seluruh styling pada users.module.css. saveUser pada actions.js tetap kerangka integrasi lintas modul berikutnya. Lihat docs/P19_MANAGEMENT_GUIDE.md untuk alur kode dan skenario browser.
+
+
+Implementasi P19 untuk latihan COTS kini berada seluruhnya di app/admin/users/page.js: data contoh, state, validasi, CRUD localStorage, form, tabel dan CSS lokal. Pencarian, filter, pagination dan modal kustom tidak menjadi fokus latihan. Lihat docs/P19_MANAGEMENT_GUIDE.md untuk urutan membangun ulang kode.
