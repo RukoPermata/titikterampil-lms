@@ -53,8 +53,6 @@ Prioritaskan satu alur lengkap siswa: masuk → katalog → detail → CBT → h
 
 Semua 24 halaman beserta route, pemilik dan TODO tersedia pada `src/config/pages.js`; halaman dinamis menerima `[id]` melalui `await params`. Link demo menggunakan ID `demo`. Halaman detail selain data contoh yang tersedia akan menampilkan pesan tidak ditemukan.
 
-Situs https://almahyraeducation.com/ adalah referensi klien untuk pengalaman belajar/tryout. Situs belum berhasil diakses lewat alat web saat penyusunan sehingga kerangka ini tidak mengklaim meniru fitur atau tampilannya.
-
 ## Skeleton fungsi yang diperbarui
 
 Seluruh fungsi bernama frontend memiliki komentar tujuan, parameter dan keluaran, serta tahapan pengembangan. Fungsi modul memiliki validasi awal dan kandidat data; aturan lanjutan serta persistence tetap TODO. Baca docs/SKELETON_GUIDE.md untuk kontrak status dan cara melengkapi halaman. Jalankan npm test, npm run lint dan npm run build sebelum integrasi.
