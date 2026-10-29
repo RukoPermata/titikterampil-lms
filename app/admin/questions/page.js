@@ -3,6 +3,7 @@
 
 import { useMemo, useState } from 'react';
 import { questions as initialQuestions, tryouts } from '@/src/data/mock';
+import { saveQuestion } from '@/src/features/tryout-management/actions';
 
 const createEmptyForm = () => ({
   prompt: '',
@@ -22,19 +23,21 @@ export default function QuestionsPage() {
   const [form, setForm] = useState(createEmptyForm);
   const [error, setError] = useState('');
 
-  const filteredQuestions = useMemo(() => {
-    return questions.filter((question) => {
-      const matchesSearch = question.prompt
-        .toLowerCase()
-        .includes(search.toLowerCase());
+  const filteredQuestions = useMemo(
+    () =>
+      questions.filter((question) => {
+        const matchesSearch = question.prompt
+          .toLowerCase()
+          .includes(search.toLowerCase());
 
-      const matchesTryout =
-        tryoutFilter === 'all' ||
-        question.tryoutId === tryoutFilter;
+        const matchesTryout =
+          tryoutFilter === 'all' ||
+          question.tryoutId === tryoutFilter;
 
-      return matchesSearch && matchesTryout;
-    });
-  }, [questions, search, tryoutFilter]);
+        return matchesSearch && matchesTryout;
+      }),
+    [questions, search, tryoutFilter]
+  );
 
   function openCreateForm() {
     setEditingId(null);
@@ -45,12 +48,13 @@ export default function QuestionsPage() {
 
   function openEditForm(question) {
     setEditingId(question.id);
-    setForm({
-      ...question,
-      options: [...question.options],
-    });
+    setForm({ ...question, options: [...question.options] });
     setError('');
     setShowForm(true);
+  }
+
+  function updateForm(field, value) {
+    setForm((current) => ({ ...current, [field]: value }));
   }
 
   function updateOption(index, value) {
@@ -65,50 +69,38 @@ export default function QuestionsPage() {
   function handleSubmit(event) {
     event.preventDefault();
 
-    if (!form.prompt.trim()) {
-      setError('Teks soal wajib diisi.');
-      return;
-    }
-
-    const validOptions = form.options.filter(
-      (option) => option.trim() !== ''
-    );
-
+    // Validasi hubungan soal dengan paket tryout.
     if (
-      validOptions.length < 2 ||
-      validOptions.length !== form.options.length
+      !form.tryoutId ||
+      !tryouts.some((test) => test.id === form.tryoutId)
     ) {
-      setError('Isi semua pilihan jawaban, minimal dua opsi.');
+      setError('Pilih paket tryout yang valid.');
       return;
     }
 
-    if (
-      !Number.isInteger(Number(form.correctIndex)) ||
-      Number(form.correctIndex) < 0 ||
-      Number(form.correctIndex) >= form.options.length
-    ) {
-      setError('Pilih kunci jawaban yang valid.');
-      return;
-    }
-
-    if (!Number.isFinite(Number(form.weight)) || Number(form.weight) <= 0) {
-      setError('Bobot harus lebih besar dari 0.');
-      return;
-    }
-
-    if (!form.tryoutId) {
-      setError('Pilih paket tryout.');
-      return;
-    }
-
-    const candidate = {
+    // Siapkan data dari form.
+    const questionData = {
       ...form,
       id: editingId ?? `question-${Date.now()}`,
+      prompt: form.prompt.trim(),
+      options: form.options,
       correctIndex: Number(form.correctIndex),
       weight: Number(form.weight),
-      prompt: form.prompt.trim(),
-      options: form.options.map((option) => option.trim()),
       explanation: form.explanation.trim(),
+    };
+
+    // Validasi soal melalui actions.js.
+    const result = saveQuestion(questionData);
+
+    if (result.status !== 'success') {
+      setError(result.message ?? 'Soal tidak valid.');
+      return;
+    }
+
+    // Tambahkan atau perbarui soal setelah validasi berhasil.
+    const candidate = {
+      ...result.data,
+      tryoutId: form.tryoutId,
     };
 
     if (editingId) {
@@ -121,6 +113,7 @@ export default function QuestionsPage() {
       setQuestions((current) => [...current, candidate]);
     }
 
+    // Tutup form dan bersihkan input.
     setShowForm(false);
     setEditingId(null);
     setForm(createEmptyForm());
@@ -128,15 +121,13 @@ export default function QuestionsPage() {
   }
 
   function handleDelete(question) {
-    const usedByTryout = questions.some(
-      (item) =>
-        item.id === question.id &&
-        tryouts.some((test) => test.id === item.tryoutId)
+    const usedByTryout = tryouts.some(
+      (test) => test.id === question.tryoutId
     );
 
     if (usedByTryout) {
       setError(
-        'Soal masih memiliki referensi paket tryout demo. Penghapusan dibatalkan.'
+        'Soal terhubung dengan paket tryout. Penghapusan dibatalkan.'
       );
       return;
     }
@@ -148,35 +139,27 @@ export default function QuestionsPage() {
   }
 
   return (
-    <main style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
-      <header
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '16px',
-          flexWrap: 'wrap',
-        }}
-      >
+    <main className="page-content questions-page">
+      <header className="questions-header">
         <div>
           <h1>Bank Soal</h1>
-          <p>Kelola soal pilihan ganda untuk paket tryout.</p>
+          <p className="lead">
+            Kelola soal pilihan ganda untuk paket tryout.
+          </p>
         </div>
 
-        <button type="button" onClick={openCreateForm}>
+        <button
+          type="button"
+          className="questions-add-button"
+          onClick={openCreateForm}
+        >
           + Tambah Soal
         </button>
       </header>
 
-      <section
-        style={{
-          display: 'flex',
-          gap: '12px',
-          margin: '24px 0',
-          flexWrap: 'wrap',
-        }}
-      >
+      <section className="questions-toolbar">
         <input
+          className="questions-search"
           type="search"
           placeholder="Cari teks soal..."
           value={search}
@@ -185,6 +168,7 @@ export default function QuestionsPage() {
         />
 
         <select
+          className="questions-filter"
           value={tryoutFilter}
           onChange={(event) => setTryoutFilter(event.target.value)}
           aria-label="Filter paket tryout"
@@ -199,36 +183,24 @@ export default function QuestionsPage() {
       </section>
 
       {error && (
-        <p role="alert" style={{ color: 'crimson' }}>
+        <p className="questions-error" role="alert">
           {error}
         </p>
       )}
 
       {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            border: '1px solid #ccc',
-            borderRadius: '8px',
-            padding: '20px',
-            marginBottom: '24px',
-            display: 'grid',
-            gap: '12px',
-          }}
-        >
+        <form className="question-form" onSubmit={handleSubmit}>
           <h2>{editingId ? 'Edit Soal' : 'Tambah Soal'}</h2>
 
-          <label>
+          <label className="question-field">
             Paket tryout
             <select
               value={form.tryoutId}
               onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  tryoutId: event.target.value,
-                }))
+                updateForm('tryoutId', event.target.value)
               }
             >
+              <option value="">Pilih paket</option>
               {tryouts.map((test) => (
                 <option key={test.id} value={test.id}>
                   {test.title}
@@ -237,43 +209,26 @@ export default function QuestionsPage() {
             </select>
           </label>
 
-          <label>
+          <label className="question-field">
             Teks soal
             <textarea
               value={form.prompt}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  prompt: event.target.value,
-                }))
-              }
+              onChange={(event) => updateForm('prompt', event.target.value)}
+              placeholder="Masukkan pertanyaan..."
               required
             />
           </label>
 
-          <fieldset>
+          <fieldset className="question-options">
             <legend>Pilihan jawaban dan kunci</legend>
 
             {form.options.map((option, index) => (
-              <div
-                key={index}
-                style={{
-                  display: 'flex',
-                  gap: '8px',
-                  alignItems: 'center',
-                  marginBottom: '10px',
-                }}
-              >
+              <div className="question-option" key={index}>
                 <input
                   type="radio"
                   name="correctAnswer"
                   checked={Number(form.correctIndex) === index}
-                  onChange={() =>
-                    setForm((current) => ({
-                      ...current,
-                      correctIndex: index,
-                    }))
-                  }
+                  onChange={() => updateForm('correctIndex', index)}
                   aria-label={`Jadikan opsi ${index + 1} sebagai kunci`}
                 />
 
@@ -289,40 +244,34 @@ export default function QuestionsPage() {
             ))}
           </fieldset>
 
-          <label>
+          <label className="question-field">
             Bobot nilai
             <input
               type="number"
               min="0.1"
               step="0.1"
               value={form.weight}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  weight: event.target.value,
-                }))
-              }
+              onChange={(event) => updateForm('weight', event.target.value)}
               required
             />
           </label>
 
-          <label>
+          <label className="question-field">
             Pembahasan
             <textarea
               value={form.explanation}
               onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  explanation: event.target.value,
-                }))
+                updateForm('explanation', event.target.value)
               }
+              placeholder="Jelaskan jawaban yang benar..."
             />
           </label>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="question-form-actions">
             <button type="submit">Simpan Soal</button>
             <button
               type="button"
+              className="question-cancel-button"
               onClick={() => {
                 setShowForm(false);
                 setError('');
@@ -334,35 +283,19 @@ export default function QuestionsPage() {
         </form>
       )}
 
-      <p>
+      <p className="questions-count">
         Menampilkan {filteredQuestions.length} dari {questions.length} soal
       </p>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            textAlign: 'left',
-          }}
-        >
+      <div className="questions-table-wrapper">
+        <table className="questions-table">
           <thead>
             <tr>
-              <th style={{ padding: '12px', borderBottom: '1px solid #ccc' }}>
-                No.
-              </th>
-              <th style={{ padding: '12px', borderBottom: '1px solid #ccc' }}>
-                Soal
-              </th>
-              <th style={{ padding: '12px', borderBottom: '1px solid #ccc' }}>
-                Paket
-              </th>
-              <th style={{ padding: '12px', borderBottom: '1px solid #ccc' }}>
-                Bobot
-              </th>
-              <th style={{ padding: '12px', borderBottom: '1px solid #ccc' }}>
-                Aksi
-              </th>
+              <th>No.</th>
+              <th>Soal</th>
+              <th>Paket</th>
+              <th>Bobot</th>
+              <th>Aksi</th>
             </tr>
           </thead>
 
@@ -374,45 +307,47 @@ export default function QuestionsPage() {
 
               return (
                 <tr key={question.id}>
-                  <td style={{ padding: '12px', borderBottom: '1px solid #ddd' }}>
-                    {index + 1}
-                  </td>
-                  <td style={{ padding: '12px', borderBottom: '1px solid #ddd' }}>
-                    <strong>{question.prompt}</strong>
-                    <div style={{ marginTop: '6px' }}>
-                      {question.options.map((option, optionIndex) => (
-                        <span key={optionIndex}>
-                          {String.fromCharCode(65 + optionIndex)}. {option}
-                          {optionIndex < question.options.length - 1
-                            ? ' · '
-                            : ''}
-                        </span>
-                      ))}
+                  <td>{index + 1}</td>
+
+                  <td>
+                    <div className="question-prompt">
+                      <strong>{question.prompt}</strong>
+
+                      <div className="question-options-preview">
+                        {question.options.map((option, optionIndex) => (
+                          <span key={optionIndex}>
+                            {String.fromCharCode(65 + optionIndex)}. {option}
+                            {optionIndex < question.options.length - 1
+                              ? ' · '
+                              : ''}
+                          </span>
+                        ))}
+                      </div>
+
+                      <small className="question-key">
+                        Kunci: {question.options[question.correctIndex] ?? '-'}
+                      </small>
                     </div>
-                    <small>
-                      Kunci:{' '}
-                      {question.options[question.correctIndex] ?? '-'}
-                    </small>
                   </td>
-                  <td style={{ padding: '12px', borderBottom: '1px solid #ddd' }}>
-                    {test?.title ?? 'Paket tidak ditemukan'}
-                  </td>
-                  <td style={{ padding: '12px', borderBottom: '1px solid #ddd' }}>
-                    {question.weight}
-                  </td>
-                  <td style={{ padding: '12px', borderBottom: '1px solid #ddd' }}>
-                    <button
-                      type="button"
-                      onClick={() => openEditForm(question)}
-                    >
-                      Edit
-                    </button>{' '}
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(question)}
-                    >
-                      Hapus
-                    </button>
+
+                  <td>{test?.title ?? 'Paket tidak ditemukan'}</td>
+                  <td>{question.weight}</td>
+
+                  <td>
+                    <div className="question-actions">
+                      <button
+                        type="button"
+                        onClick={() => openEditForm(question)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(question)}
+                      >
+                        Hapus
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -420,7 +355,7 @@ export default function QuestionsPage() {
 
             {filteredQuestions.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ padding: '20px' }}>
+                <td className="questions-empty" colSpan={5}>
                   Tidak ada soal yang cocok dengan pencarian.
                 </td>
               </tr>
