@@ -93,10 +93,6 @@ File bersama dikelola tim dengan koordinator integrasi Kaisar dan Rayazka. Autho
 
 Daftar halaman, kontrak data dan prioritas: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
-## Pengumpulan COTS
-
-Kumpulkan source tanpa `node_modules`, `.next`, `dist`, `out`, rahasia `.env` dan folder `.git`. Sertakan package.json, package-lock.json, source dan dokumentasi. Setiap anggota mencatat halaman, fungsi, screenshot, commit dan skenario uji miliknya untuk PDF kontribusi individu. PDF kontribusi dan plotting kelompok belum dibuat oleh kerangka ini.
-
 ## Skeleton fungsi yang diperbarui
 
 Seluruh fungsi bernama frontend memiliki komentar tujuan, parameter dan keluaran, serta tahapan pengembangan. Fungsi modul memiliki validasi awal dan kandidat data; aturan lanjutan serta persistence tetap TODO. Baca docs/SKELETON_GUIDE.md untuk kontrak status dan cara melengkapi halaman. Jalankan npm test, npm run lint dan npm run build sebelum integrasi.
