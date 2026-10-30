@@ -1,55 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
-import { assignments as initialMockAssignments, classes as initialMockClasses } from "../../../src/data/mock";
+import React, { useState, useEffect } from "react";
+import { classes } from "@/src/data/mock";
+import {
+  loadAssignments_103022400061,
+  loadSubmissions_103022400061,
+  createAssignment_103022400061,
+  deleteAssignment_103022400061,
+  gradeSubmission_103022400061
+} from "@/src/features/evaluation/actions";
 
 export default function TeacherAssignmentsPage_103022400061() {
-  const [assignments, setAssignments_103022400061] = useState(initialMockAssignments);
-  const [classes] = useState(initialMockClasses);
+  const [assignments, setAssignments_103022400061] = useState([]);
+  const [submissions, setSubmissions_103022400061] = useState([]);
+  const [classList] = useState(classes);
 
   const [title, setTitle_103022400061] = useState("");
-  const [classId, setClassId_103022400061] = useState(classes[0]?.id || "demo");
+  const [classId, setClassId_103022400061] = useState(classes[0]?.id || "");
   const [instructions, setInstructions_103022400061] = useState("");
-
-  const [submissions, setSubmissions_103022400061] = useState([
-    {
-      id: "SUB-01",
-      studentName: "Siswa Contoh",
-      className: classes[0]?.title || "Kelas Demo",
-      answerText: "Berikut adalah penyelesaian tugas persamaan linear.",
-      status: "Belum Dinilai",
-      score: null,
-      feedback: ""
-    }
-  ]);
 
   const [selectedSubId, setSelectedSubId_103022400061] = useState(null);
   const [inputScore, setInputScore_103022400061] = useState("");
   const [inputFeedback, setInputFeedback_103022400061] = useState("");
 
+  useEffect(() => {
+    setAssignments_103022400061(loadAssignments_103022400061());
+    setSubmissions_103022400061(loadSubmissions_103022400061());
+  }, []);
+
   function handleAddAssignment_103022400061(e) {
     e.preventDefault();
-    if (!title) return;
+    if (!title.trim()) return;
 
-    const newAssignment = {
-      id: `task-${Date.now()}`,
-      classId: classId,
-      title: title,
-      instructions: instructions
-    };
+    const newData = { classId, title, instructions };
+    const updatedAssignments = createAssignment_103022400061(assignments, newData);
 
-    setAssignments_103022400061([...assignments, newAssignment]);
+    setAssignments_103022400061(updatedAssignments);
     setTitle_103022400061("");
     setInstructions_103022400061("");
   }
 
   function handleDeleteAssignment_103022400061(id) {
-    setAssignments_103022400061(assignments.filter((item) => item.id !== id));
+    const updatedAssignments = deleteAssignment_103022400061(assignments, id);
+    setAssignments_103022400061(updatedAssignments);
   }
 
   function handleSelectSubmission_103022400061(sub) {
     setSelectedSubId_103022400061(sub.id);
-    setInputScore_103022400061(sub.score !== null ? sub.score : "");
+    setInputScore_103022400061(sub.score !== null && sub.score !== undefined ? sub.score : "");
     setInputFeedback_103022400061(sub.feedback || "");
   }
 
@@ -57,20 +55,14 @@ export default function TeacherAssignmentsPage_103022400061() {
     e.preventDefault();
     if (!selectedSubId || inputScore === "") return;
 
-    setSubmissions_103022400061(
-      submissions.map((sub) => {
-        if (sub.id === selectedSubId) {
-          return {
-            ...sub,
-            score: Number(inputScore),
-            feedback: inputFeedback,
-            status: "Sudah Dinilai"
-          };
-        }
-        return sub;
-      })
+    const updatedSubmissions = gradeSubmission_103022400061(
+      submissions,
+      selectedSubId,
+      inputScore,
+      inputFeedback
     );
 
+    setSubmissions_103022400061(updatedSubmissions);
     setSelectedSubId_103022400061(null);
     setInputScore_103022400061("");
     setInputFeedback_103022400061("");
@@ -104,7 +96,7 @@ export default function TeacherAssignmentsPage_103022400061() {
                 onChange={(e) => setClassId_103022400061(e.target.value)}
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800"
               >
-                {classes.map((cls) => (
+                {classList.map((cls) => (
                   <option key={cls.id} value={cls.id}>
                     {cls.title} ({cls.level})
                   </option>
@@ -131,28 +123,32 @@ export default function TeacherAssignmentsPage_103022400061() {
 
         <div className="md:col-span-2 bg-white p-5 rounded-lg shadow border border-gray-200">
           <h2 className="text-lg font-semibold mb-4 text-gray-800">Daftar Tugas Aktif</h2>
-          <div className="space-y-3">
-            {assignments.map((item) => (
-              <div
-                key={item.id}
-                className="p-4 border border-gray-200 rounded-lg flex justify-between items-start hover:bg-gray-50"
-              >
-                <div>
-                  <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                    ID Kelas: {item.classId}
-                  </span>
-                  <h3 className="font-bold text-gray-800 mt-2">{item.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{item.instructions}</p>
-                </div>
-                <button
-                  onClick={() => handleDeleteAssignment_103022400061(item.id)}
-                  className="text-red-600 hover:text-red-800 text-sm font-medium"
+          {assignments.length === 0 ? (
+            <p className="text-sm text-gray-500">Belum ada tugas yang terdaftar.</p>
+          ) : (
+            <div className="space-y-3">
+              {assignments.map((item) => (
+                <div
+                  key={item.id}
+                  className="p-4 border border-gray-200 rounded-lg flex justify-between items-start hover:bg-gray-50"
                 >
-                  Hapus
-                </button>
-              </div>
-            ))}
-          </div>
+                  <div>
+                    <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      ID Kelas: {item.classId}
+                    </span>
+                    <h3 className="font-bold text-gray-800 mt-2">{item.title}</h3>
+                    <p className="text-sm text-gray-600 mt-1">{item.instructions}</p>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteAssignment_103022400061(item.id)}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -171,35 +167,43 @@ export default function TeacherAssignmentsPage_103022400061() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 text-sm">
-              {submissions.map((sub) => (
-                <tr key={sub.id} className="hover:bg-gray-50 text-gray-800">
-                  <td className="py-3 px-4 font-medium">{sub.studentName}</td>
-                  <td className="py-3 px-4">{sub.className}</td>
-                  <td className="py-3 px-4 max-w-xs truncate">{sub.answerText}</td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        sub.status === "Sudah Dinilai"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {sub.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 font-bold">
-                    {sub.score !== null ? sub.score : "-"}
-                  </td>
-                  <td className="py-3 px-4">
-                    <button
-                      onClick={() => handleSelectSubmission_103022400061(sub)}
-                      className="text-blue-600 hover:underline font-medium"
-                    >
-                      Beri Nilai
-                    </button>
+              {submissions.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="py-6 text-center text-gray-500">
+                    Belum ada data pengumpulan tugas dari siswa.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                submissions.map((sub) => (
+                  <tr key={sub.id} className="hover:bg-gray-50 text-gray-800">
+                    <td className="py-3 px-4 font-medium">{sub.studentName}</td>
+                    <td className="py-3 px-4">{sub.className}</td>
+                    <td className="py-3 px-4 max-w-xs truncate">{sub.answerText}</td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          sub.status === "Sudah Dinilai"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {sub.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 font-bold">
+                      {sub.score !== null && sub.score !== undefined ? sub.score : "-"}
+                    </td>
+                    <td className="py-3 px-4">
+                      <button
+                        onClick={() => handleSelectSubmission_103022400061(sub)}
+                        className="text-blue-600 hover:underline font-medium"
+                      >
+                        Beri Nilai
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
