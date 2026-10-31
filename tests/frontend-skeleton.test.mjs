@@ -54,7 +54,7 @@ test('soal menolak kunci di luar opsi dan bobot tidak positif', () => {
   const question = { prompt: 'Soal', options: ['A', 'B'], correctIndex: 0, weight: 1 };
   assert.equal(management.saveQuestion({ ...question, correctIndex: 2 }).status, 'error');
   assert.equal(management.saveQuestion({ ...question, weight: 0 }).status, 'error');
-  assert.equal(management.saveQuestion(question).status, 'not_implemented');
+  assert.equal(management.saveQuestion(question).status, 'success');
 });
 
 test('hasil skeleton pendaftaran tidak membocorkan password atau mengklaim validasi lengkap', () => {
