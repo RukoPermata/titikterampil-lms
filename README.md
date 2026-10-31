@@ -2,97 +2,110 @@
 Modul: Panduan pengembangan frontend MVP Titik Terampil
 Author: Tim Titik Terampil; koordinator integrasi Kaisar dan Rayazka
 Tanggung jawab: menjaga petunjuk menjalankan, batas MVP dan alur kerja tim.
-@todo: Perbarui status implementasi serta bukti kontribusi menjelang COTS.
 -->
-# Titik Terampil — Kerangka Frontend MVP
+# Titik Terampil: Platform Try Out & CBT Bimbel
 
-Platform CBT dan LMS untuk SD, SMP, SMA. Menggunakan **Next.js App Router + React (JavaScript)**, melanjutkan stack repo. Styling memakai CSS biasa agar fondasinya mudah dipahami dan dipulihkan saat COTS.
+Platform CBT (*Computer-Based Test*) dan Try Out untuk **Bimbingan Belajar Titik Terampil** yang mencakup jenjang mulai dari Kelas 4 SD, SMP, SMA/SMK, hingga Gap Year / Umum. Menggunakan **Next.js 16 (App Router) + React 19 (JavaScript)** dan Vanilla CSS terpusat dengan identitas warna resmi **Turquoise `#25B5A9`**.
 
-## Menjalankan
+---
 
-Butuh Node.js 20.9 atau lebih baru dan npm.
+## 1. Menjalankan Proyek Lokal
+
+Dibutuhkan Node.js 20.9 atau lebih baru dan npm.
 
 ```sh
+# Instalasi dependensi
 npm install
+
+# Menjalankan server pengembangan
 npm run dev
 ```
 
-Buka http://localhost:3000. Pemeriksaan:
+Buka [http://localhost:3000](http://localhost:3000) pada browser Anda.
 
+Pemeriksaan kualitas kode:
 ```sh
-npm run lint
-npm run build
-npm start
+npm test          # Menjalankan pengujian otomatis unit test
+npm run lint      # Pemeriksaan linting ESLint
+npm run build     # Kompilasi produksi Next.js
 ```
 
-Gunakan `npm ci` setelah package-lock.json tersedia. Gunakan npm secara konsisten; bun.lock bawaan repo bukan lockfile aktif untuk alur ini.
+---
 
-## Status yang sebenarnya
+## 2. Batasan Scope: UTS vs UAS
 
-Ini **kerangka yang dapat dijalankan**, bukan implementasi lengkap 31 fitur MVP. Tersedia 24 route, layout responsif, navigasi per peran, sesi demo sementara, data contoh, dan fungsi pengembangan bertanda TODO. Landing page dan pemilihan peran demo sudah berjalan. Halaman fitur menampilkan kerangka, data contoh dan petunjuk implementasinya.
+- **Fokus UTS (Sekarang)**: Murni **Frontend & UI/UX Interaktif**. Seluruh antarmuka dari 27 layar dapat dicoba secara visual menggunakan data contoh (`src/data/mock.js`) dan browser storage (`sessionStorage` / `localStorage`). Fitur pembayaran Midtrans dan 2FA dibuat dalam bentuk **simulasi interaktif / dummy** tanpa perlu backend aktif.
+- **Fokus UAS (Fase Berikutnya)**: Pembuatan API endpoint backend, integrasi database relasional PostgreSQL (Drizzle ORM), integrasi SDK Midtrans produksi sungguhan, dan pengiriman email OTP via SMTP.
 
-Buka `/login`, pilih Siswa, Pengajar atau Administrator. Sesi hanya ada dalam memori dan hilang saat refresh. Guard membatasi tampilan berdasarkan peran demo; ini bukan autentikasi atau otorisasi yang aman. Tidak ada API, database, password, unggah berkas, CRUD persisten, timer aktif atau penilaian sungguhan. Fungsi dengan `status: "not_implemented"` tidak boleh ditampilkan sebagai operasi berhasil.
+---
 
-File database dan Docker bawaan repo masih disimpan sebagai referensi, tetapi tidak diimpor frontend. Tidak perlu DATABASE_URL atau Docker untuk menjalankan kerangka ini. Pembayaran, AI, proctoring, ranking dan ekspor laporan berada di luar prioritas MVP.
+## 3. Struktur Direktori Proyek (`src/app/`)
 
-## Fauzan Zulfa Muhammad — P05–P06
-
-P05 Katalog tryout dan P06 Detail tryout sudah jadi (bukan pratinjau `ModulePage`). Katalog menampilkan daftar paket; detail menampilkan metadata, aturan, dan konfirmasi sebelum mulai. P07–P09 masih kerangka.
-
-File:
-- `app/student/tryouts/page.js`
-- `app/student/tryouts/[id]/page.js`
-- `src/features/cbt/components/TryoutCatalog.js`
-- `src/features/cbt/components/TryoutDetail.js`
-- `src/features/cbt/cbt.module.css`
-
-## Struktur
+Proyek mengadopsi struktur resmi Next.js dengan folder `src/app/`:
 
 ```text
-app/                     Route publik dan halaman per peran
-  student/               10 halaman siswa
-  teacher/               4 halaman pengajar
-  admin/                 7 halaman admin
-src/
-  components/            Shell, sesi demo, landing dan pratinjau halaman
-  config/pages.js        Peta lengkap 24 route, pemilik dan TODO
-  data/mock.js           Data contoh dan ID kontrak antarmodul
-  features/
-    auth/                Kaisar
-    cbt/                 Fauzan
-    learning/            Fityah
-    academic/            Rayazka
-    tryout-management/   Farrel
-    evaluation/          Hilmy
+titikterampil-lms/
+├── public/                 # Aset statis (logo, ikon, gambar ilustrasi)
+├── docs/                   # Dokumentasi PRD, panduan kerja, dan pembagian tugas
+│
+├── src/
+│   ├── app/                # URL routing, halaman, dan layout
+│   │   ├── globals.css     # Fondasi visual brand (#25B5A9) dan utilitas CSS
+│   │   ├── layout.js       # Root layout & DemoProvider
+│   │   ├── page.js         # [Layar 01] Landing Page
+│   │   ├── (auth)/         # Halaman login, register, dan verifikasi 2FA
+│   │   ├── student/        # Halaman ruang belajar peserta (dashboard, CBT, hasil)
+│   │   ├── teacher/        # Halaman ruang pengajar (bank soal, penilaian esai)
+│   │   └── admin/          # Halaman admin (pengguna, paket tryout, voucher)
+│   │
+│   ├── components/         # Komponen bersama lintas fitur
+│   │   ├── ui/             # Primitif UI
+│   │   ├── DashboardShell.js # Sidebar navigasi, topbar, dan role-guard
+│   │   ├── DemoProvider.js # State sesi, persistensi storage, Toast global (useToast)
+│   │   └── Landing.js      # Komponen halaman beranda publik
+│   │
+│   ├── features/           # Tampilan dan logika per domain fitur
+│   │   ├── auth/           # Autentikasi, login, register, profil (PIC: Kaisar)
+│   │   ├── student/        # Fitur khusus siswa & dashboard (PIC: Kaisar)
+│   │   ├── cbt/            # Engine ujian, timer subtes, pembahasan (PIC: Fauzan)
+│   │   ├── payment/        # Transaksi dummy, voucher (PIC: Fityah)
+│   │   ├── questions/      # Bank soal, paket, impor CSV (PIC: Farrel & Hilmy)
+│   │   └── admin-management/ # Rekapitulasi pengguna & admin (PIC: Rayazka)
+│   │
+│   ├── data/
+│   │   └── mock.js         # Sumber data contoh frontend UTS
+│   │
+│   └── lib/                # Fungsi pendukung umum (formatter, helper)
+│
+├── tests/
+│   └── frontend-skeleton.test.mjs  # Unit test native Node.js
+├── package.json
+└── jsconfig.json
 ```
 
-Setiap halaman memiliki fungsi bernama sendiri dan header bahasa Indonesia: modul, author, tanggung jawab, serta `@todo`. Fungsi di `src/features/*/actions.js` merupakan fungsi JavaScript frontend biasa, **bukan Next.js Server Actions**. Komponen halaman saat ini menggunakan `ModulePage` sebagai pratinjau, kecuali P05 dan P06 yang sudah memakai komponen nyata di `src/features/cbt/components/`; pemilik mengganti isi fungsi halaman dengan implementasi modulnya sendiri. Jangan memasukkan seluruh logika semua halaman ke komponen pratinjau bersama.
+---
 
-## Pembagian final
+## 4. Pembagian Tanggung Jawab Tim (27 Layar)
 
-Mengikuti revisi terbaru pengguna: hasil/riwayat tryout menjadi bagian CBT Fauzan, dashboard pengajar menjadi bagian Kaisar. Pembagian ini menjadi baseline kerja dan tetap perlu validasi kompleksitas CRUD untuk COTS.
-
-| Anggota | NIM | Halaman |
+| Anggota | NIM | Domain & Alokasi Layar |
 |---|---|---|
-| Kaisar Rayfa Al Baihaqqi | 103022400110 | P01–P04, P13–P14 |
-| Fauzan Zulfa Muhammad | 103022400032 | P05–P09 |
-| Fityah Bayoediansyah Harahap | 103022400085 | P10–P12, P15 |
-| Rayazka Aris | 103022400096 | P18–P21 |
-| Farrel Irham Adzkaar Susanto | 103022400105 | P22–P24 |
-| Hilmy Rafi | 103022400061 | P16–P17 |
+| **Kaisar Rayfa Al Baihaqqi** | 103022400110 | Layar 01–06, 15 (Landing, Login, Register + WhatsApp, 2FA, Onboarding, Dashboard, Profil) |
+| **Fauzan Zulfa Muhammad** | 103022400032 | Layar 07–08, 10–14 (Katalog, Detail Paket, Ruang CBT 5 Tipe Soal, Hasil, Pembahasan, Riwayat, Leaderboard) |
+| **Fityah Bayoediansyah Harahap** | 103022400085 | Layar 09, 26, 27 (Checkout & Status Pembayaran, Manajemen Voucher Admin, Daftar Transaksi) |
+| **Hilmy Rafi** | 103022400061 | Layar 16, 19–21 (Dashboard Pengajar, Penugasan & Koreksi Esai Manual, Hak Akses Member Pengajar) |
+| **Farrel Irham Adzkaar Susanto** | 103022400105 | Layar 17–18, 24–25 (Bank Soal, Form Editor Soal, Manajemen Paket Try Out, Impor CSV/Excel) |
+| **Rayazka Aris** | 103022400096 | Layar 22–23 & Data Bersama (Dashboard Admin, Manajemen Pengguna & Member, Kontrak Data `mock.js`) |
 
-File bersama dikelola tim dengan koordinator integrasi Kaisar dan Rayazka. Author menunjukkan penanggung jawab pengembangan, bukan klaim kode sudah dikerjakan anggota tersebut.
+Rincian spesifik checklist to-do dan kontrak antar-anggota dapat dilihat pada dokumen: **[docs/PEMBAGIAN_FILE.md](docs/PEMBAGIAN_FILE.md)**.
 
-## Cara mengembangkan
+---
 
-1. Cari ID halaman di `src/config/pages.js`, lalu buka route `app/.../page.js` milikmu.
-2. Ganti komponen pratinjau dengan UI sebenarnya. Tambahkan `"use client"` hanya pada komponen yang membutuhkan state, event atau browser API.
-3. Kembangkan fungsi bernama di `src/features` dan kontrak `src/data/mock.js`. Awali dari data contoh; persistence lokal dapat ditambahkan setelah kontraknya disepakati.
-4. Tambahkan loading, empty state, validasi dan error. Pakai `status: "not_implemented"` untuk fitur yang belum ada, jangan memberikan konfirmasi sukses palsu.
-5. Uji alur pada desktop dan mobile; periksa lint dan build sebelum integrasi.
-
-Daftar halaman, kontrak data dan prioritas: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
-
-## Skeleton fungsi yang diperbarui
-
-Seluruh fungsi bernama frontend memiliki komentar tujuan, parameter dan keluaran, serta tahapan pengembangan. Fungsi modul memiliki validasi awal dan kandidat data; aturan lanjutan serta persistence tetap TODO. Baca docs/SKELETON_GUIDE.md untuk kontrak status dan cara melengkapi halaman. Jalankan npm test, npm run lint dan npm run build sebelum integrasi.
+## 5. Standar Kode & Disiplin Pengembangan
+1. **Warna Brand**: Wajib menggunakan token CSS `--brand: #25B5A9`, `--primary: #087F76`, dan `--accent-soft: #EAF8F5`.
+2. **Kerapihan File**: Setiap file diusahakan berada di bawah batas **500 baris kode**.
+3. **Dokumentasi Kode**: Setiap fungsi bernama wajib memiliki JSDoc bahasa Indonesia (`@param`, `@returns`).
+4. **Bebas AI Slop**: Hindari teks generik dan emoji dekoratif pada antarmuka profesional.
+5. **Quality Gate**: Sebelum membuat Pull Request ke `dev`, pastikan lulus pengujian:
+   ```bash
+   npm test && npm run lint && npm run build
+   ```
