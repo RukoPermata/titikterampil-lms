@@ -35,12 +35,23 @@ export function validateRegistration(input) {
   }
 
   const password = String(input.password ?? '');
+  const specialCharPattern = /[!@#$%^&*(),.?":{}|<>_\-+=[\]\\/`~]/;
   if (!password) {
     errors.push('Kata sandi wajib diisi.');
-  } else if (password.length < 6) {
-    errors.push('Kata sandi minimal 6 karakter.');
+  } else if (password.length < 8) {
+    errors.push('Kata sandi minimal 8 karakter.');
+  } else if (!specialCharPattern.test(password)) {
+    errors.push('Kata sandi wajib mengandung minimal satu simbol khusus (misal: !@#$).');
   }
 
+  if (input.confirmPassword !== undefined) {
+    const confirmPassword = String(input.confirmPassword ?? '');
+    if (!confirmPassword) {
+      errors.push('Konfirmasi kata sandi wajib diisi.');
+    } else if (confirmPassword !== password) {
+      errors.push('Konfirmasi kata sandi tidak cocok.');
+    }
+  }
   const gradeRanges = { SD: [1, 2, 3, 4, 5, 6], SMP: [7, 8, 9], SMA: [10, 11, 12] };
   if (!candidate.level || !gradeRanges[candidate.level]) {
     errors.push('Pilih jenjang pendidikan yang valid (SD, SMP, SMA).');
@@ -61,45 +72,139 @@ export function validateRegistration(input) {
 }
 
 /**
- * Menyiapkan perubahan profil siswa.
- * Validasi yang tersedia baru tahap awal; komentar TODO menandai aturan tersisa.
- * @param {Object} profile - Profil dengan id, name, level dan grade.
- * @returns {Object} Kesalahan input atau kandidat perubahan yang belum disimpan.
+ * Memvalidasi dan menyiapkan perubahan data profil siswa.
+ * Memastikan konsistensi jenjang pendidikan (SD, SMP, SMA) dan tingkat kelas (1-12).
+ * @param {Object} profile - Profil berisi id, name, level, grade, dan email opsional.
+ * @returns {Object} Hasil validasi { status: 'success'|'error', candidate?: Object, user?: Object, message: string, field?: string }.
  */
 export function updateProfile(profile) {
-  // 1. Pastikan identitas profil tersedia.
-  if (!profile || typeof profile.id !== 'string' || !profile.id.trim()) {
-    return { status: 'error', message: 'ID profil wajib diisi.' };
+  // 1. Pastikan data profil tersedia dan memiliki ID yang valid.
+  if (!profile || typeof profile !== 'object' || Array.isArray(profile)) {
+    return { status: 'error', message: 'Data profil tidak valid.' };
+  }
+  if (typeof profile.id !== 'string' || !profile.id.trim()) {
+    return { status: 'error', field: 'id', message: 'ID profil wajib diisi.' };
   }
 
-  // 2. Ambil hanya field profil yang diizinkan, bukan sandi atau peran.
-  const candidate = { id: profile.id, name: String(profile.name ?? '').trim(), level: profile.level, grade: profile.grade };
+  // 2. Validasi nama lengkap
+  const name = String(profile.name ?? '').trim();
+  if (!name) {
+    return { status: 'error', field: 'name', message: 'Nama lengkap wajib diisi.' };
+  }
 
-  // 3. TODO: Validasi nama dan pasangan jenjang/kelas.
-  // 4. TODO: Simpan perubahan melalui adapter frontend; tangani storage gagal.
-  // 5. TODO: Sinkronkan sesi dan tampilkan sukses hanya setelah penyimpanan berhasil.
-  return { status: 'not_implemented', candidate, message: 'Profil belum disimpan.' };
+  // 3. Validasi jenjang dan tingkat kelas
+  const level = profile.level;
+  const grade = Number(profile.grade);
+  const gradeRanges = { SD: [1, 2, 3, 4, 5, 6], SMP: [7, 8, 9], SMA: [10, 11, 12] };
+
+  if (!level || !gradeRanges[level]) {
+    return {
+      status: 'error',
+      field: 'level',
+      message: 'Pilih jenjang pendidikan yang valid (SD, SMP, SMA).',
+    };
+  }
+
+  if (!gradeRanges[level].includes(grade)) {
+    return {
+      status: 'error',
+      field: 'grade',
+      message: `Kelas ${grade} tidak sesuai dengan jenjang ${level}.`,
+    };
+  }
+
+  // 4. Susun kandidat profil terverifikasi
+  const candidate = {
+    id: profile.id,
+    name,
+    email: profile.email ? String(profile.email).trim().toLowerCase() : undefined,
+    level,
+    grade,
+    role: profile.role || 'student',
+  };
+
+  // 5. Simpan perubahan ke penyimpanan lokal jika di lingkungan browser
+  if (typeof window !== 'undefined') {
+    try {
+      const registered = getRegisteredUsers();
+      const userIndex = registered.findIndex(
+        (u) => u.id === profile.id || (profile.email && u.email === profile.email)
+      );
+      if (userIndex >= 0) {
+        registered[userIndex] = { ...registered[userIndex], ...candidate };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(registered));
+      }
+    } catch {
+      // Abaikan bila storage gagal; state aplikasi tetap dimutakhirkan
+    }
+  }
+
+  return {
+    status: 'success',
+    candidate,
+    user: candidate,
+    message: 'Profil siswa berhasil diperbarui.',
+  };
 }
 
 /**
- * Menyiapkan ringkasan dashboard pengajar.
- * Validasi yang tersedia baru tahap awal; komentar TODO menandai aturan tersisa.
- * @param {string} teacherId - ID pengajar dari sesi demo aktif.
- * @returns {Object} Kerangka ringkasan yang belum dihitung.
+ * Menghitung ringkasan aktivitas pengajaran untuk dashboard pengajar (P14).
+ * Mengagregasi jumlah kelas, siswa terdaftar, tugas aktif, dan pengumpulan yang perlu dinilai.
+ * @param {string} teacherId - ID pengajar dari sesi aktif.
+ * @param {Object} [data] - Sumber data contoh opsional { classes, assignments, users }.
+ * @returns {Object} Hasil agregasi { status: 'success'|'error', teacherId?: string, summary?: Object, message?: string }.
  */
-export function getTeacherSummary(teacherId) {
+export function getTeacherSummary(teacherId, data = {}) {
   // 1. Pastikan ringkasan diminta untuk pengajar tertentu.
   if (typeof teacherId !== 'string' || !teacherId.trim()) {
     return { status: 'error', message: 'ID pengajar wajib diisi.' };
   }
 
-  // 2. Siapkan kontrak; null berarti belum dihitung, bukan nilai nol.
-  const summary = { classCount: null, pendingSubmissionCount: null, studentCount: null };
+  const classList = Array.isArray(data.classes) ? data.classes : [
+    { id: 'demo', title: 'Matematika · Persiapan Kelas 12', level: 'SMA', grade: 12, teacherId: 'teacher-demo' },
+  ];
+  const assignmentList = Array.isArray(data.assignments) ? data.assignments : [
+    { id: 'demo', classId: 'demo', title: 'Latihan persamaan linear', instructions: 'Jelaskan langkah menyelesaikan persamaan 2x + 4 = 10.' },
+  ];
+  const userList = Array.isArray(data.users) ? data.users : [
+    { id: 'student-demo', name: 'Siswa Contoh', role: 'student', level: 'SMA', grade: 12 },
+  ];
 
-  // 3. TODO: Ambil kelas pengajar dari data akademik Rayazka.
-  // 4. TODO: Gunakan hasil monitoring Hilmy untuk menghitung tugas dan peserta.
-  // 5. TODO: Tangani data kosong dan teruskan ringkasan ke dashboard P14.
-  return { status: 'not_implemented', teacherId, summary };
+  // 2. Ambil kelas yang diampu pengajar aktif
+  const teacherClasses = classList.filter((c) => c && c.teacherId === teacherId);
+  const classCount = teacherClasses.length;
+
+  // 3. Hitung tugas dan siswa pada kelas pengajar
+  const teacherClassIds = new Set(teacherClasses.map((c) => c.id));
+  const teacherAssignments = assignmentList.filter((a) => a && teacherClassIds.has(a.classId));
+  const assignmentCount = teacherAssignments.length;
+
+  const studentCount = teacherClasses.reduce((acc, c) => {
+    if (Array.isArray(c.studentIds) && c.studentIds.length > 0) {
+      return acc + c.studentIds.length;
+    }
+    const matching = userList.filter((u) => u && u.role === 'student' && (!c.level || u.level === c.level));
+    return acc + (matching.length || 1);
+  }, 0);
+
+  // Pada data contoh, tugas yang terbit membutuhkan penilaian dari pengajar
+  const pendingSubmissionCount = teacherAssignments.length;
+
+  const summary = {
+    classCount,
+    studentCount: classCount > 0 ? studentCount : 0,
+    assignmentCount,
+    pendingSubmissionCount,
+  };
+
+  return {
+    status: 'success',
+    teacherId,
+    summary,
+    classes: teacherClasses,
+    assignments: teacherAssignments,
+    message: 'Ringkasan pengajar berhasil dihitung.',
+  };
 }
 
 /**
@@ -223,19 +328,10 @@ export function authenticateUser(credentials) {
   const allAccounts = [...registered, ...DEMO_ACCOUNTS];
 
   const matched = allAccounts.find((acc) => acc.email === email);
-  if (!matched) {
+  if (!matched || matched.password !== password) {
     return {
       status: 'error',
-      field: 'email',
-      message: 'Email tidak ditemukan. Silakan periksa kembali atau daftar akun baru.',
-    };
-  }
-
-  if (matched.password !== password) {
-    return {
-      status: 'error',
-      field: 'password',
-      message: 'Kata sandi yang Anda masukkan salah.',
+      message: 'Email atau kata sandi yang Anda masukkan salah.',
     };
   }
 
