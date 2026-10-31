@@ -44,3 +44,6 @@ next-env.d.ts
 # Author: Tim Titik Terampil; tanggung jawab: kebersihan source pengumpulan.
 # @todo: Periksa arsip kontribusi sebelum dikumpulkan.
 /dist/
+
+# Private brief and meeting notes
+private/

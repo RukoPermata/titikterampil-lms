@@ -54,7 +54,7 @@ test('soal menolak kunci di luar opsi dan bobot tidak positif', () => {
   const question = { prompt: 'Soal', options: ['A', 'B'], correctIndex: 0, weight: 1 };
   assert.equal(management.saveQuestion({ ...question, correctIndex: 2 }).status, 'error');
   assert.equal(management.saveQuestion({ ...question, weight: 0 }).status, 'error');
-  assert.equal(management.saveQuestion(question).status, 'not_implemented');
+  assert.equal(management.saveQuestion(question).status, 'success');
 });
 
 test('hasil skeleton pendaftaran tidak membocorkan password atau mengklaim validasi lengkap', () => {
@@ -70,4 +70,89 @@ test('filter kelas dari form cocok dengan data numerik tanpa mengubah sumber', (
   assert.deepEqual(cbt.filterTryouts(packages, { level: 'SMA', grade: '12' }).map((item) => item.id), ['sma']);
   assert.deepEqual(packages, before);
   assert.deepEqual(cbt.filterTryouts(null), []);
+});
+
+test('autentikasi login memvalidasi email, kata sandi, dan menerima akun demo yang sah', () => {
+  assert.equal(auth.authenticateUser(null).status, 'error');
+  assert.equal(auth.authenticateUser({ email: 'salah-format' }).status, 'error');
+  assert.equal(auth.authenticateUser({ email: 'unknown@email.com', password: '123' }).status, 'error');
+  assert.equal(auth.authenticateUser({ email: 'siswa@titikterampil.id', password: 'salah' }).status, 'error');
+  const success = auth.authenticateUser({ email: 'siswa@titikterampil.id', password: 'password123' });
+  assert.equal(success.status, 'success');
+  assert.equal(success.user.role, 'student');
+});
+
+test('updateProfile memvalidasi konsistensi jenjang dan tingkat kelas serta identitas profil', () => {
+  assert.equal(auth.updateProfile(null).status, 'error');
+  assert.equal(auth.updateProfile({ id: '' }).status, 'error');
+  assert.equal(auth.updateProfile({ id: 's1', name: '' }).status, 'error');
+  assert.equal(auth.updateProfile({ id: 's1', name: 'Budi', level: 'SD', grade: 9 }).status, 'error');
+  assert.equal(auth.updateProfile({ id: 's1', name: 'Budi', level: 'SMP', grade: 12 }).status, 'error');
+  assert.equal(auth.updateProfile({ id: 's1', name: 'Budi', level: 'SMA', grade: 6 }).status, 'error');
+
+  const validUpdate = auth.updateProfile({ id: 'student-demo', name: 'Siswa Contoh Baru', level: 'SMA', grade: 12 });
+  assert.equal(validUpdate.status, 'success');
+  assert.equal(validUpdate.candidate.name, 'Siswa Contoh Baru');
+  assert.equal(validUpdate.candidate.grade, 12);
+});
+
+test('getTeacherSummary memvalidasi ID pengajar dan mengagregasi data kelas pengajaran', () => {
+  assert.equal(auth.getTeacherSummary(null).status, 'error');
+  assert.equal(auth.getTeacherSummary('').status, 'error');
+
+  const summaryResult = auth.getTeacherSummary('teacher-demo');
+  assert.equal(summaryResult.status, 'success');
+  assert.ok(summaryResult.summary.classCount >= 1);
+  assert.ok(summaryResult.summary.studentCount >= 1);
+  assert.ok(summaryResult.summary.assignmentCount >= 1);
+});
+
+test('validateRegistration memvalidasi panjang sandi minimal 8 karakter, keberadaan simbol, dan konfirmasi sandi', () => {
+  // Kurang dari 8 karakter
+  const shortPass = auth.validateRegistration({
+    name: 'Siswa',
+    email: 'siswa@titikterampil.id',
+    password: 'p@ss',
+    confirmPassword: 'p@ss',
+    level: 'SMA',
+    grade: 10,
+  });
+  assert.equal(shortPass.valid, false);
+  assert.ok(shortPass.errors.some((err) => err.includes('8 karakter')));
+
+  // Tidak ada simbol
+  const noSymbolPass = auth.validateRegistration({
+    name: 'Siswa',
+    email: 'siswa@titikterampil.id',
+    password: 'password123',
+    confirmPassword: 'password123',
+    level: 'SMA',
+    grade: 10,
+  });
+  assert.equal(noSymbolPass.valid, false);
+  assert.ok(noSymbolPass.errors.some((err) => err.includes('simbol')));
+
+  // Konfirmasi tidak cocok
+  const mismatchPass = auth.validateRegistration({
+    name: 'Siswa',
+    email: 'siswa@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@Beda',
+    level: 'SMA',
+    grade: 10,
+  });
+  assert.equal(mismatchPass.valid, false);
+  assert.ok(mismatchPass.errors.some((err) => err.includes('Konfirmasi kata sandi')));
+
+  // Valid lengkap
+  const validPass = auth.validateRegistration({
+    name: 'Siswa Contoh',
+    email: 'siswa@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    level: 'SMA',
+    grade: 10,
+  });
+  assert.equal(validPass.valid, true);
+  assert.equal(validPass.status, 'success');
 });
