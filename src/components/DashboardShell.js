@@ -5,6 +5,7 @@
  * @todo Tambahkan autentikasi sungguhan; guard UI bukan jaminan keamanan.
  */
 'use client';
+import { useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { pages, demoHref } from '@/src/config/pages';
@@ -21,7 +22,20 @@ export function DashboardShell({ role, children }) {
   // 1. Baca sesi dan alamat aktif untuk status menu.
   const { user, signOut } = useDemo();
   const pathname = usePathname();
+  // Hindari perbedaan render SSR dan hidrasi client dengan useSyncExternalStore
+  const isMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
+  if (!isMounted) {
+    return (
+      <main id="main" className="auth-page" style={{ opacity: 0 }}>
+        <section className="panel" />
+      </main>
+    );
+  }
   // 2. Tampilkan petunjuk bila sesi kosong atau perannya tidak cocok.
   // TODO: Proteksi data di server ketika backend tersedia; guard ini hanya membatasi UI.
   if (!user || user.role !== role) {
