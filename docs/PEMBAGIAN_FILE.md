@@ -35,54 +35,58 @@ titikterampil-lms/
 ├── src/
 │   ├── app/                               # Routing, Halaman, dan Layout (Next.js App Router)
 │   │   ├── globals.css                    # Token visual brand (#25B5A9), form, dan utilitas shell
-│   │   ├── layout.js                      # Root layout, font, dan DemoProvider global
-│   │   ├── not-found.js                   # Halaman 404
-│   │   ├── page.js                        # [Layar 01] Landing Page
+│   │   ├── layout.jsx                     # Root layout, font, dan DemoProvider global
+│   │   ├── not-found.jsx                  # Halaman 404
+│   │   ├── page.jsx                       # [Layar 01] Landing Page
+│   │   ├── api/                               # Endpoint Mock API (Fetch API UTS Poin 2.2)
+│   │   │   ├── tryouts/route.js               # GET data tryout dinamis
+│   │   │   ├── leaderboard/route.js           # GET data peringkat nilai
+│   │   │   └── user/route.js                  # GET data profil pengguna
 │   │   │
 │   │   ├── (auth)/                        # Route Group Publik & Autentikasi
-│   │   │   ├── login/page.js              # [Layar 02] Sign In
-│   │   │   ├── register/page.js           # [Layar 03] Sign Up (+ WhatsApp)
-│   │   │   └── verify-2fa/page.js         # [Layar 04] Verifikasi Kode Email 2FA
+│   │   │   ├── login/page.jsx             # [Layar 02] Sign In
+│   │   │   ├── register/page.jsx          # [Layar 03] Sign Up (+ WhatsApp)
+│   │   │   └── verify-2fa/page.jsx        # [Layar 04] Verifikasi Kode Email 2FA
 │   │   │
 │   │   ├── student/                       # Ruang Kerja Peserta
-│   │   │   ├── layout.js                  # Guard peran student
-│   │   │   ├── onboarding/page.js         # [Layar 05] Personalisasi Awal
-│   │   │   ├── dashboard/page.js          # [Layar 06] Dashboard Peserta (+ Leaderboard Widget)
+│   │   │   ├── layout.jsx                 # Guard peran student
+│   │   │   ├── onboarding/page.jsx        # [Layar 05] Personalisasi Awal
+│   │   │   ├── dashboard/page.jsx         # [Layar 06] Dashboard Peserta (+ Leaderboard Widget)
 │   │   │   ├── tryouts/
-│   │   │   │   ├── page.js                # [Layar 07] Katalog Try Out (Filter Jenjang Eksklusif)
-│   │   │   │   └── [id]/page.js           # [Layar 08] Detail Paket Try Out & Redeem Voucher
-│   │   │   ├── checkout/[id]/page.js      # [Layar 09] Checkout & Status Pembayaran
+│   │   │   │   ├── page.jsx               # [Layar 07] Katalog Try Out (Filter Jenjang Eksklusif)
+│   │   │   │   └── [id]/page.jsx          # [Layar 08] Detail Paket Try Out & Redeem Voucher
+│   │   │   ├── checkout/[id]/page.jsx     # [Layar 09] Checkout & Status Pembayaran
 │   │   │   ├── exam/[id]/
-│   │   │   │   ├── instructions/page.js   # [Layar 10] Petunjuk Sebelum Ujian
-│   │   │   │   └── page.js                # [Layar 11] Ruang Ujian CBT
-│   │   │   ├── results/[id]/page.js       # [Layar 12] Hasil Skor & Pembahasan Tiap Soal
-│   │   │   ├── history/page.js            # [Layar 13] Riwayat Try Out Peserta
-│   │   │   ├── leaderboard/page.js        # [Layar 14] Halaman Leaderboard Antar Jenjang
-│   │   │   └── profile/page.js            # [Layar 15] Profil Peserta (+ Target Prodi & Kesiapan)
+│   │   │   │   ├── instructions/page.jsx  # [Layar 10] Petunjuk Sebelum Ujian
+│   │   │   │   └── page.jsx               # [Layar 11] Ruang Ujian CBT
+│   │   │   ├── results/[id]/page.jsx      # [Layar 12] Hasil Skor & Pembahasan Tiap Soal
+│   │   │   ├── history/page.jsx           # [Layar 13] Riwayat Try Out Peserta
+│   │   │   ├── leaderboard/page.jsx       # [Layar 14] Halaman Leaderboard Antar Jenjang
+│   │   │   └── profile/page.jsx           # [Layar 15] Profil Peserta (+ Target Prodi & Kesiapan)
 │   │   │
 │   │   ├── teacher/                       # Ruang Kerja Pengajar
-│   │   │   ├── layout.js                  # Guard peran teacher
-│   │   │   ├── dashboard/page.js          # [Layar 16] Dashboard Pengajar
-│   │   │   ├── questions/page.js          # [Layar 17-18] Bank Soal & Form Tambah/Edit Soal
+│   │   │   ├── layout.jsx                 # Guard peran teacher
+│   │   │   ├── dashboard/page.jsx         # [Layar 16] Dashboard Pengajar
+│   │   │   ├── questions/page.jsx         # [Layar 17-18] Bank Soal & Form Tambah/Edit Soal
 │   │   │   ├── grading/
-│   │   │   │   ├── page.js                # [Layar 19] Daftar Penugasan Esai
-│   │   │   │   └── [id]/page.js           # [Layar 20] Form Penilaian Esai Peserta
-│   │   │   └── members/page.js            # [Layar 21] Daftar Siswa & Pemberian Status Member
+│   │   │   │   ├── page.jsx               # [Layar 19] Daftar Penugasan Esai
+│   │   │   │   └── [id]/page.jsx          # [Layar 20] Form Penilaian Esai Peserta
+│   │   │   └── members/page.jsx           # [Layar 21] Daftar Siswa & Pemberian Status Member
 │   │   │
 │   │   └── admin/                         # Ruang Kerja Administrator
-│   │       ├── layout.js                  # Guard peran admin
-│   │       ├── dashboard/page.js          # [Layar 22] Dashboard Admin
-│   │       ├── users/page.js              # [Layar 23] Manajemen Pengguna & Member
+│   │       ├── layout.jsx                 # Guard peran admin
+│   │       ├── dashboard/page.jsx         # [Layar 22] Dashboard Admin
+│   │       ├── users/page.jsx             # [Layar 23] Manajemen Pengguna & Member
 │   │       ├── packages/
-│   │       │   ├── page.js                # [Layar 24] Manajemen Paket Try Out
-│   │       │   └── editor/page.js         # [Layar 25] Form Tambah/Edit Paket & Subtes
-│   │       ├── vouchers/page.js           # [Layar 26] Manajemen Kode Voucher
-│   │       └── transactions/page.js       # [Layar 27] Pemantauan Daftar Transaksi
+│   │       │   ├── page.jsx               # [Layar 24] Manajemen Paket Try Out
+│   │       │   └── editor/page.jsx        # [Layar 25] Form Tambah/Edit Paket & Subtes
+│   │       ├── vouchers/page.jsx          # [Layar 26] Manajemen Kode Voucher
+│   │       └── transactions/page.jsx      # [Layar 27] Pemantauan Daftar Transaksi
 │   │
 │   ├── components/                        # Komponen Bersama Lintas Fitur
-│   │   ├── DashboardShell.js              # Sidebar navigasi peran, topbar, dan role-guard
-│   │   ├── DemoProvider.js                # State sesi frontend, persistensi storage, Toast global
-│   │   ├── Landing.js                     # Komponen halaman landing publik
+│   │   ├── DashboardShell.jsx             # Sidebar navigasi peran, topbar, dan role-guard
+│   │   ├── DemoProvider.jsx               # State sesi frontend, persistensi storage, Toast global
+│   │   ├── Landing.jsx                    # Komponen halaman landing publik
 │   │   └── ui/                            # Primitif UI (Button, Modal, Card, Tag)
 │   │
 │   ├── features/                          # Tampilan dan logika per fitur
@@ -308,3 +312,6 @@ titikterampil-lms/
    ```bash
    npm test && npm run lint && npm run build
    ```
+6. **Standar Ekstensi Berkas**:
+   - Berkas yang merender antarmuka pengguna (halaman, layout, dan komponen React) menggunakan ekstensi **`.jsx`**.
+   - Berkas fungsi logika murni (`actions.js`), data contoh (`mock.js`), fungsi helper (`utils.js`), dan API Route Handlers (`route.js`) tetap menggunakan ekstensi **`.js`**.
