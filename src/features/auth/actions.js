@@ -20,8 +20,9 @@ export function validateRegistration(input) {
   const candidate = {
     name: String(input.name ?? '').trim(),
     email: String(input.email ?? '').trim().toLowerCase(),
+    whatsapp: String(input.whatsapp ?? '').trim().replace(/\D/g, ''),
     level: input.level,
-    grade: Number(input.grade),
+    grade: input.grade,
   };
 
   const errors = [];
@@ -32,6 +33,14 @@ export function validateRegistration(input) {
     errors.push('Alamat email wajib diisi.');
   } else if (!emailPattern.test(candidate.email)) {
     errors.push('Format email tidak valid.');
+  }
+
+  if (input.whatsapp !== undefined) {
+    if (!candidate.whatsapp) {
+      errors.push('Nomor WhatsApp wajib diisi.');
+    } else if (candidate.whatsapp.length < 10 || candidate.whatsapp.length > 15) {
+      errors.push('Nomor WhatsApp minimal 10 digit angka valid.');
+    }
   }
 
   const password = String(input.password ?? '');
@@ -52,11 +61,19 @@ export function validateRegistration(input) {
       errors.push('Konfirmasi kata sandi tidak cocok.');
     }
   }
-  const gradeRanges = { SD: [1, 2, 3, 4, 5, 6], SMP: [7, 8, 9], SMA: [10, 11, 12] };
+  const gradeRanges = {
+    SD: [4, 5, 6],
+    SMP: [7, 8, 9],
+    SMA: [10, 11, 12, 'Gap Year'],
+    Umum: ['Umum'],
+  };
   if (!candidate.level || !gradeRanges[candidate.level]) {
-    errors.push('Pilih jenjang pendidikan yang valid (SD, SMP, SMA).');
-  } else if (!gradeRanges[candidate.level].includes(candidate.grade)) {
-    errors.push(`Kelas ${candidate.grade} tidak sesuai dengan jenjang ${candidate.level}.`);
+    errors.push('Pilih jenjang pendidikan yang valid (SD, SMP, SMA, Umum).');
+  } else {
+    const isMatched = gradeRanges[candidate.level].some((g) => String(g) === String(candidate.grade));
+    if (!isMatched) {
+      errors.push(`Pilihan kelas ${candidate.grade} tidak sesuai dengan jenjang ${candidate.level}.`);
+    }
   }
 
   if (errors.length > 0) {
@@ -94,22 +111,27 @@ export function updateProfile(profile) {
 
   // 3. Validasi jenjang dan tingkat kelas
   const level = profile.level;
-  const grade = Number(profile.grade);
-  const gradeRanges = { SD: [1, 2, 3, 4, 5, 6], SMP: [7, 8, 9], SMA: [10, 11, 12] };
+  const gradeRanges = {
+    SD: [4, 5, 6],
+    SMP: [7, 8, 9],
+    SMA: [10, 11, 12, 'Gap Year'],
+    Umum: ['Umum'],
+  };
 
   if (!level || !gradeRanges[level]) {
     return {
       status: 'error',
       field: 'level',
-      message: 'Pilih jenjang pendidikan yang valid (SD, SMP, SMA).',
+      message: 'Pilih jenjang pendidikan yang valid (SD, SMP, SMA, Umum).',
     };
   }
 
-  if (!gradeRanges[level].includes(grade)) {
+  const isMatched = gradeRanges[level].some((g) => String(g) === String(profile.grade));
+  if (!isMatched) {
     return {
       status: 'error',
       field: 'grade',
-      message: `Kelas ${grade} tidak sesuai dengan jenjang ${level}.`,
+      message: `Pilihan kelas ${profile.grade} tidak sesuai dengan jenjang ${level}.`,
     };
   }
 
@@ -118,9 +140,12 @@ export function updateProfile(profile) {
     id: profile.id,
     name,
     email: profile.email ? String(profile.email).trim().toLowerCase() : undefined,
+    whatsapp: profile.whatsapp ? String(profile.whatsapp).trim().replace(/\D/g, '') : undefined,
     level,
-    grade,
+    grade: profile.grade,
     role: profile.role || 'student',
+    readiness: profile.readiness || 'Cukup siap',
+    studyTargets: Array.isArray(profile.studyTargets) ? profile.studyTargets.slice(0, 3) : [],
   };
 
   // 5. Simpan perubahan ke penyimpanan lokal jika di lingkungan browser
@@ -223,6 +248,7 @@ export const DEMO_ACCOUNTS = [
       role: 'student',
       level: 'SMA',
       grade: 12,
+      whatsapp: '081234567890',
     },
   },
   {
