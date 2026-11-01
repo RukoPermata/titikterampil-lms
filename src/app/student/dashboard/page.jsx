@@ -3,7 +3,7 @@
  * @author Kaisar Rayfa Al Baihaqqi (103022400110)
  * Tanggung jawab: mengembangkan dan memverifikasi modul ini sesuai plotting COTS.
  */
-import { StudentDashboard } from '@/src/features/auth/components/StudentDashboard';
+import { StudentDashboard } from '@/src/features/student/components/StudentDashboard';
 
 /**
  * Menampilkan dashboard siswa (P04).
