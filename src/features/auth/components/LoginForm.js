@@ -112,11 +112,10 @@ export function LoginForm() {
       }
 
       setIsLoading(true);
-      signIn(result.user);
       if (typeof showToast === 'function') {
-        showToast('Berhasil masuk ke akun.', 'success');
+        showToast('Kredensial valid. Silakan verifikasi kode 2FA Anda.', 'info');
       }
-      router.push(`/${result.user.role}/dashboard`);
+      router.push(`/verify-2fa?email=${encodeURIComponent(result.user.email)}&role=${result.user.role}`);
     } catch {
       setErrorMessage('Terjadi kesalahan saat memproses login. Silakan coba lagi.');
     }
