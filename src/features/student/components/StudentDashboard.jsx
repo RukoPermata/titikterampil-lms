@@ -125,7 +125,7 @@ export function StudentDashboard() {
         </div>
         <div className="stat-box">
           <span className="stat-label">Paket Tryout CBT</span>
-          <strong className="stat-number">{relevantTryouts.length}</strong>
+          <strong className="stat-number">{displayTryouts.length}</strong>
           <small className="muted">{isMember ? 'Akses Lintas Jenjang' : 'Khusus Jenjang Anda'}</small>
         </div>
         <div className="stat-box">
@@ -197,13 +197,13 @@ export function StudentDashboard() {
           </Link>
         </div>
 
-        {relevantTryouts.length === 0 ? (
+        {displayTryouts.length === 0 ? (
           <div className="panel dashboard-empty">
             <p>Tidak ada paket tryout yang aktif untuk jenjang {studentLevel}.</p>
           </div>
         ) : (
           <div className="grid">
-            {relevantTryouts.slice(0, 4).map((item) => (
+            {displayTryouts.slice(0, 4).map((item) => (
               <article className="panel item-card" key={item.id}>
                 <div className="item-card-header">
                   <span className="item-tag">{item.level} / Kelas {item.grade}</span>
