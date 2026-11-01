@@ -1,5 +1,5 @@
 /**
- * Modul: P01 — Beranda
+ * Modul: P01: Beranda
  * @author Kaisar Rayfa Al Baihaqqi (103022400110)
  * Tanggung jawab: mengembangkan dan memverifikasi modul ini sesuai plotting COTS.
  * @todo Lengkapi informasi program dan identitas visual setelah validasi klien.
