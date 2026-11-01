@@ -6,7 +6,7 @@ Tanggung jawab: menjelaskan cara membangun ulang halaman dan CRUD dari satu file
 -->
 # P19 — Satu file untuk latihan CRUD
 
-Semua kode khusus halaman berada di app/admin/users/page.js. File ini hanya mengimpor useState, useEffect dan useRef dari React. Data awal, state, validasi, penyimpanan, handler CRUD, form, tabel serta CSS lokal berada di file yang sama.
+Semua kode khusus halaman berada di src/app/admin/users/page.jsx. File ini hanya mengimpor useState, useEffect dan useRef dari React. Data awal, state, validasi, penyimpanan, handler CRUD, form, tabel serta CSS lokal berada di file yang sama.
 
 Layout admin, sesi demo dan token design system tetap memakai fondasi bersama yang sudah ada. Halaman ini tidak perlu lagi UserForm.js, users.module.css, file repository, utilitas pengguna atau file data contoh terpisah.
 
