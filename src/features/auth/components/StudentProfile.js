@@ -150,7 +150,7 @@ export function StudentProfile() {
                   setError('');
                   setSuccess('');
                 }}
-                placeholder="Contoh: Kaisar Rayfa"
+                placeholder="Contoh: Budi Santoso"
                 required
               />
             </div>
