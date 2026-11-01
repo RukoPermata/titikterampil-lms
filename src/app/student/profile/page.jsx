@@ -3,7 +3,7 @@
  * @author Kaisar Rayfa Al Baihaqqi (103022400110)
  * Tanggung jawab: mengembangkan dan memverifikasi modul ini sesuai plotting COTS.
  */
-import { StudentProfile } from '@/src/features/auth/components/StudentProfile';
+import { StudentProfile } from '@/src/features/student/components/StudentProfile';
 
 /**
  * Menampilkan profil siswa (P13).
