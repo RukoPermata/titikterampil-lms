@@ -54,7 +54,7 @@ test('soal menolak kunci di luar opsi dan bobot tidak positif', () => {
   const question = { prompt: 'Soal', options: ['A', 'B'], correctIndex: 0, weight: 1 };
   assert.equal(management.saveQuestion({ ...question, correctIndex: 2 }).status, 'error');
   assert.equal(management.saveQuestion({ ...question, weight: 0 }).status, 'error');
-  assert.equal(management.saveQuestion(question).status, 'not_implemented');
+  assert.equal(management.saveQuestion(question).status, 'success');
 });
 
 test('hasil skeleton pendaftaran tidak membocorkan password atau mengklaim validasi lengkap', () => {
@@ -72,9 +72,161 @@ test('filter kelas dari form cocok dengan data numerik tanpa mengubah sumber', (
   assert.deepEqual(cbt.filterTryouts(null), []);
 });
 
+test('autentikasi login memvalidasi email, kata sandi, dan menerima akun demo yang sah', () => {
+  assert.equal(auth.authenticateUser(null).status, 'error');
+  assert.equal(auth.authenticateUser({ email: 'salah-format' }).status, 'error');
+  assert.equal(auth.authenticateUser({ email: 'unknown@email.com', password: '123' }).status, 'error');
+  assert.equal(auth.authenticateUser({ email: 'siswa@titikterampil.id', password: 'salah' }).status, 'error');
+  const success = auth.authenticateUser({ email: 'siswa@titikterampil.id', password: 'password123' });
+  assert.equal(success.status, 'success');
+  assert.equal(success.user.role, 'student');
+});
+
+test('updateProfile memvalidasi konsistensi jenjang dan tingkat kelas serta identitas profil', () => {
+  assert.equal(auth.updateProfile(null).status, 'error');
+  assert.equal(auth.updateProfile({ id: '' }).status, 'error');
+  assert.equal(auth.updateProfile({ id: 's1', name: '' }).status, 'error');
+  assert.equal(auth.updateProfile({ id: 's1', name: 'Budi', level: 'SD', grade: 9 }).status, 'error');
+  assert.equal(auth.updateProfile({ id: 's1', name: 'Budi', level: 'SMP', grade: 12 }).status, 'error');
+  assert.equal(auth.updateProfile({ id: 's1', name: 'Budi', level: 'SMA', grade: 6 }).status, 'error');
+
+  const validUpdate = auth.updateProfile({ id: 'student-demo', name: 'Siswa Contoh Baru', level: 'SMA', grade: 12 });
+  assert.equal(validUpdate.status, 'success');
+  assert.equal(validUpdate.candidate.name, 'Siswa Contoh Baru');
+  assert.equal(validUpdate.candidate.grade, 12);
+});
+
+test('getTeacherSummary memvalidasi ID pengajar dan mengagregasi data kelas pengajaran', () => {
+  assert.equal(auth.getTeacherSummary(null).status, 'error');
+  assert.equal(auth.getTeacherSummary('').status, 'error');
+
+  const summaryResult = auth.getTeacherSummary('teacher-demo');
+  assert.equal(summaryResult.status, 'success');
+  assert.ok(summaryResult.summary.classCount >= 1);
+  assert.ok(summaryResult.summary.studentCount >= 1);
+  assert.ok(summaryResult.summary.assignmentCount >= 1);
+});
+
+test('validateRegistration memvalidasi panjang sandi minimal 8 karakter, keberadaan simbol, dan konfirmasi sandi', () => {
+  // Kurang dari 8 karakter
+  const shortPass = auth.validateRegistration({
+    name: 'Siswa',
+    email: 'siswa@titikterampil.id',
+    password: 'p@ss',
+    confirmPassword: 'p@ss',
+    level: 'SMA',
+    grade: 10,
+  });
+  assert.equal(shortPass.valid, false);
+  assert.ok(shortPass.errors.some((err) => err.includes('8 karakter')));
+
+  // Tidak ada simbol
+  const noSymbolPass = auth.validateRegistration({
+    name: 'Siswa',
+    email: 'siswa@titikterampil.id',
+    password: 'password123',
+    confirmPassword: 'password123',
+    level: 'SMA',
+    grade: 10,
+  });
+  assert.equal(noSymbolPass.valid, false);
+  assert.ok(noSymbolPass.errors.some((err) => err.includes('simbol')));
+
+  // Konfirmasi tidak cocok
+  const mismatchPass = auth.validateRegistration({
+    name: 'Siswa',
+    email: 'siswa@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@Beda',
+    level: 'SMA',
+    grade: 10,
+  });
+  assert.equal(mismatchPass.valid, false);
+  assert.ok(mismatchPass.errors.some((err) => err.includes('Konfirmasi kata sandi')));
+
+  // Valid lengkap
+  const validPass = auth.validateRegistration({
+    name: 'Siswa Contoh',
+    email: 'siswa@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    level: 'SMA',
+    grade: 10,
+  });
+  assert.equal(validPass.valid, true);
+  assert.equal(validPass.status, 'success');
+});
+
+test('validateRegistration memvalidasi nomor WhatsApp dan rentang jenjang baru (SD 4-6, Gap Year, Umum)', () => {
+  // SD kelas 2 ditolak karena SD dimulai dari kelas 4
+  const sdDua = auth.validateRegistration({
+    name: 'Siswa SD',
+    email: 'sd@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    whatsapp: '081234567890',
+    level: 'SD',
+    grade: 2,
+  });
+  assert.equal(sdDua.valid, false);
+
+  // SD kelas 4 diterima
+  const sdEmpat = auth.validateRegistration({
+    name: 'Siswa SD',
+    email: 'sd@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    whatsapp: '081234567890',
+    level: 'SD',
+    grade: 4,
+  });
+  assert.equal(sdEmpat.valid, true);
+  assert.equal(sdEmpat.status, 'success');
+
+  // SMA Gap Year diterima
+  const gapYear = auth.validateRegistration({
+    name: 'Siswa Gap Year',
+    email: 'gap@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    whatsapp: '081234567890',
+    level: 'SMA',
+    grade: 'Gap Year',
+  });
+  assert.equal(gapYear.valid, true);
+  assert.equal(gapYear.status, 'success');
+
+  // WhatsApp tanpa awalan 08 atau 628 ditolak
+  const badPrefixWa = auth.validateRegistration({
+    name: 'Siswa',
+    email: 'siswa@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    whatsapp: '12123123123',
+    level: 'SMA',
+    grade: 12,
+  });
+  assert.equal(badPrefixWa.valid, false);
+  assert.ok(badPrefixWa.errors.some((err) => err.includes('08 atau 628')));
+
+  // WhatsApp dengan awalan 628 diterima
+  const goodPrefixWa = auth.validateRegistration({
+    name: 'Siswa',
+    email: 'siswa@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    whatsapp: '6281234567890',
+    level: 'SMA',
+    grade: 12,
+  });
+  assert.equal(goodPrefixWa.valid, true);
+  assert.equal(goodPrefixWa.status, 'success');
+});
+
+
 // Fungsi validasi tetap diuji dari source halaman, tanpa membuat file logika tambahan.
 // Blok data/validasi tidak mengandung JSX, React atau akses browser.
-const pageSource = await readFile(new URL('../app/admin/users/page.js', import.meta.url), 'utf8');
+const pageSource = await readFile(new URL('../src/app/admin/users/page.jsx', import.meta.url), 'utf8');
 const pureCrudCode = pageSource.split('// BAGIAN 1 — DATA DAN VALIDASI')[1].split('// BAGIAN 2 — HALAMAN DAN STATE REACT')[0];
 const crud = await import('data:text/javascript;base64,' + Buffer.from(pureCrudCode + '\nexport { validateUser, isValidStoredUsers, INITIAL_USERS };').toString('base64'));
 
