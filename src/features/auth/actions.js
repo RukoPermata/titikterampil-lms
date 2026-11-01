@@ -36,10 +36,12 @@ export function validateRegistration(input) {
   }
 
   if (input.whatsapp !== undefined) {
-    if (!candidate.whatsapp) {
+    const rawWa = String(input.whatsapp ?? '').trim().replace(/[\s-]/g, '');
+    const waPattern = /^(\+628|628|08)[0-9]{8,12}$/;
+    if (!rawWa) {
       errors.push('Nomor WhatsApp wajib diisi.');
-    } else if (candidate.whatsapp.length < 10 || candidate.whatsapp.length > 15) {
-      errors.push('Nomor WhatsApp minimal 10 digit angka valid.');
+    } else if (!waPattern.test(rawWa)) {
+      errors.push('Nomor WhatsApp harus diawali 08 atau 628 (contoh: 081234567890).');
     }
   }
 
