@@ -5,9 +5,10 @@
  */
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useDemo } from '@/src/components/DemoProvider';
-import { tryouts, leaderboards, users } from '@/src/data/mock';
+import { tryouts, leaderboards } from '@/src/data/mock';
 
 /**
  * Komponen utama dashboard siswa yang menyajikan ikhtisar tryout CBT dan papan peringkat.
@@ -21,15 +22,61 @@ export function StudentDashboard() {
   const studentLevel = user?.level || 'SMA';
   const studentGrade = user?.grade || (studentLevel === 'Umum' ? 'Umum' : 12);
   const isMember = Boolean(user?.isMember);
+  // 2. State data dinamis dengan integrasi Fetch API (Kriteria UTS Poin 2.2 & 2.3.f)
+  const [dynamicTryouts, setDynamicTryouts] = useState(() => (
+    isMember ? tryouts : tryouts.filter((t) => t.level === studentLevel)
+  ));
+  const [dynamicLeaderboard, setDynamicLeaderboard] = useState(() => (
+    leaderboards[studentLevel] || leaderboards.SMA || []
+  ));
+  const [isLoading, setIsLoading] = useState(false);
+  const [fetchError, setFetchError] = useState('');
 
-  // 2. Filter eksklusif paket tryout: non-member hanya melihat paket sesuai jenjangnya
-  const relevantTryouts = isMember
-    ? tryouts
-    : tryouts.filter((t) => t.level === studentLevel);
+  useEffect(() => {
+    let active = true;
+    async function loadData() {
+      setIsLoading(true);
+      setFetchError('');
+      try {
+        const [resTryout, resLeaderboard] = await Promise.all([
+          fetch(`/api/tryouts?level=${isMember ? '' : studentLevel}`),
+          fetch(`/api/leaderboard?level=${studentLevel}`),
+        ]);
 
-  // 3. Ambil data leaderboard per jenjang siswa
-  const currentLeaderboard = leaderboards[studentLevel] || leaderboards.SMA || [];
+        if (!resTryout.ok || !resLeaderboard.ok) {
+          throw new Error('Gagal memuat dari API.');
+        }
 
+        const tryoutJson = await resTryout.json();
+        const leaderboardJson = await resLeaderboard.json();
+
+        if (active) {
+          if (Array.isArray(tryoutJson.data)) {
+            setDynamicTryouts(tryoutJson.data);
+          }
+          if (Array.isArray(leaderboardJson.data)) {
+            setDynamicLeaderboard(leaderboardJson.data);
+          }
+        }
+      } catch {
+        if (active) {
+          setFetchError('Koneksi API offline. Menggunakan data lokal.');
+        }
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadData();
+    return () => {
+      active = false;
+    };
+  }, [studentLevel, isMember]);
+
+  const displayTryouts = dynamicTryouts;
+  const currentLeaderboard = dynamicLeaderboard;
   return (
     <section className="page-content">
       {/* 1. Header Ringkasan Siswa */}
@@ -44,6 +91,16 @@ export function StudentDashboard() {
             <p className="muted" style={{ fontSize: '13px', margin: '4px 0 0' }}>
               Target Utama: <strong style={{ color: 'var(--primary)' }}>{user.studyTargets[0]}</strong>
             </p>
+          )}
+          {isLoading && (
+            <small className="muted" style={{ display: 'block', marginTop: '6px' }}>
+              Memperbarui data tryout via API...
+            </small>
+          )}
+          {fetchError && (
+            <small style={{ color: '#b42318', display: 'block', marginTop: '6px' }}>
+              {fetchError}
+            </small>
           )}
         </div>
         <div className="dashboard-badge-box">
