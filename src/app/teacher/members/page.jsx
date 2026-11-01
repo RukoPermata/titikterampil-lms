@@ -4,13 +4,8 @@ import React, { useEffect, useState } from "react";
 import { getStudentsForMembership_103022400061, toggleMembership_103022400061 } from "@/src/features/questions/actions";
 
 export default function MembersManagementPage_103022400061() {
-  const [students, setStudents_103022400061] = useState([]);
+  const [students, setStudents_103022400061] = useState(() => getStudentsForMembership_103022400061());
   const [search, setSearch_103022400061] = useState("");
-
-  useEffect(() => {
-    setStudents_103022400061(getStudentsForMembership_103022400061());
-  }, []);
-
   function handleToggleMember_103022400061(id) {
     const updated = toggleMembership_103022400061(id);
     setStudents_103022400061(updated);

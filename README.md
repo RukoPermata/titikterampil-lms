@@ -51,8 +51,9 @@ titikterampil-lms/
 ├── src/
 │   ├── app/                # URL routing, halaman, dan layout
 │   │   ├── globals.css     # Fondasi visual brand (#25B5A9) dan utilitas CSS
-│   │   ├── layout.js       # Root layout & DemoProvider
-│   │   ├── page.js         # [Layar 01] Landing Page
+│   │   ├── layout.jsx      # Root layout & DemoProvider
+│   │   ├── page.jsx        # [Layar 01] Landing Page
+│   │   ├── api/            # Route Handler Mock API (Fetch API UTS Poin 2.2)
 │   │   ├── (auth)/         # Halaman login, register, dan verifikasi 2FA
 │   │   ├── student/        # Halaman ruang belajar peserta (dashboard, CBT, hasil)
 │   │   ├── teacher/        # Halaman ruang pengajar (bank soal, penilaian esai)
@@ -60,9 +61,9 @@ titikterampil-lms/
 │   │
 │   ├── components/         # Komponen bersama lintas fitur
 │   │   ├── ui/             # Primitif UI
-│   │   ├── DashboardShell.js # Sidebar navigasi, topbar, dan role-guard
-│   │   ├── DemoProvider.js # State sesi, persistensi storage, Toast global (useToast)
-│   │   └── Landing.js      # Komponen halaman beranda publik
+│   │   ├── DashboardShell.jsx # Sidebar navigasi, topbar, dan role-guard
+│   │   ├── DemoProvider.jsx # State sesi, persistensi storage, Toast global (useToast)
+│   │   └── Landing.jsx     # Komponen halaman beranda publik
 │   │
 │   ├── features/           # Tampilan dan logika per domain fitur
 │   │   ├── auth/           # Autentikasi, login, register, profil (PIC: Kaisar)

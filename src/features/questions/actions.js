@@ -12,20 +12,47 @@ export function getTeacherStats_103022400061() {
   };
 }
 
+const defaultSubmissions = [
+  {
+    id: "sub-01",
+    studentName: "Budi Santoso",
+    packageName: "Tryout Matematika SMA - Paket 1",
+    submittedAt: "2026-10-30 14:20",
+    score: null,
+    status: "Perlu Dinilai",
+    essayPrompt: "Jelaskan langkah menyelesaikan persamaan 2x + 4 = 10 dan tentukan nilai x.",
+    essayAnswer: "Langkah pertama kurangkan 4 dari kedua sisi menjadi 2x = 6. Kemudian bagi kedua sisi dengan 2, sehingga didapatkan x = 3.",
+    maxScore: 20
+  },
+  {
+    id: "sub-02",
+    studentName: "Siti Rahmawati",
+    packageName: "Simulasi UTBK-SNBT Skolastik",
+    submittedAt: "2026-10-31 09:15",
+    score: 18,
+    status: "Selesai",
+    essayPrompt: "Uraikan argumen utama mengenai dampak kecerdasan buatan pada dunia pendidikan.",
+    essayAnswer: "Dampak AI mencakup personalisasi belajar dan efisiensi evaluasi, namun perlu pengawasan etis dan integritas akademik.",
+    feedback: "Penjelasan terstruktur dan komprehensif.",
+    maxScore: 20
+  }
+];
+
 export function getSubmissions_103022400061() {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") return defaultSubmissions;
 
   const saved = window.localStorage.getItem("titikterampil_submissions");
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (e) {
-      return [];
+      return Array.isArray(parsed) ? parsed : defaultSubmissions;
+    } catch {
+      return defaultSubmissions;
     }
   }
 
-  return [];
+  window.localStorage.setItem("titikterampil_submissions", JSON.stringify(defaultSubmissions));
+  return defaultSubmissions;
 }
 
 export function getSubmissionById_103022400061(id) {

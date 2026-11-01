@@ -6,16 +6,7 @@ import { classes, assignments } from "@/src/data/mock";
 import { getTeacherStats_103022400061 } from "@/src/features/questions/actions";
 
 export default function TeacherDashboardPage_103022400061() {
-  const [stats, setStats_103022400061] = useState({
-    essaysWaiting: 0,
-    totalQuestions: 0,
-    totalClasses: 0,
-    totalAssignments: 0
-  });
-
-  useEffect(() => {
-    setStats_103022400061(getTeacherStats_103022400061());
-  }, []);
+  const [stats] = useState(() => getTeacherStats_103022400061());
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
