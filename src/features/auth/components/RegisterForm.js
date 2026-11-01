@@ -12,9 +12,10 @@ import { useDemo } from '@/src/components/DemoProvider';
 import { validateRegistration, saveRegisteredUser } from '../actions';
 
 const GRADE_OPTIONS = {
-  SD: [1, 2, 3, 4, 5, 6],
+  SD: [4, 5, 6],
   SMP: [7, 8, 9],
-  SMA: [10, 11, 12],
+  SMA: [10, 11, 12, 'Gap Year'],
+  Umum: ['Umum'],
 };
 
 function EyeIcon() {
@@ -41,6 +42,7 @@ export function RegisterForm() {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -48,11 +50,13 @@ export function RegisterForm() {
 
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [whatsappError, setWhatsappError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmError, setConfirmError] = useState('');
 
   const [nameTouched, setNameTouched] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
+  const [whatsappTouched, setWhatsappTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [confirmTouched, setConfirmTouched] = useState(false);
 
@@ -110,6 +114,33 @@ export function RegisterForm() {
   function handleEmailBlur() {
     setEmailTouched(true);
     setEmailError(checkEmailRules(email));
+  }
+
+  /**
+   * Memeriksa kesesuaian nomor WhatsApp secara interaktif.
+   * @param {string} val - Nilai nomor WhatsApp.
+   * @returns {string} Pesan error atau string kosong jika valid.
+   */
+  function checkWhatsappRules(val) {
+    const raw = String(val ?? '').trim().replace(/[\s-]/g, '');
+    if (!raw) return 'Nomor WhatsApp wajib diisi.';
+    const waPattern = /^(\+628|628|08)[0-9]{8,12}$/;
+    if (!waPattern.test(raw)) {
+      return 'Nomor WhatsApp harus diawali 08 atau 628 (contoh: 081234567890).';
+    }
+    return '';
+  }
+
+  function handleWhatsappChange(e) {
+    const val = e.target.value.replace(/[^\d+]/g, '');
+    setWhatsapp(val);
+    setWhatsappTouched(true);
+    setWhatsappError(checkWhatsappRules(val));
+  }
+
+  function handleWhatsappBlur() {
+    setWhatsappTouched(true);
+    setWhatsappError(checkWhatsappRules(whatsapp));
   }
   /**
    * Memeriksa kesesuaian aturan kata sandi secara interaktif.
@@ -195,11 +226,13 @@ export function RegisterForm() {
     setErrorMessage('');
     setNameTouched(true);
     setEmailTouched(true);
+    setWhatsappTouched(true);
     setPasswordTouched(true);
     setConfirmTouched(true);
 
     const nErr = checkNameRules(name);
     const eErr = checkEmailRules(email);
+    const wErr = checkWhatsappRules(whatsapp);
     const pErr = checkPasswordRules(password);
 
     let cErr = '';
@@ -211,15 +244,17 @@ export function RegisterForm() {
 
     setNameError(nErr);
     setEmailError(eErr);
+    setWhatsappError(wErr);
     setPasswordError(pErr);
     setConfirmError(cErr);
 
-    if (nErr || eErr || pErr || cErr) {
+    if (nErr || eErr || wErr || pErr || cErr) {
       return;
     }
     const validation = validateRegistration({
       name,
       email,
+      whatsapp,
       password,
       confirmPassword,
       level,
@@ -237,6 +272,7 @@ export function RegisterForm() {
       id: `student-${Date.now()}`,
       name: validation.candidate.name,
       email: validation.candidate.email,
+      whatsapp: validation.candidate.whatsapp,
       password,
       role: 'student',
       level: validation.candidate.level,
@@ -248,7 +284,7 @@ export function RegisterForm() {
     if (typeof showToast === 'function') {
       showToast('Pendaftaran akun siswa berhasil.', 'success');
     }
-    router.push('/student/dashboard');
+    router.push('/student/onboarding');
   }
   return (
     <main id="main" className="auth-page">
@@ -297,6 +333,22 @@ export function RegisterForm() {
             />
             {emailError && <p className="error-msg">{emailError}</p>}
           </div>
+
+          <div className="form-group">
+            <label htmlFor="whatsapp">Nomor WhatsApp *</label>
+            <input
+              id="whatsapp"
+              type="tel"
+              placeholder="contoh: 081234567890"
+              value={whatsapp}
+              onChange={handleWhatsappChange}
+              onBlur={handleWhatsappBlur}
+              className={whatsappError ? 'has-error' : ''}
+              required
+            />
+            {whatsappError && <p className="error-msg">{whatsappError}</p>}
+          </div>
+
           <div className="form-group">
             <label htmlFor="password">Kata Sandi *</label>
             <div className={`password-input-group ${passwordError ? 'has-error' : ''}`}>
@@ -361,9 +413,10 @@ export function RegisterForm() {
                 value={level}
                 onChange={(e) => handleLevelChange(e.target.value)}
               >
-                <option value="SD">SD</option>
-                <option value="SMP">SMP</option>
-                <option value="SMA">SMA</option>
+                <option value="SD">SD (Kelas 4-6)</option>
+                <option value="SMP">SMP (Kelas 7-9)</option>
+                <option value="SMA">SMA / SMK</option>
+                <option value="Umum">Umum / Alumni</option>
               </select>
             </div>
 
@@ -376,7 +429,7 @@ export function RegisterForm() {
               >
                 {(GRADE_OPTIONS[level] || []).map((g) => (
                   <option key={g} value={g}>
-                    Kelas {g}
+                    {typeof g === 'number' ? `Kelas ${g}` : g}
                   </option>
                 ))}
               </select>

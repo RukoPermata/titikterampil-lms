@@ -1,16 +1,16 @@
 /**
  * Modul: Komponen Dashboard Siswa (P04)
  * @author Kaisar Rayfa Al Baihaqqi (103022400110)
- * Tanggung jawab: menampilkan ringkasan aktivitas belajar, kelas, jadwal tryout, dan navigasi siswa.
+ * Tanggung jawab: menampilkan ringkasan aktivitas tryout CBT, filter eksklusif jenjang, dan widget leaderboard.
  */
 'use client';
 
 import Link from 'next/link';
 import { useDemo } from '@/src/components/DemoProvider';
-import { tryouts, classes, assignments, users } from '@/src/data/mock';
+import { tryouts, leaderboards, users } from '@/src/data/mock';
 
 /**
- * Komponen utama dashboard siswa yang menyajikan ikhtisar belajar dan navigasi cepat.
+ * Komponen utama dashboard siswa yang menyajikan ikhtisar tryout CBT dan papan peringkat.
  * @returns {React.ReactElement} Antarmuka dashboard siswa.
  */
 export function StudentDashboard() {
@@ -19,50 +19,43 @@ export function StudentDashboard() {
   // 1. Identifikasi data siswa aktif
   const studentName = user?.name || 'Siswa';
   const studentLevel = user?.level || 'SMA';
-  const studentGrade = user?.grade || 12;
+  const studentGrade = user?.grade || (studentLevel === 'Umum' ? 'Umum' : 12);
+  const isMember = Boolean(user?.isMember);
 
-  // 2. Filter kelas dan tryout yang relevan dengan jenjang siswa
-  const relevantClasses = classes.filter(
-    (c) => !studentLevel || c.level === studentLevel
-  );
-  const displayClasses = relevantClasses.length > 0 ? relevantClasses : classes;
+  // 2. Filter eksklusif paket tryout: non-member hanya melihat paket sesuai jenjangnya
+  const relevantTryouts = isMember
+    ? tryouts
+    : tryouts.filter((t) => t.level === studentLevel);
 
-  const relevantTryouts = tryouts.filter(
-    (t) => !studentLevel || t.level === studentLevel
-  );
-  const displayTryouts = relevantTryouts.length > 0 ? relevantTryouts : tryouts;
-
-  // 3. Ringkasan data aktif
-  const activeClassCount = displayClasses.length;
-  const availableTryoutCount = displayTryouts.length;
-  const assignmentCount = assignments.length;
-
-  /**
-   * Menemukan nama pengajar berdasarkan ID pengajar.
-   * @param {string} teacherId - ID pengajar.
-   * @returns {string} Nama pengajar terdaftar.
-   */
-  function getTeacherName(teacherId) {
-    const teacher = users.find((u) => u.id === teacherId);
-    return teacher ? teacher.name : 'Pengajar Titik Terampil';
-  }
+  // 3. Ambil data leaderboard per jenjang siswa
+  const currentLeaderboard = leaderboards[studentLevel] || leaderboards.SMA || [];
 
   return (
     <section className="page-content">
       {/* 1. Header Ringkasan Siswa */}
       <div className="dashboard-welcome">
         <div>
-          <p className="eyebrow">TITIK TERAMPIL / P04 / DASHBOARD SISWA</p>
-          <h1>Dashboard Siswa</h1>
+          <p className="eyebrow">TITIK TERAMPIL / P04 / DASHBOARD PESERTA</p>
+          <h1>Dashboard Peserta</h1>
           <p className="lead">
-            Selamat datang, {studentName}. Pantau kelas aktif, jadwal latihan CBT, dan tugas belajar Anda di sini.
+            Selamat datang, {studentName}. Pantau paket tryout aktif, jadwal latihan CBT, dan peringkat belajar Anda.
           </p>
+          {user?.studyTargets && user.studyTargets.length > 0 && (
+            <p className="muted" style={{ fontSize: '13px', margin: '4px 0 0' }}>
+              Target Utama: <strong style={{ color: 'var(--primary)' }}>{user.studyTargets[0]}</strong>
+            </p>
+          )}
         </div>
         <div className="dashboard-badge-box">
           <span className="dashboard-badge">
-            {studentLevel} / Kelas {studentGrade}
+            {isMember ? 'Member Titik Terampil' : `${studentLevel} / Kelas ${studentGrade}`}
           </span>
           <span className="dashboard-badge-muted">{user?.email || 'siswa@titikterampil.id'}</span>
+          {user?.readiness && (
+            <small className="muted" style={{ fontSize: '11px' }}>
+              Kesiapan: {user.readiness}
+            </small>
+          )}
         </div>
       </div>
 
@@ -71,22 +64,26 @@ export function StudentDashboard() {
         <div className="stat-box">
           <span className="stat-label">Jenjang Pendidikan</span>
           <strong className="stat-number">{studentLevel}</strong>
-          <small className="muted">Kelas {studentGrade}</small>
-        </div>
-        <div className="stat-box">
-          <span className="stat-label">Kelas Terdaftar</span>
-          <strong className="stat-number">{activeClassCount}</strong>
-          <small className="muted">Ruang belajar aktif</small>
+          <small className="muted">{studentLevel === 'Umum' ? 'Peserta Mandiri' : `Kelas ${studentGrade}`}</small>
         </div>
         <div className="stat-box">
           <span className="stat-label">Paket Tryout CBT</span>
-          <strong className="stat-number">{availableTryoutCount}</strong>
-          <small className="muted">Latihan tersedia</small>
+          <strong className="stat-number">{relevantTryouts.length}</strong>
+          <small className="muted">{isMember ? 'Akses Lintas Jenjang' : 'Khusus Jenjang Anda'}</small>
         </div>
         <div className="stat-box">
-          <span className="stat-label">Tugas Terjadwal</span>
-          <strong className="stat-number">{assignmentCount}</strong>
-          <small className="muted">Latihan formatif</small>
+          <span className="stat-label">Status Akses</span>
+          <strong className="stat-number" style={{ color: isMember ? 'var(--primary)' : 'var(--ink)' }}>
+            {isMember ? 'Member' : 'Reguler'}
+          </strong>
+          <small className="muted">{isMember ? 'Semua Paket Terbuka' : 'Voucher & Gratis'}</small>
+        </div>
+        <div className="stat-box">
+          <span className="stat-label">Tingkat Kesiapan</span>
+          <strong className="stat-number" style={{ fontSize: '18px', paddingTop: '6px' }}>
+            {user?.readiness || 'Cukup siap'}
+          </strong>
+          <small className="muted">Target Asesmen CBT</small>
         </div>
       </div>
 
@@ -100,52 +97,56 @@ export function StudentDashboard() {
             <span className="quick-action-tag">CBT</span>
             <div>
               <strong>Katalog Tryout</strong>
-              <p>Latihan ujian berbasis komputer sesuai jenjang dan mata pelajaran.</p>
-            </div>
-          </Link>
-          <Link href="/student/classes" className="quick-action-card">
-            <span className="quick-action-tag">LMS</span>
-            <div>
-              <strong>Kelas Belajar</strong>
-              <p>Daftar ruang kelas, dokumen materi, dan instruksi pembelajaran.</p>
+              <p>Temukan dan kerjakan latihan soal ujian online sesuai jenjang Anda.</p>
             </div>
           </Link>
           <Link href="/student/history" className="quick-action-card">
-            <span className="quick-action-tag">REKAP</span>
+            <span className="quick-action-tag">HASIL</span>
             <div>
-              <strong>Riwayat Ujian</strong>
-              <p>Rekapitulasi skor hasil submit ujian dan evaluasi jawaban.</p>
+              <strong>Riwayat & Pembahasan</strong>
+              <p>Lihat rekapitulasi skor, evaluasi jawaban, dan pembahasan tiap soal.</p>
+            </div>
+          </Link>
+          <Link href="/student/leaderboard" className="quick-action-card">
+            <span className="quick-action-tag">RANK</span>
+            <div>
+              <strong>Papan Peringkat</strong>
+              <p>Pantau posisi skor terbaik Anda di antara sesama peserta jenjang {studentLevel}.</p>
             </div>
           </Link>
           <Link href="/student/profile" className="quick-action-card">
-            <span className="quick-action-tag">AKUN</span>
+            <span className="quick-action-tag">PROFIL</span>
             <div>
-              <strong>Profil Siswa</strong>
-              <p>Pembaruan nama, jenjang pendidikan, dan penyesuaian tingkat kelas.</p>
+              <strong>Profil & Target Studi</strong>
+              <p>Perbarui WhatsApp, jenjang kelas, target kampus, dan kesiapan.</p>
             </div>
           </Link>
         </div>
       </div>
 
-      {/* 4. Rekomendasi Tryout CBT */}
+      {/* 4. Rekomendasi Tryout CBT (Filter Eksklusif Jenjang) */}
       <div className="dashboard-section">
         <div className="dashboard-section-head">
           <div>
-            <h2>Paket Tryout CBT Tersedia</h2>
-            <p className="muted">Daftar latihan soal ujian untuk jenjang {studentLevel}.</p>
+            <h2>Latihan Tryout CBT Tersedia</h2>
+            <p className="muted">
+              {isMember
+                ? 'Sebagai Member, Anda dapat mengakses semua paket tryout lintas jenjang.'
+                : `Paket tryout yang disaring eksklusif untuk jenjang ${studentLevel}.`}
+            </p>
           </div>
           <Link href="/student/tryouts" className="button secondary">
             Buka Katalog Lengkap
           </Link>
         </div>
 
-        {displayTryouts.length === 0 ? (
+        {relevantTryouts.length === 0 ? (
           <div className="panel dashboard-empty">
-            <p>Tidak ada paket tryout yang aktif untuk jenjang ini.</p>
+            <p>Tidak ada paket tryout yang aktif untuk jenjang {studentLevel}.</p>
           </div>
         ) : (
           <div className="grid">
-            {displayTryouts.slice(0, 3).map((item) => (
+            {relevantTryouts.slice(0, 4).map((item) => (
               <article className="panel item-card" key={item.id}>
                 <div className="item-card-header">
                   <span className="item-tag">{item.level} / Kelas {item.grade}</span>
@@ -164,40 +165,46 @@ export function StudentDashboard() {
         )}
       </div>
 
-      {/* 5. Daftar Kelas Belajar */}
+      {/* 5. Widget Leaderboard Antar Jenjang */}
       <div className="dashboard-section">
         <div className="dashboard-section-head">
           <div>
-            <h2>Kelas Belajar Terdaftar</h2>
-            <p className="muted">Ruang belajar dan penugasan tahun ajaran 2026/2027.</p>
+            <h2>Papan Peringkat ({studentLevel})</h2>
+            <p className="muted">5 besar skor tryout terbaik peserta jenjang {studentLevel}.</p>
           </div>
-          <Link href="/student/classes" className="button secondary">
-            Buka Semua Kelas
+          <Link href="/student/leaderboard" className="button secondary">
+            Lihat Peringkat Penuh
           </Link>
         </div>
 
-        {displayClasses.length === 0 ? (
-          <div className="panel dashboard-empty">
-            <p>Belum ada kelas belajar yang terhubung dengan akun Anda.</p>
+        <div className="leaderboard-panel">
+          <div style={{ overflowX: 'auto' }}>
+            <table className="leaderboard-table">
+              <thead>
+                <tr>
+                  <th style={{ width: '60px' }}>Rank</th>
+                  <th>Nama Peserta</th>
+                  <th>Asal Sekolah / Kategori</th>
+                  <th style={{ textAlign: 'right' }}>Skor Terbaik</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentLeaderboard.slice(0, 5).map((entry) => (
+                  <tr key={entry.rank}>
+                    <td className="leaderboard-rank">
+                      <span className="leaderboard-rank-top">{entry.rank}</span>
+                    </td>
+                    <td>
+                      <strong>{entry.name}</strong>
+                    </td>
+                    <td className="muted">{entry.school}</td>
+                    <td className="leaderboard-score">{entry.score}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ) : (
-          <div className="grid">
-            {displayClasses.map((c) => (
-              <article className="panel item-card" key={c.id}>
-                <div className="item-card-header">
-                  <span className="item-tag">{c.level} / Kelas {c.grade}</span>
-                </div>
-                <h3>{c.title}</h3>
-                <p className="item-meta">Pengajar: <b>{getTeacherName(c.teacherId)}</b></p>
-                <div className="item-card-footer">
-                  <Link href={`/student/classes/${c.id}`} className="button secondary">
-                    Masuk Kelas
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+        </div>
       </div>
     </section>
   );

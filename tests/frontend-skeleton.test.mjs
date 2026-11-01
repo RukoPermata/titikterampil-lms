@@ -196,16 +196,29 @@ test('validateRegistration memvalidasi nomor WhatsApp dan rentang jenjang baru (
   assert.equal(gapYear.valid, true);
   assert.equal(gapYear.status, 'success');
 
-  // WhatsApp kurang dari 10 digit ditolak
-  const badWa = auth.validateRegistration({
+  // WhatsApp tanpa awalan 08 atau 628 ditolak
+  const badPrefixWa = auth.validateRegistration({
     name: 'Siswa',
     email: 'siswa@titikterampil.id',
     password: 'Password@123',
     confirmPassword: 'Password@123',
-    whatsapp: '0812',
+    whatsapp: '12123123123',
     level: 'SMA',
     grade: 12,
   });
-  assert.equal(badWa.valid, false);
-  assert.ok(badWa.errors.some((err) => err.includes('WhatsApp')));
+  assert.equal(badPrefixWa.valid, false);
+  assert.ok(badPrefixWa.errors.some((err) => err.includes('08 atau 628')));
+
+  // WhatsApp dengan awalan 628 diterima
+  const goodPrefixWa = auth.validateRegistration({
+    name: 'Siswa',
+    email: 'siswa@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    whatsapp: '6281234567890',
+    level: 'SMA',
+    grade: 12,
+  });
+  assert.equal(goodPrefixWa.valid, true);
+  assert.equal(goodPrefixWa.status, 'success');
 });
