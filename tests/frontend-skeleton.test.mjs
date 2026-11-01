@@ -156,3 +156,56 @@ test('validateRegistration memvalidasi panjang sandi minimal 8 karakter, keberad
   assert.equal(validPass.valid, true);
   assert.equal(validPass.status, 'success');
 });
+
+test('validateRegistration memvalidasi nomor WhatsApp dan rentang jenjang baru (SD 4-6, Gap Year, Umum)', () => {
+  // SD kelas 2 ditolak karena SD dimulai dari kelas 4
+  const sdDua = auth.validateRegistration({
+    name: 'Siswa SD',
+    email: 'sd@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    whatsapp: '081234567890',
+    level: 'SD',
+    grade: 2,
+  });
+  assert.equal(sdDua.valid, false);
+
+  // SD kelas 4 diterima
+  const sdEmpat = auth.validateRegistration({
+    name: 'Siswa SD',
+    email: 'sd@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    whatsapp: '081234567890',
+    level: 'SD',
+    grade: 4,
+  });
+  assert.equal(sdEmpat.valid, true);
+  assert.equal(sdEmpat.status, 'success');
+
+  // SMA Gap Year diterima
+  const gapYear = auth.validateRegistration({
+    name: 'Siswa Gap Year',
+    email: 'gap@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    whatsapp: '081234567890',
+    level: 'SMA',
+    grade: 'Gap Year',
+  });
+  assert.equal(gapYear.valid, true);
+  assert.equal(gapYear.status, 'success');
+
+  // WhatsApp kurang dari 10 digit ditolak
+  const badWa = auth.validateRegistration({
+    name: 'Siswa',
+    email: 'siswa@titikterampil.id',
+    password: 'Password@123',
+    confirmPassword: 'Password@123',
+    whatsapp: '0812',
+    level: 'SMA',
+    grade: 12,
+  });
+  assert.equal(badWa.valid, false);
+  assert.ok(badWa.errors.some((err) => err.includes('WhatsApp')));
+});
