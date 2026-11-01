@@ -5,7 +5,7 @@ Tanggung jawab: menjaga petunjuk menjalankan, batas MVP dan alur kerja tim.
 -->
 # Titik Terampil: Platform Try Out & CBT Bimbel
 
-Platform CBT (*Computer-Based Test*) dan Try Out untuk **Bimbingan Belajar Titik Terampil** yang mencakup jenjang mulai dari Kelas 4 SD, SMP, SMA/SMK, hingga Gap Year / Umum. Menggunakan **Next.js 16 (App Router) + React 19 (JavaScript)** dan Vanilla CSS terpusat dengan identitas warna resmi **Turquoise `#25B5A9`**.
+Platform CBT (*Computer-Based Test*) dan Try Out untuk **Bimbingan Belajar Titik Terampil** yang mencakup jenjang mulai dari Kelas 4 SD, SMP, SMA/SMK, hingga Gap Year / Umum. Menggunakan **Next.js 16 (App Router) + React 19 (JavaScript)** dengan **Tailwind CSS v4** dan identitas warna resmi **Turquoise `#25B5A9`**.
 
 ---
 

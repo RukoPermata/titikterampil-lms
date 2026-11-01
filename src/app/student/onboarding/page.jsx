@@ -3,7 +3,7 @@
  * @author Kaisar Rayfa Al Baihaqqi (103022400110)
  * Tanggung jawab: entry point rute personalisasi awal siswa baru sebelum masuk dashboard.
  */
-import { OnboardingForm } from '@/src/features/auth/components/OnboardingForm';
+import { OnboardingForm } from '@/src/features/student/components/OnboardingForm';
 
 export const metadata = {
   title: 'Personalisasi Awal',
