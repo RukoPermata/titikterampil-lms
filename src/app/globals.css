@@ -93,14 +93,28 @@ small, .muted { color: var(--muted); }
 }
 
 .landing-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 28px 0;
+  padding: 18px 0;
+  background: var(--paper);
   border-bottom: 1px solid var(--line);
   gap: 20px;
 }
 .landing-nav nav { display: flex; align-items: center; gap: 30px; }
+.landing-nav nav a:not(.button) {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  transition: color 0.15s ease;
+}
+.landing-nav nav a:not(.button):hover {
+  color: var(--primary);
+}
 
 .hero {
   display: grid;
@@ -383,6 +397,36 @@ footer {
   gap: 10px;
 }
 
+
+/* Form OTP 2FA */
+.otp-input {
+  font-size: 26px !important;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 10px;
+  max-width: 260px;
+  margin: 10px auto 0;
+  display: block;
+}
+.otp-timer-box {
+  text-align: center;
+  margin: 18px 0 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.otp-resend-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-size: 13px;
+}
+.otp-resend-btn:hover {
+  color: var(--primary-hover);
+}
 .demo-hints {
   margin: 20px 0 0;
   padding: 12px 14px;
@@ -691,31 +735,68 @@ summary { cursor: pointer; font-weight: 700; }
 .route-map { display: grid; gap: 10px; padding: 20px 0; }
 
 /* 4. Responsivitas: verifikasi navigasi dan kartu pada layar kecil. */
+@media (max-width: 900px) {
+  .landing-nav nav { gap: 16px; }
+  .landing-nav nav a { font-size: 13px; }
+}
+
 @media (max-width: 850px) {
   .hero { grid-template-columns: 1fr; padding: 45px 0; gap: 35px; }
-  .hero-board { max-width: 580px; }
+  .hero-board { max-width: 100%; }
   .app-shell { grid-template-columns: 1fr; }
   .sidebar {
     border-right: 0;
     border-bottom: 1px solid var(--line);
-    padding: 20px;
+    padding: 16px 20px;
     gap: 12px;
   }
-  .sidebar nav { display: flex; overflow-x: auto; }
-  .sidebar nav a { white-space: nowrap; }
+  .sidebar nav {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .sidebar nav a {
+    white-space: nowrap;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
   .sidebar > button { align-self: flex-start; }
   .page-content { padding: 28px 20px; }
-  .topbar { padding: 16px 20px; }
+  .topbar { padding: 14px 20px; }
 }
 
-@media (max-width: 480px) {
-  .landing-nav { align-items: flex-start; }
-  .landing-nav nav > a:first-child { display: none; }
+@media (max-width: 640px) {
+  .landing-nav nav a:not(.button) { display: none; }
+  .landing-nav { padding: 14px 0; }
   .brand { font-size: 22px; }
-  .hero-board { padding: 24px; }
-  .panel { padding: 22px; }
+  .hero { padding: 32px 0; gap: 28px; }
+  .hero h1 { font-size: clamp(2rem, 7.5vw, 2.8rem); }
+  .hero-board { padding: 24px; border-radius: 10px 10px 40px 10px; }
+  .board-number { font-size: 52px; }
+  .actions { flex-direction: column; align-items: stretch; gap: 12px; }
+  .actions .button { width: 100%; text-align: center; }
+  .form-row { grid-template-columns: 1fr; gap: 12px; }
+  .dashboard-stats { grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0 24px; }
+  .stat-box { padding: 14px; }
+  .stat-number { font-size: 22px; }
+  .dashboard-welcome { flex-direction: column; align-items: stretch; }
+  .dashboard-badge-box { align-items: flex-start; margin-top: 8px; }
+  .auth-page { margin: 2vh auto; padding: 12px; }
+  .auth-page .panel { padding: 22px 16px; }
+  .profile-layout { grid-template-columns: 1fr; gap: 16px; }
+  .quick-actions-grid { grid-template-columns: 1fr; }
+  .page-content { padding: 20px 14px; }
+  .panel { padding: 20px 16px; }
+  .topbar { padding: 12px 14px; font-size: 11px; }
+  .topbar span:last-child { font-weight: 600; }
 }
 
+@media (max-width: 380px) {
+  .dashboard-stats { grid-template-columns: 1fr; }
+  .landing { padding: 0 4%; }
+  .auth-page .panel { padding: 18px 12px; }
+}
 /* 5. Aksesibilitas: hormati preferensi pengguna untuk mengurangi gerakan. */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
