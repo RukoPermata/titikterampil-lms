@@ -9,20 +9,15 @@ export default function GradingDetailPage_103022400061() {
   const router = useRouter();
   const id = params?.id;
 
-  const [submission, setSubmission_103022400061] = useState(null);
-  const [score, setScore_103022400061] = useState("");
-  const [feedback, setFeedback_103022400061] = useState("");
-
-  useEffect(() => {
-    if (id) {
-      const data = getSubmissionById_103022400061(id);
-      if (data) {
-        setSubmission_103022400061(data);
-        setScore_103022400061(data.score !== null && data.score !== undefined ? data.score : "");
-        setFeedback_103022400061(data.feedback || "");
-      }
-    }
-  }, [id]);
+  const [submission] = useState(() => (id ? getSubmissionById_103022400061(id) : null));
+  const [score, setScore_103022400061] = useState(() => {
+    const data = id ? getSubmissionById_103022400061(id) : null;
+    return data && data.score !== null && data.score !== undefined ? data.score : "";
+  });
+  const [feedback, setFeedback_103022400061] = useState(() => {
+    const data = id ? getSubmissionById_103022400061(id) : null;
+    return data?.feedback || "";
+  });
 
   function handleSubmit_103022400061(e) {
     e.preventDefault();

@@ -5,12 +5,8 @@ import { useRouter } from "next/navigation";
 import { getSubmissions_103022400061 } from "@/src/features/questions/actions";
 
 export default function GradingListPage_103022400061() {
-  const [submissions, setSubmissions_103022400061] = useState([]);
+  const [submissions] = useState(() => getSubmissions_103022400061());
   const router = useRouter();
-
-  useEffect(() => {
-    setSubmissions_103022400061(getSubmissions_103022400061());
-  }, []);
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
