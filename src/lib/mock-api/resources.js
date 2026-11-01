@@ -83,6 +83,13 @@ export async function updateRecord(collection, id, input) {
   return changeState((state) => {
     const previous = findRecord(state, collection, id);
     const record = validateRecord(collection, input, state, previous);
+    if (collection === 'users' && previous.role !== record.role) {
+      validateUserTransition(state, previous);
+      ensure(!state.collections.classes.some((item) => item.teacherId === id),
+        'Pengajar masih ditugaskan pada kelas; ubah penugasan sebelum mengganti peran.', 409);
+      ensure(!state.collections.transactions.some((item) => item.studentId === id),
+        'Peserta masih dirujuk transaksi; perannya belum dapat diganti.', 409);
+    }
     if (collection === 'tryouts') validatePublication(record, state);
     if (collection === 'questions') {
       validateQuestionPackage(state, previous.tryoutId);
@@ -115,6 +122,7 @@ function validateQuestionPackage(state, tryoutId) {
 function validateDeletion(state, collection, id) {
   const data = state.collections;
   if (collection === 'users') {
+    validateUserTransition(state, findRecord(state, collection, id));
     ensure(!data.classes.some((item) => item.teacherId === id) &&
       !data.transactions.some((item) => item.studentId === id), 'Pengguna masih dirujuk kelas atau transaksi.', 409);
   }
@@ -127,6 +135,19 @@ function validateDeletion(state, collection, id) {
   if (collection === 'questions') {
     const question = findRecord(state, collection, id);
     validateQuestionPackage(state, question.tryoutId);
+  }
+}
+
+/**
+ * Menjaga minimal satu admin dalam state terkunci, termasuk mutasi paralel.
+ * @param {Object} state - State terbaru di dalam lock penyimpanan.
+ * @param {Object} previous - Pengguna yang akan dihapus atau berubah peran.
+ * @returns {void} Melempar konflik jika admin terakhir akan hilang.
+ */
+function validateUserTransition(state, previous) {
+  if (previous.role === 'admin') {
+    ensure(state.collections.users.filter((user) => user.role === 'admin').length > 1,
+      'Administrator terakhir tidak boleh dihapus atau diganti peran.', 409);
   }
 }
 
