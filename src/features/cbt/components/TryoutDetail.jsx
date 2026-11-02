@@ -30,6 +30,7 @@ export function TryoutDetail({ tryoutId }) {
         <div className={styles.metaItem}><small>Tingkat kelas</small><strong>Kelas {tryout.grade}</strong></div>
         <div className={styles.metaItem}><small>Mata pelajaran</small><strong>{tryout.subject}</strong></div>
         <div className={styles.metaItem}><small>Durasi</small><strong>{tryout.durationMinutes} menit</strong></div>
+        <div className={styles.metaItem}><small>Biaya Akses</small><strong>{tryout.isFree ? 'Gratis' : `Rp ${Number(tryout.price).toLocaleString('id-ID')}`}</strong></div>
       </div>
 
       <article className="panel">
@@ -49,11 +50,19 @@ export function TryoutDetail({ tryoutId }) {
           <span>Saya sudah membaca aturan dan siap mengerjakan tryout ini.</span>
         </label>
 
-        {setuju ? (
-          <Link className="button" href={'/student/exams/' + tryout.id}>Mulai tryout →</Link>
-        ) : (
-          <button type="button" disabled>Mulai tryout →</button>
-        )}
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '16px' }}>
+          {setuju ? (
+            <Link className="button" href={'/student/exams/' + tryout.id}>Mulai tryout →</Link>
+          ) : (
+            <button type="button" disabled>Mulai tryout →</button>
+          )}
+          <Link
+            className="button secondary"
+            href={'/student/checkout/' + tryout.id}
+          >
+            {tryout.isFree ? 'Klaim Voucher Akses →' : 'Beli Paket (Checkout) →'}
+          </Link>
+        </div>
       </article>
     </section>
   );
