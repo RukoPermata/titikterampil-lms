@@ -72,11 +72,11 @@ export default function TeacherDashboardPage_103022400061() {
               <p>Kelola aktivasi dan pencabutan akses Member siswa bimbingan belajar.</p>
             </div>
           </Link>
-          <Link href="/admin/questions" className="quick-action-card">
-            <span className="quick-action-tag">SOAL</span>
+          <Link href="/teacher/materials" className="quick-action-card">
+            <span className="quick-action-tag">MATERI</span>
             <div>
-              <strong>Bank Soal</strong>
-              <p>Akses koleksi soal dan manajemen paket latihan tryout.</p>
+              <strong>Kelola Materi</strong>
+              <p>Pengelolaan konten belajar dan koleksi soal untuk kelas binaan.</p>
             </div>
           </Link>
         </div>

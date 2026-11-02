@@ -157,32 +157,32 @@ export const pages = [
   },
   {
     "id": "P15",
-    "route": "/teacher/materials",
-    "title": "Kelola materi",
-    "owner": "Fityah Bayoediansyah Harahap (103022400085)",
-    "component": "MaterialsPage",
-    "description": "Pengelolaan konten belajar oleh pengajar.",
-    "todo": "Buat form tambah, edit dan hapus materi sesuai kelas pengajar.",
+    "route": "/admin/questions",
+    "title": "Bank Soal",
+    "owner": "Farrel Irham Adzkaar Susanto (103022400105)",
+    "component": "QuestionsPage",
+    "description": "Akses koleksi soal dan manajemen paket latihan tryout untuk pengajar.",
+    "todo": "Sinkronkan akses pengajar ke bank soal admin.",
     "role": "teacher"
   },
   {
     "id": "P16",
-    "route": "/teacher/assignments",
-    "title": "Tugas dan penilaian",
+    "route": "/teacher/grading",
+    "title": "Daftar Penilaian Esai",
     "owner": "Hilmy Rafi (103022400061)",
-    "component": "TeacherAssignmentsPage",
-    "description": "Pembuatan tugas dan penilaian pengumpulan siswa.",
-    "todo": "Buat CRUD tugas dan form penilaian dengan batas nilai yang valid.",
+    "component": "TeacherGradingPage",
+    "description": "Tabel pengumpulan esai peserta dan antarmuka koreksi nilai.",
+    "todo": "Hubungkan form koreksi dengan database nilai.",
     "role": "teacher"
   },
   {
     "id": "P17",
-    "route": "/teacher/results",
-    "title": "Monitoring siswa",
+    "route": "/teacher/members",
+    "title": "Pemberian Status Member",
     "owner": "Hilmy Rafi (103022400061)",
-    "component": "TeacherResultsPage",
-    "description": "Rekap hasil belajar siswa di kelas pengajar.",
-    "todo": "Tampilkan hasil berdasarkan kelas pengajar dan filter peserta.",
+    "component": "TeacherMembersPage",
+    "description": "Pencarian siswa dan aktivasi atau pencabutan status Member khusus bimbel.",
+    "todo": "Mutasi database untuk update status Member.",
     "role": "teacher"
   },
   {
@@ -289,7 +289,7 @@ export const pages = [
 
 /**
  * Mencari metadata berdasarkan ID halaman internal.
- * @param {string} id - ID P01 sampai P24.
+ * @param {string} id - ID P01 sampai P27.
  * @returns {Object|undefined} Metadata halaman atau undefined bila ID tidak dikenal.
  */
 export function findPage(id) {
