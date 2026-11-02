@@ -679,6 +679,26 @@ textarea.textAnswer {
 .reviewEmpty { background: #edf1e7; color: #4f6158; }
 .reviewPending { background: #fff4db; color: #7a5000; }
 
+.reviewOptionCorrect {
+  border-color: #087f76;
+  background: #e6f7ee;
+}
+
+.reviewOptionWrong {
+  border-color: #b42318;
+  background: #feeceb;
+}
+
+.reviewOptionTag {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .answerBox {
   padding: 11px 13px;
   margin: 8px 0;
