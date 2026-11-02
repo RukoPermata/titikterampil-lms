@@ -116,16 +116,6 @@ export const pages = [
     "role": "student"
   },
   {
-    "id": "P10",
-    "route": "/student/classes",
-    "title": "Kelas belajar",
-    "owner": "Fityah Bayoediansyah Harahap (103022400085)",
-    "component": "ClassCatalogPage",
-    "description": "Ruang belajar berdasarkan jenjang dan mata pelajaran.",
-    "todo": "Filter kelas sesuai siswa aktif dan tampilkan status keanggotaan.",
-    "role": "student"
-  },
-  {
     "id": "P11",
     "route": "/student/classes/[id]",
     "title": "Materi kelas",
