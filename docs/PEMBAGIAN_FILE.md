@@ -222,14 +222,14 @@ titikterampil-lms/
 **Fokus Area**: Transaksi Pembelian Paket, Manajemen Voucher & Pembayaran
 
 #### Target UTS (Frontend UI/UX):
-- [ ] **Layar 09 (Checkout dan Status Pembayaran)**:
+- [x] **Layar 09 (Checkout dan Status Pembayaran)**:
   - Ringkasan pembelian paket tryout, rincian harga.
   - Simulasi pembayaran dummy (tombol simulasi bayar sukses/gagal untuk demonstrasi demo).
   - Tampilan status pesanan: Menunggu Pembayaran, Berhasil, Kedaluwarsa.
-- [ ] **Layar 26 (Manajemen Voucher - Admin)**:
+- [x] **Layar 26 (Manajemen Voucher - Admin)**:
   - Form pembuatan kode voucher: kode, kuota pemakaian, masa berlaku, paket yang dicakup.
   - Tabel daftar voucher aktif beserta statistik penukaran.
-- [ ] **Layar 27 (Daftar Transaksi - Admin)**:
+- [x] **Layar 27 (Daftar Transaksi - Admin)**:
   - Tabel rekapitulasi transaksi seluruh peserta: nama peserta, paket, nominal, status, tanggal.
 
 #### Target UAS (Backend & Integrasi):
@@ -319,4 +319,4 @@ titikterampil-lms/
 
 ## Catatan migrasi kontribusi Ray
 
-Implementasi latihan CRUD pengguna tetap dipertahankan di `src/app/admin/users/page.jsx` setelah migrasi App Router ke `src/app`. Panduan latihannya tersedia di `docs/P19_MANAGEMENT_GUIDE.md`. Mock API bersama dijelaskan dalam `docs/MOCK_API.md`; integrasi halaman ke API merupakan tahap berikutnya.
+Implementasi latihan CRUD pengguna tetap dipertahankan di `src/app/admin/users/page.jsx` setelah migrasi App Router ke `src/app`. Panduan latihannya tersedia di `docs/P19_MANAGEMENT_GUIDE.md`. Mock API bersama dijelaskan dalam `docs/MOCK_API.md`. Halaman pengguna kini dipecah ke fitur `src/features/admin-management` dan terhubung ke API, termasuk member serta ringkasan dashboard admin.

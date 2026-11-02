@@ -28,7 +28,6 @@ export function TryoutDetail({ tryoutId }) {
   const [voucherCode, setVoucherCode] = useState('');
   const [voucherState, setVoucherState] = useState({ tone: '', message: '' });
   const [redeeming, setRedeeming] = useState(false);
-  const [purchaseNotice, setPurchaseNotice] = useState('');
   const [unlocked, setUnlocked] = useState(() => Boolean(
     user?.id && isTryoutUnlocked(user.id, tryoutId)
   ));
@@ -197,20 +196,14 @@ export function TryoutDetail({ tryoutId }) {
             <div>
               <h3>Paket berbayar</h3>
               <p className={styles.cardMeta}>
-                Harga paket {formatPrice(tryout.price)}. Tukar voucher di bawah atau lanjutkan pembayaran.
+                Harga paket {formatPrice(tryout.price)}. Tukar voucher di bawah atau lanjutkan ke checkout.
               </p>
             </div>
             <div className={styles.actionRow}>
-              <button
-                type="button"
-                onClick={() => setPurchaseNotice(
-                  'Halaman checkout pembayaran (Layar 09) belum tersedia pada build frontend ini.'
-                )}
-              >
-                Beli paket
-              </button>
+              <Link className="button" href={`/student/checkout/${tryout.id}`}>
+                Beli paket →
+              </Link>
             </div>
-            {purchaseNotice && <p className={styles.warningText} role="status">{purchaseNotice}</p>}
           </div>
         )}
 
