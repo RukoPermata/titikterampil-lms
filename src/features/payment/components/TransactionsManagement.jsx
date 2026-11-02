@@ -72,6 +72,7 @@ export function TransactionsManagement() {
   }, [searchQuery, filters.status]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Sinkronisasi data transaksi dari API saat filter berubah.
     loadTransactions();
     return () => abortControllerRef.current?.abort();
   }, [loadTransactions]);

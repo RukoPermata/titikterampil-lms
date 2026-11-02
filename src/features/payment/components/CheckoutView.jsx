@@ -4,7 +4,7 @@
  * @author Fityah Bayoediansyah Harahap (103022400085)
  * Tanggung jawab: ringkasan pesanan, rincian harga, penukaran voucher, dan simulasi pembayaran demo.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useDemo, useToast } from '@/src/components/DemoProvider';
 import { formatRupiah } from '@/src/lib/utils';
@@ -77,6 +77,11 @@ export function CheckoutView({ tryoutId }) {
     };
   }, [tryoutId]);
 
+  const simulateStatusRef = useRef(handleSimulateStatus);
+  useEffect(() => {
+    simulateStatusRef.current = handleSimulateStatus;
+  });
+
   // Timer hitung mundur saat status 'Menunggu'
   useEffect(() => {
     if (orderStatus !== 'Menunggu') return;
@@ -84,7 +89,7 @@ export function CheckoutView({ tryoutId }) {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          handleSimulateStatus('Kedaluwarsa');
+          simulateStatusRef.current('Kedaluwarsa');
           return 0;
         }
         return prev - 1;
