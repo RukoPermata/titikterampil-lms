@@ -139,6 +139,17 @@ function readAccessMap() {
 }
 
 /**
+ * Mengambil seluruh ID paket yang telah dibuka dengan voucher oleh siswa.
+ * @param {string} studentId - ID siswa.
+ * @returns {string[]} Daftar ID paket yang terbuka.
+ */
+export function getUnlockedTryoutIds(studentId) {
+  if (typeof studentId !== 'string' || !studentId.trim()) return [];
+  const access = readAccessMap();
+  return Array.isArray(access[studentId]) ? [...access[studentId]] : [];
+}
+
+/**
  * Memeriksa apakah paket sudah dibuka dengan voucher oleh siswa.
  * @param {string} studentId - ID siswa.
  * @param {string} tryoutId - ID paket.

@@ -6,23 +6,14 @@
  * Tanggung jawab: menampilkan paket sesuai jenjang, filter katalog, dan status akses.
  */
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useDemo } from '@/src/components/DemoProvider';
 import { tryouts as fallbackTryouts } from '@/src/data/mock';
-import { filterTryouts, formatPrice } from '../actions';
+import { filterTryouts } from '../actions';
+import { getUnlockedTryoutIds } from '../attempt-store';
+import { PackageCard } from './PackageCard';
 import styles from '../cbt.module.css';
 
-/**
- * Menentukan label akses yang ditampilkan pada kartu paket.
- * @param {Object} item - Paket tryout.
- * @param {boolean} isMember - Status member siswa aktif.
- * @returns {{label: string, tone: string}} Label dan kelas warna badge.
- */
-function accessBadge(item, isMember) {
-  if (item.isFree) return { label: 'Gratis', tone: 'free' };
-  if (isMember) return { label: 'Akses Member', tone: 'member' };
-  return { label: formatPrice(item.price), tone: 'paid' };
-}
+const LEVEL_ORDER = ['SD', 'SMP', 'SMA', 'Umum'];
 
 /**
  * Menampilkan katalog paket tryout dengan filter jenjang, mapel, kelas, dan pencarian.
@@ -32,6 +23,8 @@ export function TryoutCatalog() {
   const { user } = useDemo();
   const isMember = Boolean(user?.isMember);
   const studentLevel = user?.level || 'SMA';
+  // Paket yang dibuka lewat voucher dibaca langsung dari storage agar selalu segar.
+  const unlockedIds = user?.id ? getUnlockedTryoutIds(user.id) : [];
 
   // 1. Siapkan data awal dari fixture agar halaman langsung memiliki isi.
   const [packages, setPackages] = useState(fallbackTryouts);
@@ -52,7 +45,8 @@ export function TryoutCatalog() {
         const response = await fetch('/api/tryouts', { cache: 'no-store' });
         if (!response.ok) throw new Error('Gagal memuat katalog.');
         const payload = await response.json();
-        if (active && Array.isArray(payload.data)) setPackages(payload.data);
+        if (!active) return;
+        if (Array.isArray(payload.data)) setPackages(payload.data);
       } catch {
         if (active) setError('Koneksi API tidak tersedia. Menampilkan data contoh.');
       } finally {
@@ -71,14 +65,21 @@ export function TryoutCatalog() {
     [packages]
   );
   const levels = useMemo(
-    () => [...new Set(packages.map((item) => item.level).filter(Boolean))],
+    () => [...new Set(packages.map((item) => item.level).filter(Boolean))]
+      .sort((a, b) => LEVEL_ORDER.indexOf(a) - LEVEL_ORDER.indexOf(b)),
     [packages]
   );
   const grades = useMemo(
     () => [...new Set(packages
       .filter((item) => !level || item.level === level)
       .map((item) => item.grade)
-      .filter((value) => value !== undefined && value !== null))],
+      .filter((value) => value !== undefined && value !== null))]
+      .sort((a, b) => {
+        const left = Number(a);
+        const right = Number(b);
+        if (Number.isFinite(left) && Number.isFinite(right)) return left - right;
+        return String(a).localeCompare(String(b), 'id');
+      }),
     [packages, level]
   );
 
@@ -105,6 +106,19 @@ export function TryoutCatalog() {
   }
 
   const hasFilter = Boolean(query || subject || grade || (isMember && level));
+  const unlockedSet = new Set(unlockedIds);
+
+  /**
+   * Menentukan label akses yang ditampilkan pada kartu paket.
+   * @param {Object} item - Paket tryout.
+   * @returns {string} Label akses, atau string kosong bila paket masih terkunci.
+   */
+  function accessLabelFor(item) {
+    if (item.isFree) return 'Gratis';
+    if (isMember) return 'Akses Member';
+    if (unlockedSet.has(item.id)) return 'Voucher aktif';
+    return '';
+  }
 
   return (
     <section className="page-content">
@@ -188,35 +202,15 @@ export function TryoutCatalog() {
           <button type="button" className="button" onClick={resetFilters}>Tampilkan semua paket</button>
         </div>
       ) : (
-        <div className="grid">
-          {visiblePackages.map((item) => {
-            const badge = accessBadge(item, isMember);
-            return (
-              <article className="panel item-card" key={item.id}>
-                <div>
-                  <div className="item-card-header">
-                    <span className="item-tag">{item.level} / Kelas {item.grade}</span>
-                    <span className={`${styles.statusBadge} ${styles[`status${badge.tone[0].toUpperCase()}${badge.tone.slice(1)}`]}`}>
-                      {badge.label}
-                    </span>
-                  </div>
-                  <h3>{item.title}</h3>
-                  <p className="item-meta">Mata pelajaran: <b>{item.subject}</b></p>
-                  <p className={styles.cardMeta}>
-                    {item.durationMinutes} menit · {item.questionCount ?? 0} soal
-                  </p>
-                  {Array.isArray(item.subtests) && item.subtests.length > 0 && (
-                    <p className={styles.cardMeta}>{item.subtests.length} subtes</p>
-                  )}
-                </div>
-                <div className="item-card-footer">
-                  <Link className="button" href={`/student/tryouts/${item.id}`}>
-                    Lihat detail →
-                  </Link>
-                </div>
-              </article>
-            );
-          })}
+        <div className={styles.catalogGrid}>
+          {visiblePackages.map((item) => (
+            <PackageCard
+              key={item.id}
+              href={`/student/tryouts/${item.id}`}
+              item={item}
+              accessLabel={accessLabelFor(item)}
+            />
+          ))}
         </div>
       )}
     </section>
