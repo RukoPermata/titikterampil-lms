@@ -5,7 +5,7 @@
  * Tanggung jawab: pemantauan transaksi pembelian tryout, verifikasi status, dan metrik pendapatan.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useToast } from '@/src/components/DemoProvider';
+import { useToast } from '@/src/components/Toast';
 import { formatRupiah } from '@/src/lib/utils';
 import { paymentApi, transactionsQuery } from '../api.js';
 import { formatTransactionDate } from '../actions.js';
