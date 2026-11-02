@@ -1,21 +1,51 @@
+
 'use client';
 
 import { useMemo, useState } from 'react';
 import { tryouts as initialTryouts, questions } from '@/src/data/mock';
 import { saveTryoutPackage } from '@/src/features/tryout-management/actions';
 
+const STATUSES = [
+  { value: 'draft', label: 'Draf' },
+  { value: 'published', label: 'Terbit' },
+  { value: 'archived', label: 'Arsip' },
+];
+
+const LEVELS = ['SD', 'SMP', 'SMA', 'Umum'];
+
 const createEmptyForm = () => ({
   title: '',
   level: 'SMA',
   grade: 12,
   subject: '',
+  category: 'FOKUS TKA',
   durationMinutes: 30,
+  price: 0,
+  isFree: false,
+  status: 'draft',
 });
+
+function getStatus(test) {
+  return test.status ?? 'published';
+}
+
+function formatPrice(price, isFree) {
+  if (isFree || Number(price) === 0) {
+    return 'Gratis';
+  }
+
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+  }).format(Number(price));
+}
 
 export default function TryoutsPage() {
   const [tryouts, setTryouts] = useState(initialTryouts);
   const [search, setSearch] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(createEmptyForm);
@@ -28,14 +58,18 @@ export default function TryoutsPage() {
 
         const matchesSearch =
           test.title.toLowerCase().includes(keyword) ||
-          test.subject.toLowerCase().includes(keyword);
+          test.subject.toLowerCase().includes(keyword) ||
+          (test.category ?? '').toLowerCase().includes(keyword);
 
         const matchesLevel =
           levelFilter === 'all' || test.level === levelFilter;
 
-        return matchesSearch && matchesLevel;
+        const matchesStatus =
+          statusFilter === 'all' || getStatus(test) === statusFilter;
+
+        return matchesSearch && matchesLevel && matchesStatus;
       }),
-    [tryouts, search, levelFilter]
+    [tryouts, search, levelFilter, statusFilter]
   );
 
   function openCreateForm() {
@@ -47,7 +81,16 @@ export default function TryoutsPage() {
 
   function openEditForm(test) {
     setEditingId(test.id);
-    setForm({ ...test });
+
+    setForm({
+      ...createEmptyForm(),
+      ...test,
+      status: getStatus(test),
+      category: test.category ?? '',
+      price: test.price ?? 0,
+      isFree: test.isFree ?? Number(test.price) === 0,
+    });
+
     setError('');
     setShowForm(true);
   }
@@ -64,33 +107,50 @@ export default function TryoutsPage() {
 
     const title = form.title.trim();
     const subject = form.subject.trim();
-    const grade = Number(form.grade);
+    const category = form.category.trim();
     const durationMinutes = Number(form.durationMinutes);
+    const price = Number(form.price);
 
-    if (!title || !subject) {
-      setError('Nama paket dan mata pelajaran wajib diisi.');
+    if (!title || !subject || !category) {
+      setError('Nama paket, kategori, dan mata pelajaran wajib diisi.');
       return;
     }
 
-    const validLevels = ['SD', 'SMP', 'SMA'];
-
-    if (!validLevels.includes(form.level)) {
+    if (!LEVELS.includes(form.level)) {
       setError('Pilih jenjang pendidikan yang valid.');
       return;
     }
 
-    if (
-      !Number.isInteger(grade) ||
-      (form.level === 'SD' && (grade < 1 || grade > 6)) ||
-      (form.level === 'SMP' && (grade < 7 || grade > 9)) ||
-      (form.level === 'SMA' && (grade < 10 || grade > 12))
-    ) {
-      setError('Tingkat kelas tidak sesuai dengan jenjang pendidikan.');
-      return;
+    let grade = form.grade;
+
+    if (form.level === 'Umum') {
+      grade = 'Umum';
+    } else {
+      grade = Number(form.grade);
+
+      if (
+        !Number.isInteger(grade) ||
+        (form.level === 'SD' && (grade < 1 || grade > 6)) ||
+        (form.level === 'SMP' && (grade < 7 || grade > 9)) ||
+        (form.level === 'SMA' && (grade < 10 || grade > 12))
+      ) {
+        setError('Tingkat kelas tidak sesuai dengan jenjang pendidikan.');
+        return;
+      }
     }
 
     if (!Number.isInteger(durationMinutes) || durationMinutes <= 0) {
       setError('Durasi harus berupa bilangan bulat lebih dari 0.');
+      return;
+    }
+
+    if (!Number.isFinite(price) || price < 0) {
+      setError('Harga harus berupa angka nol atau lebih.');
+      return;
+    }
+
+    if (!STATUSES.some((item) => item.value === form.status)) {
+      setError('Pilih status paket yang valid.');
       return;
     }
 
@@ -100,10 +160,13 @@ export default function TryoutsPage() {
       level: form.level,
       grade,
       subject,
+      category,
       durationMinutes,
+      price: form.isFree ? 0 : price,
+      isFree: form.isFree || price === 0,
+      status: form.status,
     };
 
-    // Validasi paket menggunakan actions.js.
     const result = saveTryoutPackage(tryoutData);
 
     if (result.status !== 'success') {
@@ -113,7 +176,6 @@ export default function TryoutsPage() {
 
     const candidate = result.data;
 
-    // Update atau tambahkan paket ke state.
     if (editingId) {
       setTryouts((current) =>
         current.map((test) =>
@@ -142,6 +204,12 @@ export default function TryoutsPage() {
       return;
     }
 
+    const confirmed = window.confirm(
+      `Apakah kamu yakin ingin menghapus paket "${test.title}"?`
+    );
+
+    if (!confirmed) return;
+
     setTryouts((current) =>
       current.filter((item) => item.id !== test.id)
     );
@@ -155,7 +223,8 @@ export default function TryoutsPage() {
         <div>
           <h1>Paket Tryout</h1>
           <p className="lead">
-            Kelola paket tryout berdasarkan jenjang dan mata pelajaran.
+            Kelola paket tryout berdasarkan jenjang, kategori,
+            status, dan harga.
           </p>
         </div>
 
@@ -172,7 +241,7 @@ export default function TryoutsPage() {
         <input
           className="tryouts-search"
           type="search"
-          placeholder="Cari nama paket atau mata pelajaran..."
+          placeholder="Cari nama paket, mata pelajaran, atau kategori..."
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           aria-label="Cari paket tryout"
@@ -185,9 +254,25 @@ export default function TryoutsPage() {
           aria-label="Filter jenjang"
         >
           <option value="all">Semua jenjang</option>
-          <option value="SD">SD</option>
-          <option value="SMP">SMP</option>
-          <option value="SMA">SMA</option>
+          {LEVELS.map((level) => (
+            <option key={level} value={level}>
+              {level}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="tryouts-filter"
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value)}
+          aria-label="Filter status"
+        >
+          <option value="all">Semua status</option>
+          {STATUSES.map((status) => (
+            <option key={status.value} value={status.value}>
+              {status.label}
+            </option>
+          ))}
         </select>
       </section>
 
@@ -199,14 +284,18 @@ export default function TryoutsPage() {
 
       {showForm && (
         <form className="tryout-form" onSubmit={handleSubmit}>
-          <h2>{editingId ? 'Edit Paket Tryout' : 'Tambah Paket Tryout'}</h2>
+          <h2>
+            {editingId ? 'Edit Paket Tryout' : 'Tambah Paket Tryout'}
+          </h2>
 
           <label className="tryout-field">
             Nama paket
             <input
               type="text"
               value={form.title}
-              onChange={(event) => updateForm('title', event.target.value)}
+              onChange={(event) =>
+                updateForm('title', event.target.value)
+              }
               placeholder="Contoh: Tryout Matematika SMA"
               required
             />
@@ -218,7 +307,13 @@ export default function TryoutsPage() {
               value={form.level}
               onChange={(event) => {
                 const level = event.target.value;
-                const defaultGrade = { SD: 6, SMP: 9, SMA: 12 };
+
+                const defaultGrade = {
+                  SD: 6,
+                  SMP: 9,
+                  SMA: 12,
+                  Umum: 'Umum',
+                };
 
                 setForm((current) => ({
                   ...current,
@@ -227,40 +322,59 @@ export default function TryoutsPage() {
                 }));
               }}
             >
-              <option value="SD">SD</option>
-              <option value="SMP">SMP</option>
-              <option value="SMA">SMA</option>
-            </select>
-          </label>
-
-          <label className="tryout-field">
-            Tingkat kelas
-            <select
-              value={form.grade}
-              onChange={(event) =>
-                updateForm('grade', event.target.value)
-              }
-            >
-              {(form.level === 'SD'
-                ? [1, 2, 3, 4, 5, 6]
-                : form.level === 'SMP'
-                  ? [7, 8, 9]
-                  : [10, 11, 12]
-              ).map((grade) => (
-                <option key={grade} value={grade}>
-                  Kelas {grade}
+              {LEVELS.map((level) => (
+                <option key={level} value={level}>
+                  {level}
                 </option>
               ))}
             </select>
           </label>
+
+          {form.level !== 'Umum' && (
+            <label className="tryout-field">
+              Tingkat kelas
+              <select
+                value={form.grade}
+                onChange={(event) =>
+                  updateForm('grade', event.target.value)
+                }
+              >
+                {(form.level === 'SD'
+                  ? [1, 2, 3, 4, 5, 6]
+                  : form.level === 'SMP'
+                    ? [7, 8, 9]
+                    : [10, 11, 12]
+                ).map((grade) => (
+                  <option key={grade} value={grade}>
+                    Kelas {grade}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
 
           <label className="tryout-field">
             Mata pelajaran
             <input
               type="text"
               value={form.subject}
-              onChange={(event) => updateForm('subject', event.target.value)}
+              onChange={(event) =>
+                updateForm('subject', event.target.value)
+              }
               placeholder="Contoh: Matematika"
+              required
+            />
+          </label>
+
+          <label className="tryout-field">
+            Kategori paket
+            <input
+              type="text"
+              value={form.category}
+              onChange={(event) =>
+                updateForm('category', event.target.value)
+              }
+              placeholder="Contoh: FOKUS TKA"
               required
             />
           </label>
@@ -279,14 +393,67 @@ export default function TryoutsPage() {
             />
           </label>
 
+          <label className="tryout-field">
+            Harga paket (Rupiah)
+            <input
+              type="number"
+              min="0"
+              step="1000"
+              value={form.price}
+              disabled={form.isFree}
+              onChange={(event) =>
+                updateForm('price', event.target.value)
+              }
+              required
+            />
+          </label>
+
+          <label className="tryout-field">
+            <span className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={form.isFree}
+                onChange={(event) => {
+                  const isFree = event.target.checked;
+
+                  setForm((current) => ({
+                    ...current,
+                    isFree,
+                    price: isFree ? 0 : current.price,
+                  }));
+                }}
+              />
+              Paket gratis
+            </span>
+          </label>
+
+          <label className="tryout-field">
+            Status paket
+            <select
+              value={form.status}
+              onChange={(event) =>
+                updateForm('status', event.target.value)
+              }
+            >
+              {STATUSES.map((status) => (
+                <option key={status.value} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <div className="tryout-form-actions">
-            <button type="submit">Simpan Paket</button>
+            <button type="submit">
+              {editingId ? 'Simpan Perubahan' : 'Simpan Paket'}
+            </button>
 
             <button
               type="button"
               className="tryout-cancel-button"
               onClick={() => {
                 setShowForm(false);
+                setEditingId(null);
                 setError('');
               }}
             >
@@ -307,54 +474,82 @@ export default function TryoutsPage() {
               <th>No.</th>
               <th>Nama Paket</th>
               <th>Jenjang</th>
-              <th>Mata Pelajaran</th>
-              <th>Durasi</th>
+              <th>Kategori</th>
+              <th>Status</th>
+              <th>Harga</th>
               <th>Aksi</th>
             </tr>
           </thead>
 
           <tbody>
-            {filteredTryouts.map((test, index) => (
-              <tr key={test.id}>
-                <td>{index + 1}</td>
+            {filteredTryouts.map((test, index) => {
+              const status = getStatus(test);
 
-                <td>
-                  <div className="tryout-title">
-                    <strong>{test.title}</strong>
-                    <small>Kelas {test.grade}</small>
-                  </div>
-                </td>
+              const statusLabel =
+                STATUSES.find((item) => item.value === status)?.label ??
+                'Terbit';
 
-                <td>
-                  <span className="tryout-level">{test.level}</span>
-                </td>
+              return (
+                <tr key={test.id}>
+                  <td>{index + 1}</td>
 
-                <td>{test.subject}</td>
-                <td>{test.durationMinutes} menit</td>
+                  <td>
+                    <div className="tryout-title">
+                      <strong>{test.title}</strong>
+                      <small>
+                        {test.level === 'Umum'
+                          ? 'Umum'
+                          : `Kelas ${test.grade}`}
+                        {' · '}
+                        {test.subject}
+                      </small>
+                    </div>
+                  </td>
 
-                <td>
-                  <div className="tryout-actions">
-                    <button
-                      type="button"
-                      onClick={() => openEditForm(test)}
+                  <td>
+                    <span className="tryout-level">
+                      {test.level}
+                    </span>
+                  </td>
+
+                  <td>{test.category ?? '-'}</td>
+
+                  <td>
+                    <span
+                      className={`tryout-status tryout-status-${status}`}
                     >
-                      Edit
-                    </button>
+                      {statusLabel}
+                    </span>
+                  </td>
 
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(test)}
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  <td>
+                    {formatPrice(test.price, test.isFree)}
+                  </td>
+
+                  <td>
+                    <div className="tryout-actions">
+                      <button
+                        type="button"
+                        onClick={() => openEditForm(test)}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(test)}
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
 
             {filteredTryouts.length === 0 && (
               <tr>
-                <td className="tryouts-empty" colSpan={6}>
+                <td className="tryouts-empty" colSpan={7}>
                   Tidak ada paket yang cocok dengan pencarian.
                 </td>
               </tr>
