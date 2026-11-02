@@ -105,24 +105,121 @@ export function validateVoucher(voucher, tryoutId, now = new Date()) {
 
 
 /**
- * Menyiapkan percobaan ujian untuk sebuah paket.
- * Validasi yang tersedia baru tahap awal; komentar TODO menandai aturan tersisa.
- * @param {string} tryoutId - ID paket yang akan dikerjakan.
- * @returns {Object} Kesalahan atau kerangka percobaan; belum memulai timer.
+ * Membuat ID attempt unik tanpa bergantung pada pustaka tambahan.
+ * @returns {string} ID attempt baru.
  */
-export function startAttempt(tryoutId) {
-  // 1. Pastikan ID paket tersedia.
-  if (typeof tryoutId !== 'string' || !tryoutId.trim()) {
+function createAttemptId() {
+  const uuid = globalThis.crypto?.randomUUID?.();
+  if (uuid) return `attempt-${uuid}`;
+  return `attempt-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/**
+ * Mengubah nilai waktu menjadi milidetik yang valid.
+ * @param {Date|string|number} value - Nilai waktu.
+ * @returns {number} Milidetik atau NaN.
+ */
+function toMillis(value) {
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === 'number') return value;
+  return Date.parse(value);
+}
+
+/**
+ * Menghitung sisa waktu berdasarkan deadline, bukan hitungan interval.
+ * @param {Date|string|number} deadline - Batas waktu attempt.
+ * @param {Date|string|number} [now=Date.now()] - Waktu pembanding.
+ * @returns {number} Sisa milidetik; 0 bila sudah lewat atau tidak valid.
+ */
+export function computeRemainingMs(deadline, now = Date.now()) {
+  const end = toMillis(deadline);
+  const current = toMillis(now);
+  if (!Number.isFinite(end) || !Number.isFinite(current)) return 0;
+  return Math.max(0, end - current);
+}
+
+/**
+ * Memformat sisa waktu menjadi HH:MM:SS.
+ * @param {number} milliseconds - Sisa waktu dalam milidetik.
+ * @returns {string} Waktu siap tampil.
+ */
+export function formatClock(milliseconds) {
+  const total = Math.max(0, Math.ceil(Number(milliseconds) / 1000));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  return [hours, minutes, seconds].map((part) => String(part).padStart(2, '0')).join(':');
+}
+
+/**
+ * Memeriksa apakah attempt sudah melewati deadline.
+ * @param {Object} attempt - Attempt dengan field deadline.
+ * @param {Date|string|number} [now=Date.now()] - Waktu pembanding.
+ * @returns {boolean} True bila waktu ujian habis.
+ */
+export function isAttemptExpired(attempt, now = Date.now()) {
+  if (!attempt || typeof attempt !== 'object') return true;
+  return computeRemainingMs(attempt.deadline, now) <= 0;
+}
+
+/**
+ * Memulai percobaan baru dengan deadline yang tersimpan.
+ * @param {string|Object} tryout - ID paket atau record paket lengkap.
+ * @param {Object} [options] - Opsi pembuatan attempt.
+ * @param {string} [options.studentId] - ID siswa pemilik attempt.
+ * @param {Date|string|number} [options.now] - Waktu mulai untuk pengujian.
+ * @param {Object} [options.tryout] - Record paket saat argumen pertama berupa ID.
+ * @returns {Object} Attempt baru atau kesalahan validasi.
+ */
+export function startAttempt(tryout, options = {}) {
+  const packageData = typeof tryout === 'string'
+    ? { id: tryout, ...(options.tryout ?? {}) }
+    : tryout;
+
+  // 1. Pastikan paket dan pemilik attempt tersedia.
+  if (!packageData || typeof packageData !== 'object' || typeof packageData.id !== 'string' ||
+    !packageData.id.trim()) {
     return { status: 'error', message: 'ID paket wajib diisi.' };
   }
+  if (typeof options.studentId !== 'string' || !options.studentId.trim()) {
+    return { status: 'error', message: 'ID siswa wajib diisi sebelum memulai ujian.' };
+  }
 
-  // 2. Siapkan kontrak; ID dan deadline belum dibuat pada skeleton.
-  const draft = { tryoutId, answers: {}, flaggedQuestionIds: [], submittedAt: null };
+  // 2. Pastikan durasi paket dapat dipakai untuk menghitung deadline.
+  const durationMinutes = Number(packageData.durationMinutes);
+  if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+    return { status: 'error', message: 'Durasi paket tidak valid.' };
+  }
+  const startMs = toMillis(options.now ?? Date.now());
+  if (!Number.isFinite(startMs)) {
+    return { status: 'error', message: 'Waktu mulai tidak valid.' };
+  }
 
-  // 3. TODO: Cari paket dan validasi jenjang, jadwal serta batas percobaan.
-  // 4. TODO: Pulihkan attempt aktif atau buat ID unik dan deadline dari durasi paket.
-  // 5. TODO: Simpan percobaan sebelum UI menyalakan timer berbasis deadline.
-  return { status: 'not_implemented', draft, message: 'Percobaan belum dimulai.' };
+  // 3. Susun attempt dengan salinan data paket untuk riwayat dan hasil.
+  const attempt = {
+    id: createAttemptId(),
+    studentId: options.studentId.trim(),
+    tryoutId: packageData.id.trim(),
+    tryoutTitle: packageData.title ?? 'Paket tryout',
+    tryoutLevel: packageData.level ?? '',
+    tryoutGrade: packageData.grade ?? '',
+    tryoutSubject: packageData.subject ?? '',
+    durationMinutes,
+    startedAt: new Date(startMs).toISOString(),
+    deadline: new Date(startMs + durationMinutes * 60 * 1000).toISOString(),
+    answers: {},
+    flaggedQuestionIds: [],
+    status: 'active',
+    submittedAt: null,
+    score: null,
+    submitReason: null,
+  };
+
+  return {
+    status: 'success',
+    attempt,
+    message: 'Percobaan dimulai. Timer berjalan sejak sekarang.',
+  };
 }
 
 /**
