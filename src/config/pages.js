@@ -51,8 +51,8 @@ export const pages = [
     "title": "Katalog tryout",
     "owner": "Fauzan Zulfa Muhammad (103022400032)",
     "component": "TryoutCatalogPage",
-    "description": "Temukan latihan sesuai jenjang dan kelas.",
-    "todo": "Tambahkan filter jenjang, tingkat kelas, mata pelajaran dan pencarian.",
+    "description": "Katalog paket dengan filter jenjang, kelas, mapel, pencarian, dan status akses.",
+    "todo": "Sinkronkan status publikasi paket dengan backend saat tersedia.",
     "role": "student"
   },
   {
@@ -61,8 +61,8 @@ export const pages = [
     "title": "Detail tryout",
     "owner": "Fauzan Zulfa Muhammad (103022400032)",
     "component": "TryoutDetailPage",
-    "description": "Petunjuk, durasi dan aturan pengerjaan tryout.",
-    "todo": "Validasi akses paket dan tampilkan konfirmasi sebelum mulai ujian.",
+    "description": "Detail paket, subtes, harga, penukaran voucher, dan gerbang akses.",
+    "todo": "Hubungkan pembayaran ke modul checkout ketika halaman P09 tersedia.",
     "role": "student"
   },
   {
@@ -71,8 +71,18 @@ export const pages = [
     "title": "Ruang ujian",
     "owner": "Fauzan Zulfa Muhammad (103022400032)",
     "component": "ExamPage",
-    "description": "Kerangka CBT dengan navigasi soal dan pilihan jawaban.",
-    "todo": "Implementasikan timer berbasis deadline, autosave, penandaan dan submit idempoten.",
+    "description": "Ruang ujian lima tipe soal dengan timer, autosave, navigasi, dan submit idempoten.",
+    "todo": "Pindahkan penyimpanan attempt dan penilaian ke server saat backend siap.",
+    "role": "student"
+  },
+  {
+    "id": "P26",
+    "route": "/student/exams/[id]/instructions",
+    "title": "Petunjuk ujian",
+    "owner": "Fauzan Zulfa Muhammad (103022400032)",
+    "component": "ExamInstructionsPage",
+    "description": "Konfirmasi aturan dan tombol mulai sebelum attempt dibuat.",
+    "todo": "Sinkronkan pemeriksaan akses paket dengan backend.",
     "role": "student"
   },
   {
@@ -81,8 +91,8 @@ export const pages = [
     "title": "Hasil dan pembahasan",
     "owner": "Fauzan Zulfa Muhammad (103022400032)",
     "component": "ResultPage",
-    "description": "Nilai dan evaluasi jawaban siswa.",
-    "todo": "Tampilkan hasil percobaan yang sesuai ID serta pembahasan setiap soal.",
+    "description": "Skor objektif, status pending esai, dan pembahasan setiap soal.",
+    "todo": "Tampilkan nilai esai dari pengajar setelah penilaian backend tersedia.",
     "role": "student"
   },
   {
@@ -91,8 +101,18 @@ export const pages = [
     "title": "Riwayat tryout",
     "owner": "Fauzan Zulfa Muhammad (103022400032)",
     "component": "HistoryPage",
-    "description": "Daftar percobaan ujian yang telah diselesaikan.",
-    "todo": "Hubungkan hasil submit CBT dan tambahkan filter riwayat.",
+    "description": "Riwayat attempt aktif dan selesai dengan filter paket serta status.",
+    "todo": "Ganti sumber localStorage dengan API riwayat peserta.",
+    "role": "student"
+  },
+  {
+    "id": "P25",
+    "route": "/student/leaderboard",
+    "title": "Leaderboard",
+    "owner": "Fauzan Zulfa Muhammad (103022400032)",
+    "component": "LeaderboardPage",
+    "description": "Papan peringkat nilai terbaik peserta per jenjang.",
+    "todo": "Hubungkan agregasi nilai final per paket ketika backend tersedia.",
     "role": "student"
   },
   {
