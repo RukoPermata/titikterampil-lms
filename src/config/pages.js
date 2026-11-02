@@ -244,6 +244,36 @@ export const pages = [
     "description": "Rekap hasil tryout dan aktivitas pembelajaran.",
     "todo": "Buat filter jenjang, kelas, paket dan rentang tanggal; ekspor di luar MVP.",
     "role": "admin"
+  },
+  {
+    "id": "P25",
+    "route": "/student/checkout/[id]",
+    "title": "Checkout paket",
+    "owner": "Fityah Bayoediansyah Harahap (103022400085)",
+    "component": "StudentCheckoutPage",
+    "description": "Ringkasan pesanan dan simulasi pembayaran paket tryout.",
+    "todo": "Simulasi status menunggu, bayar berhasil, dan kedaluwarsa.",
+    "role": "student"
+  },
+  {
+    "id": "P26",
+    "route": "/admin/vouchers",
+    "title": "Manajemen voucher",
+    "owner": "Fityah Bayoediansyah Harahap (103022400085)",
+    "component": "AdminVouchersPage",
+    "description": "Pengelolaan kode voucher promo try out dan statistik kuota.",
+    "todo": "Form pembuatan voucher dan tabel voucher aktif beserta kuota.",
+    "role": "admin"
+  },
+  {
+    "id": "P27",
+    "route": "/admin/transactions",
+    "title": "Daftar transaksi",
+    "owner": "Fityah Bayoediansyah Harahap (103022400085)",
+    "component": "AdminTransactionsPage",
+    "description": "Pemantauan riwayat transaksi pembelian paket seluruh peserta.",
+    "todo": "Tabel rekapitulasi transaksi seluruh peserta beserta statusnya.",
+    "role": "admin"
   }
 ];
 
