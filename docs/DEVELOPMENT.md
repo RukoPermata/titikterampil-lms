@@ -75,3 +75,15 @@ Seluruh fungsi bernama frontend memiliki komentar tujuan, parameter dan keluaran
 
 
 Implementasi P19 untuk latihan COTS kini berada seluruhnya di app/admin/users/page.js: data contoh, state, validasi, CRUD localStorage, form, tabel dan CSS lokal. Pencarian, filter, pagination dan modal kustom tidak menjadi fokus latihan. Lihat docs/P19_MANAGEMENT_GUIDE.md untuk urutan membangun ulang kode.
+
+## Implementasi Engine CBT (P05–P09)
+
+Alur peserta CBT kini menggunakan komponen client di `src/features/cbt/components/`:
+
+- `TryoutCatalog` dan `TryoutDetail`: filter katalog, badge akses, subtes, dan penukaran voucher.
+- `ExamInstructions`: gerbang konfirmasi sebelum attempt dibuat.
+- `ExamRoom`: timer berbasis deadline, lima tipe soal, navigasi nomor, penanda ragu-ragu, autosave, dan submit idempoten.
+- `ResultReview`: skor objektif, status pending esai, dan pembahasan per soal.
+- `AttemptHistory` dan `LeaderboardBoard`: riwayat attempt lokal serta papan peringkat per jenjang.
+
+Penyimpanan attempt dan akses voucher memakai `src/features/cbt/attempt-store.js` dengan `localStorage`. Data ini hanya untuk demo frontend; validasi kepemilikan, penyimpanan jawaban, dan penilaian final tetap perlu dipindahkan ke server pada tahap backend.
