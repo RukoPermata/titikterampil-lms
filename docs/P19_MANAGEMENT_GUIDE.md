@@ -1,53 +1,115 @@
-<!--
-Modul: Panduan latihan COTS CRUD Pengguna P19
-Author: Rayazka Aris (103022400096)
-Tanggung jawab: menjelaskan cara membangun ulang halaman dan CRUD dari satu file.
-@todo: Tambahkan API dan otorisasi server setelah tahap frontend/COTS.
--->
-# P19 — Satu file untuk latihan CRUD
+# Manajemen pengguna dan dashboard admin
 
-Semua kode khusus halaman berada di src/app/admin/users/page.jsx. File ini hanya mengimpor useState, useEffect dan useRef dari React. Data awal, state, validasi, penyimpanan, handler CRUD, form, tabel serta CSS lokal berada di file yang sama.
+PIC: Rayazka Aris (103022400096). Implementasi frontend UTS menggunakan mock API.
 
-Layout admin, sesi demo dan token design system tetap memakai fondasi bersama yang sudah ada. Halaman ini tidak perlu lagi UserForm.js, users.module.css, file repository, utilitas pengguna atau file data contoh terpisah.
+## Urutan membaca kode
 
-## Bagian file yang perlu dibaca
+1. `src/app/admin/users/page.jsx`: pintu masuk halaman dan metadata.
+2. `src/features/admin-management/components/UsersManagement.jsx`: pengatur form,
+   filter, pembacaan detail, dan tindakan pengguna.
+3. `hooks/useUsers.js`: pembacaan daftar dan akademik, pembatalan request lama,
+   status loading, serta siklus penyimpanan dan pemuatan ulang daftar.
+4. `api.js`: pemanggilan fetch, pengecekan HTTP/JSON, serta kontrak respons.
+5. `validation.js`: normalisasi form, validasi per field, dan pembentukan payload.
+6. `components/UserForm.jsx`, `UserFilters.jsx`, `UsersTable.jsx`: tampilan tugas
+   masing-masing; styling memakai utilitas Tailwind dan `admin.module.css`.
+7. `src/app/admin/dashboard/page.jsx` dan `components/AdminDashboard.jsx`:
+   ringkasan administrasi dari `/api/admin/summary`.
 
-| Bagian | Isi |
-|---|---|
-| BAGIAN 1 | Key localStorage, pilihan peran/jenjang, data contoh dan validasi |
-| BAGIAN 2 | State pengguna/form/mode edit, dan effect pembacaan awal |
-| BAGIAN 3 | saveUsers, resetForm, handleChange, handleSubmit, handleEdit, handleDelete, restoreExamples |
-| BAGIAN 4 | Judul, notifikasi, form dan tabel dengan users.map |
-| BAGIAN 5 | CSS lokal sederhana pada style jsx |
+Semua path pada poin 3–7 yang tidak diawali `src/` relatif terhadap
+`src/features/admin-management/`.
 
-## Flow membangun ulang saat latihan
+## Sumber data
 
-1. Buat data contoh dan state users terlebih dahulu, lalu tampilkan dengan map (READ).
-2. Buat state form dan controlled input: value membaca state, onChange mengubah state.
-3. Buat onSubmit: preventDefault, normalisasi, validasi dan tambah record dengan spread array (CREATE).
-4. Tambahkan editingId dan tombol Edit: masukkan record lama ke form, ganti record dengan map berdasarkan ID (UPDATE).
-5. Tambahkan tombol Hapus, confirm, lalu filter berdasarkan ID (DELETE).
-6. Lengkapi saveUsers: JSON.stringify ke localStorage, baru perbarui state jika berhasil.
-7. Lengkapi effect pembacaan awal: getItem, JSON.parse dan validasi bentuk data.
-8. Uji satu operasi sampai berjalan sebelum menambah operasi berikutnya.
+```text
+Input pengguna → validasi form → fetch → Route Handler
+→ validasi API dalam lock → state demo → respons → pemuatan ulang daftar
+```
 
-## Fungsi inti
+Daftar pengguna memakai `GET /api/users`. Jenjang/kelas dari `/api/academics`.
+Sebelum edit, halaman mengambil `/api/users/[id]` agar form memakai detail terbaru.
+POST menambah, PATCH mengedit/member, dan DELETE menghapus setelah konfirmasi.
+Detail kontrak: [MOCK_API.md](./MOCK_API.md), ringkasan URL: [API_ENDPOINTS.md](./API_ENDPOINTS.md).
 
-- handleSubmit membedakan CREATE dan UPDATE melalui editingId. Tambah memakai [...users, newUser]; edit memakai users.map.
-- handleEdit menyalin isi baris ke form. ID dan tanggal bergabung dipertahankan saat menyimpan perubahan.
-- handleDelete memakai window.confirm bawaan browser dan users.filter.
-- saveUsers mengembalikan true hanya bila localStorage berhasil ditulis. Form tidak dikosongkan jika penyimpanan gagal.
-- validateUser memeriksa nama, email, keunikan email, peran, status, jenjang/kelas dan administrator aktif terakhir.
-- isValidStoredUsers memeriksa JSON hasil penyimpanan sebelum ditampilkan. Data rusak tidak ditimpa diam-diam; pemulihan contoh memerlukan konfirmasi.
+Direktori pengguna lama di localStorage tidak dibaca atau dihapus oleh halaman baru.
+Tidak ada impor otomatis data lama. State API tersimpan di `.next/cache/mock-api/state.json`;
+refresh browser maupun restart server tetap membaca state yang sama selama cache ada.
+SessionStorage tetap dipakai oleh sesi demo bersama aplikasi, bukan sebagai direktori pengguna.
 
-## Batas latihan
+## Aturan pengguna
 
-Pencarian, filter, pagination, kartu statistik dan modal kustom sengaja dikeluarkan dari fokus halaman. Form selalu terlihat di atas/sebelah tabel. Tampilan cukup untuk membaca dan mengoperasikan CRUD, belum menjadi desain final klien.
+- Nama 2–80 karakter, email valid maksimal 254 karakter dan unik, WhatsApp Indonesia.
+- Peran: peserta (`student`), pengajar (`teacher`), admin (`admin`).
+- Peserta memilih jenjang/kelas yang disediakan endpoint akademik. Kelas numerik
+  dikirim sebagai angka; Gap Year dan Umum tetap string.
+- Member adalah status peserta, bukan status aktif/nonaktif akun.
+- Form tidak mengirim field `status`, `createdAt`, `id`, atau password.
+- API menjaga minimal satu administrator, termasuk saat penghapusan/perubahan peran paralel.
+- UI mencegah penghapusan atau perubahan peran akun yang sedang digunakan.
+- API menolak penghapusan atau perubahan peran jika hubungan kelas/transaksi menghalangi.
+- Pembatasan UI dan sesi demo belum merupakan autentikasi/otorisasi produksi.
 
-Storage key tetap titik-terampil:user-directory:v1 agar direktori yang telah disimpan tetap terbaca. Data contoh awal kini tiga pengguna fiktif; daftar lama tidak dihapus. Sesi login demo masih hilang saat refresh: masuk lagi melalui /login → Administrator → Manajemen pengguna.
+## Perilaku antarmuka
 
-Halaman membaca data sekali saat dipasang. Sinkronisasi langsung antartab tidak menjadi bagian latihan ini; pakai satu tab ketika mencoba CRUD. Data P19 tidak membuat kredensial login, mengirim email atau mengubah relasi kelas pada modul lain. API, database dan otorisasi server belum diimplementasikan.
+Pencarian nama/email memakai jeda 300 ms. Filter peran dan member digabung dengan AND.
+Pencarian sebelumnya dibatalkan; versi request memastikan respons lama tidak menimpa
+hasil baru. Filter member dibersihkan ketika memilih peran nonpeserta.
+
+Form memiliki error per field dan mengarahkan fokus ke field pertama yang salah.
+Error API tidak mengosongkan input. Tombol terkait dinonaktifkan selama operasi;
+guard sinkron pada hook mencegah submit ganda sebelum React memperbarui UI.
+
+Pesan sukses hanya ditampilkan setelah respons API mengakui perubahan. Jika penulisan
+sukses tetapi daftar gagal dimuat ulang, pesan menyatakan perubahan tersimpan dan
+meminta muat ulang daftar; form tidak perlu dikirim lagi. Jika koneksi terputus saat
+mutasi, pesan menjelaskan bahwa hasil belum dapat dipastikan.
+
+Referensi akademik dan daftar dimuat terpisah. Gagal memuat pilihan akademik
+menonaktifkan form, tetapi daftar masih dapat dibaca. Gagal memuat daftar memberi
+pesan dan tombol coba lagi. Data lama yang masih ditampilkan diberi keterangan dan
+aksi tabel dinonaktifkan sampai daftar berhasil diperbarui.
+
+## Dashboard admin
+
+Statistik seluruhnya berasal dari `/api/admin/summary`: peserta, member, paket,
+pendapatan transaksi berhasil, jumlah pengguna per peran, transaksi menunggu, dan esai
+menunggu penilaian. Paket tanpa status belum dihitung terbit. Angka lama tidak
+berubah menjadi nol saat refresh gagal; error ditampilkan dengan tombol pemulihan.
+Ringkasan diperbarui saat halaman dipasang, tombol ditekan, atau jendela kembali fokus.
+
+Pintasan membuka manajemen pengguna, paket, dan bank soal yang sudah tersedia.
+Pengintegrasian modul pengajar/pembayaran lainnya tetap mengikuti pemilik modul.
 
 ## Pengujian
 
-npm test memeriksa aturan validasi dari blok fungsi murni pada page.js tanpa menduplikasi source produksi. npm run lint dan npm run build memeriksa React/Next.js. Uji browser: tampilkan data, tambah, tolak email duplikat, edit, batalkan hapus, konfirmasi hapus, tolak admin terakhir, lalu refresh dan masuk kembali.
+```sh
+npm test
+npm run lint
+npm run build
+```
+
+Tes form tidak lagi mengekstrak fungsi dari JSX satu file. Validasi form diuji dari
+modul fitur; aturan penyimpanan, relasi, dan administrator terakhir diuji melalui API.
+`tests/admin-client.test.mjs` menguji HTTP, JSON rusak, bentuk respons, jaringan,
+dan pembatalan permintaan.
+
+Pengujian browser opsional menggunakan Chrome lokal dan Playwright Core di cache:
+
+```powershell
+npm install --prefix .next/cache/admin-e2e --ignore-scripts --no-audit --no-fund playwright-core
+npm run build
+$env:TITIKTERAMPIL_MOCK_DATA_FILE = Join-Path $PWD '.next/cache/admin-ui-state.json'
+npm run start -- --port 3157
+```
+
+Di terminal kedua pada proyek yang sama:
+
+```powershell
+$env:ADMIN_E2E_ALLOW_WRITES = 'true'
+npm run test:admin-ui
+```
+
+Gunakan state uji terpisah seperti di atas. Skrip mensimulasikan sesi demo admin,
+menambah/mengedit/member/menghapus pengguna uji, memeriksa error/konfirmasi/pencarian,
+dan menguji lebar 360/768/1280 piksel. Screenshot serta laporan tersimpan di
+`.next/cache/admin-ui-check/`; data browser harian tidak dipakai oleh server uji.

@@ -64,6 +64,8 @@ export function academicFields(record) {
  */
 function validateUser(record, state) {
   ['name', 'email', 'whatsapp', 'role'].forEach((key) => textField(record[key], key));
+  ensure(record.name.length >= 2 && record.name.length <= 80, 'Nama harus terdiri dari 2–80 karakter.');
+  ensure(record.email.length <= 254, 'Email maksimal 254 karakter.');
   record.email = record.email.toLowerCase();
   ensure(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(record.email), 'Format email tidak valid.');
   ensure(/^(?:08|628|\+628)\d{7,12}$/.test(record.whatsapp), 'whatsapp harus nomor Indonesia yang valid.');

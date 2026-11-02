@@ -221,3 +221,12 @@ ringkasan, persistensi lintas proses, dan penulisan paralel.
 
 Build keseluruhan tetap memerlukan penyelesaian konflik merge dan referensi modul
 aplikasi yang belum lengkap. Kelulusan tes API tidak berarti semua halaman sudah siap.
+
+
+## Integrasi admin
+
+Halaman manajemen pengguna dan dashboard admin telah memakai API. Panduan alurnya
+tersedia di [P19_MANAGEMENT_GUIDE.md](./P19_MANAGEMENT_GUIDE.md). API pengguna kini
+memvalidasi nama 2–80 karakter dan email maksimal 254 karakter, serta melindungi
+administrator terakhir dalam lock penulisan. Perubahan peran pengguna yang masih
+dirujuk kelas/transaksi ditolak dengan 409.

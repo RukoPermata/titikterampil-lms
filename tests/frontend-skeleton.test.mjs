@@ -224,39 +224,43 @@ test('validateRegistration memvalidasi nomor WhatsApp dan rentang jenjang baru (
 });
 
 
-// Fungsi validasi tetap diuji dari source halaman, tanpa membuat file logika tambahan.
-// Blok data/validasi tidak mengandung JSX, React atau akses browser.
-const pageSource = await readFile(new URL('../src/app/admin/users/page.jsx', import.meta.url), 'utf8');
-const pureCrudCode = pageSource.split('// BAGIAN 1 — DATA DAN VALIDASI')[1].split('// BAGIAN 2 — HALAMAN DAN STATE REACT')[0];
-const crud = await import('data:text/javascript;base64,' + Buffer.from(pureCrudCode + '\nexport { validateUser, isValidStoredUsers, INITIAL_USERS };').toString('base64'));
+// Validasi form kini diuji dari modul fitur, tanpa mengekstrak source JSX.
+const admin = await loadModule('src/features/admin-management/validation.js');
+const academicChoices = [
+  { level: 'SD', grades: [4, 5, 6] }, { level: 'SMP', grades: [7, 8, 9] },
+  { level: 'SMA', grades: [10, 11, 12, 'Gap Year'] }, { level: 'Umum', grades: ['Umum'] },
+];
+const validForm = { name: 'Peserta Baru', email: 'BARU@example.test ', whatsapp: '081234567891', role: 'student', level: 'SMA', grade: '12', isMember: true };
 
-test('CRUD menolak email duplikat tetapi mengizinkan email sendiri saat edit', () => {
-  const user = crud.INITIAL_USERS[2];
-  assert.match(crud.validateUser({ ...user, email: user.email.toUpperCase() }, crud.INITIAL_USERS), /Email sudah/);
-  assert.equal(crud.validateUser(user, crud.INITIAL_USERS, user.id), '');
+test('form pengguna menormalkan email dan kelas tanpa mengirim field lokal lama', () => {
+  const result = admin.validateUserForm(validForm, academicChoices);
+  assert.deepEqual(result.errors, {});
+  assert.equal(result.payload.email, 'baru@example.test');
+  assert.equal(result.payload.grade, 12);
+  assert.equal(Object.hasOwn(result.payload, 'status'), false);
+  assert.equal(Object.hasOwn(result.payload, 'id'), false);
 });
 
-test('CRUD memvalidasi jenjang dan kelas termasuk nilai jenjang tidak dikenal', () => {
-  const user = crud.INITIAL_USERS[2];
-  assert.match(crud.validateUser({ ...user, level: 'SD', grade: 12 }, []), /Jenjang/);
-  assert.match(crud.validateUser({ ...user, level: '__proto__' }, []), /Jenjang/);
-  assert.equal(crud.validateUser({ ...user, level: 'SMP', grade: 9 }, []), '');
+test('form pengguna memvalidasi WhatsApp, nama, dan pasangan jenjang kelas', () => {
+  const result = admin.validateUserForm({ ...validForm, name: 'A', whatsapp: '123', level: 'SD', grade: '12' }, academicChoices);
+  assert.ok(result.errors.name);
+  assert.ok(result.errors.whatsapp);
+  assert.ok(result.errors.grade);
 });
 
-test('CRUD melindungi admin aktif terakhir saat perubahan peran dan status', () => {
-  const admin = crud.INITIAL_USERS[0];
-  assert.match(crud.validateUser({ ...admin, status: 'inactive' }, crud.INITIAL_USERS, admin.id), /terakhir/);
-  assert.match(crud.validateUser({ ...admin, role: 'teacher' }, crud.INITIAL_USERS, admin.id), /terakhir/);
-  const withSecond = [...crud.INITIAL_USERS, { ...admin, id: 'a2', email: 'a2@example.com' }];
-  assert.equal(crud.validateUser({ ...admin, status: 'inactive' }, withSecond, admin.id), '');
+test('form Gap Year dan Umum menjaga tipe kategori dari referensi API', () => {
+  for (const [level, grade] of [['SMA', 'Gap Year'], ['Umum', 'Umum']]) {
+    const result = admin.validateUserForm({ ...validForm, level, grade }, academicChoices);
+    assert.deepEqual(result.errors, {});
+    assert.equal(result.payload.grade, grade);
+  }
 });
 
-test('READ menolak storage rusak dan ID/email duplikat tanpa menghapus data sumber', () => {
-  const users = structuredClone(crud.INITIAL_USERS);
-  assert.equal(crud.isValidStoredUsers(users), true);
-  assert.equal(crud.isValidStoredUsers({ users }), false);
-  assert.equal(crud.isValidStoredUsers([...users, users[0]]), false);
-  assert.equal(crud.isValidStoredUsers(users.filter((user) => user.role !== 'admin')), false);
-  assert.equal(crud.isValidStoredUsers(users.map((user) => ({ ...user, createdAt: 'rusak' }))), false);
-  assert.deepEqual(users, crud.INITIAL_USERS);
+test('form peran nonpeserta tidak membawa member atau data akademik lama', () => {
+  const result = admin.validateUserForm({ ...validForm, role: 'teacher' }, academicChoices);
+  assert.deepEqual(result.errors, {});
+  assert.equal(result.payload.isMember, false);
+  assert.equal(Object.hasOwn(result.payload, 'grade'), false);
+  assert.equal(Object.hasOwn(result.payload, 'level'), false);
+  assert.equal(admin.userForm().isMember, false);
 });

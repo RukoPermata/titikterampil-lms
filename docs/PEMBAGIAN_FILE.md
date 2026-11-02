@@ -319,4 +319,4 @@ titikterampil-lms/
 
 ## Catatan migrasi kontribusi Ray
 
-Implementasi latihan CRUD pengguna tetap dipertahankan di `src/app/admin/users/page.jsx` setelah migrasi App Router ke `src/app`. Panduan latihannya tersedia di `docs/P19_MANAGEMENT_GUIDE.md`. Mock API bersama dijelaskan dalam `docs/MOCK_API.md`; integrasi halaman ke API merupakan tahap berikutnya.
+Implementasi latihan CRUD pengguna tetap dipertahankan di `src/app/admin/users/page.jsx` setelah migrasi App Router ke `src/app`. Panduan latihannya tersedia di `docs/P19_MANAGEMENT_GUIDE.md`. Mock API bersama dijelaskan dalam `docs/MOCK_API.md`. Halaman pengguna kini dipecah ke fitur `src/features/admin-management` dan terhubung ke API, termasuk member serta ringkasan dashboard admin.

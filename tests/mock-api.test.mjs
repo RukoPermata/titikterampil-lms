@@ -199,3 +199,21 @@ test('cache rusak tidak menghapus perubahan dengan mengembalikan fixture diam-di
   assert.equal((await listResource('users', request('/api/users'))).status, 500);
   assert.equal((await readFile(file, 'utf8')), '{broken');
 });
+
+test('API melindungi admin terakhir dan relasi peran dari perubahan langsung', async () => {
+  assert.equal((await removeResource('users', request('/api/users/admin-demo', 'DELETE'), context('admin-demo'))).status, 409);
+  assert.equal((await patchResource('users', request('/api/users/admin-demo', 'PATCH', { role: 'teacher' }), context('admin-demo'))).status, 409);
+  assert.equal((await patchResource('users', request('/api/users/teacher-demo', 'PATCH', { role: 'admin' }), context('teacher-demo'))).status, 409);
+});
+
+test('dua penghapusan admin paralel menyisakan tepat satu administrator', async () => {
+  const created = await postResource('users', request('/api/users', 'POST', {
+    name: 'Admin Kedua', email: 'admin2@example.test', whatsapp: '081234567892', role: 'admin',
+  }));
+  const secondId = (await created.json()).data.id;
+  const results = await Promise.all(['admin-demo', secondId].map((id) =>
+    removeResource('users', request(`/api/users/${id}`, 'DELETE'), context(id))));
+  assert.deepEqual(results.map((response) => response.status).sort(), [200, 409]);
+  const body = await (await listResource('users', request('/api/users?role=admin'))).json();
+  assert.equal(body.count, 1);
+});
