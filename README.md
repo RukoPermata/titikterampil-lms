@@ -110,9 +110,3 @@ Rincian spesifik checklist to-do dan kontrak antar-anggota dapat dilihat pada do
    ```bash
    npm test && npm run lint && npm run build
    ```
-
-
-## Mock API dan kontribusi Ray
-
-Daftar endpoint, contoh fetch, dan batas penyimpanan demo tersedia di [docs/MOCK_API.md](docs/MOCK_API.md).
-Halaman latihan CRUD Ray tetap dipertahankan dan dipindahkan ke `src/app/admin/users/page.jsx`; halaman itu masih memakai localStorage sampai tahap integrasi UI.
