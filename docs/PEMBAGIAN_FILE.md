@@ -222,14 +222,14 @@ titikterampil-lms/
 **Fokus Area**: Transaksi Pembelian Paket, Manajemen Voucher & Pembayaran
 
 #### Target UTS (Frontend UI/UX):
-- [ ] **Layar 09 (Checkout dan Status Pembayaran)**:
+- [x] **Layar 09 (Checkout dan Status Pembayaran)**:
   - Ringkasan pembelian paket tryout, rincian harga.
   - Simulasi pembayaran dummy (tombol simulasi bayar sukses/gagal untuk demonstrasi demo).
   - Tampilan status pesanan: Menunggu Pembayaran, Berhasil, Kedaluwarsa.
-- [ ] **Layar 26 (Manajemen Voucher - Admin)**:
+- [x] **Layar 26 (Manajemen Voucher - Admin)**:
   - Form pembuatan kode voucher: kode, kuota pemakaian, masa berlaku, paket yang dicakup.
   - Tabel daftar voucher aktif beserta statistik penukaran.
-- [ ] **Layar 27 (Daftar Transaksi - Admin)**:
+- [x] **Layar 27 (Daftar Transaksi - Admin)**:
   - Tabel rekapitulasi transaksi seluruh peserta: nama peserta, paket, nominal, status, tanggal.
 
 #### Target UAS (Backend & Integrasi):
