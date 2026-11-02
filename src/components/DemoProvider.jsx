@@ -1,8 +1,7 @@
 /**
  * Modul: State sesi demo lintas halaman
  * @author Kaisar Rayfa Al Baihaqqi (103022400110)
- * Tanggung jawab: mengembangkan dan memverifikasi modul ini sesuai plotting COTS.
- * @todo Sesi sementara hilang ketika browser dimuat ulang.
+ * Tanggung jawab: Mengelola sesi autentikasi dan peran (Siswa, Pengajar, Admin) dengan persistensi storage.
  */
 'use client';
 import { createContext, useContext, useState } from 'react';
@@ -33,14 +32,8 @@ const defaultProfiles = {
   },
 };
 
-let toastSequence = 0;
-function createToastId() {
-  toastSequence += 1;
-  return `tt-toast-${toastSequence}`;
-}
-
 /**
- * Menyediakan sesi sementara bagi seluruh komponen frontend.
+ * Menyediakan sesi pengguna demo bagi seluruh komponen frontend.
  * @param {Object} props - Properti provider.
  * @param {React.ReactNode} props.children - Konten yang membutuhkan sesi.
  * @returns {React.ReactElement} Provider sesi demo.
@@ -56,38 +49,6 @@ export function DemoProvider({ children }) {
       return null;
     }
   });
-  const [toasts, setToasts] = useState([]);
-
-  /**
-   * Menampilkan pesan notifikasi toast global.
-   * @param {string} message - Pesan notifikasi.
-   * @param {'success'|'error'|'info'} [type='info'] - Kategori toast.
-   * @param {number} [duration=3000] - Lama tampil dalam milidetik.
-   */
-  function showToast(message, type = 'info', duration = 3000) {
-    if (!message) return;
-    const id = createToastId();
-    setToasts((prev) => [...prev, { id, message, type, isExiting: false }]);
-
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
-    }
-  }
-
-  /**
-   * Menghapus toast dengan animasi keluar.
-   * @param {string} id - ID notifikasi toast.
-   */
-  function removeToast(id) {
-    setToasts((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, isExiting: true } : t))
-    );
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 250);
-  }
 
   /**
    * Mengaktifkan peran atau akun demo yang dipilih pengguna.
@@ -115,10 +76,9 @@ export function DemoProvider({ children }) {
 
   /**
    * Menghapus sesi demo aktif.
-   * @returns {void} Memperbarui state tanpa menghapus data pembelajaran.
+   * @returns {void}
    */
   function signOut() {
-    // 1. Kosongkan identitas agar guard menutup tampilan halaman peran.
     setUser(null);
     try {
       if (typeof window !== 'undefined') {
@@ -151,55 +111,20 @@ export function DemoProvider({ children }) {
     return true;
   }
 
-  // 2. TODO: Tambahkan status loading/error bila sesi kelak dibaca asinkron.
-  // 3. Bagikan state dan operasi sesi melalui satu kontrak context.
   return (
-    <DemoContext.Provider value={{ user, signIn, signOut, updateUser, showToast }}>
+    <DemoContext.Provider value={{ user, signIn, signOut, updateUser }}>
       {children}
-      {toasts.length > 0 && (
-        <div className="toast-container" role="region" aria-label="Notifikasi sistem">
-          {toasts.map((toast) => (
-            <div
-              key={toast.id}
-              className={`toast toast-${toast.type || 'info'} ${toast.isExiting ? 'toast-exit' : 'toast-enter'}`}
-              role={toast.type === 'error' ? 'alert' : 'status'}
-            >
-              <span>{toast.message}</span>
-              <button
-                type="button"
-                className="toast-close-btn"
-                onClick={() => removeToast(toast.id)}
-                aria-label="Tutup notifikasi"
-              >
-                x
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
     </DemoContext.Provider>
   );
 }
 
 /**
  * Membaca sesi demo dari provider terdekat.
- * @returns {Object} User aktif beserta fungsi signIn dan signOut.
+ * @returns {Object} User aktif beserta fungsi signIn, signOut, dan updateUser.
  * @throws {Error} Jika komponen tidak berada dalam DemoProvider.
  */
 export function useDemo() {
-  // 1. Baca context milik root layout.
   const context = useContext(DemoContext);
-  // 2. Beri pesan jelas bila provider belum dipasang.
   if (!context) throw new Error('useDemo harus digunakan di dalam DemoProvider.');
-  // 3. TODO: Perbarui kontrak ini jika status loading/error ditambahkan.
   return context;
-}
-
-/**
- * Hook praktis untuk memanggil notifikasi toast pada modul apa pun.
- * @returns {(message: string, type?: 'success'|'error'|'info', duration?: number) => void} Fungsi showToast.
- */
-export function useToast() {
-  const { showToast } = useDemo();
-  return showToast;
 }
