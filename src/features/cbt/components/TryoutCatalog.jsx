@@ -121,7 +121,7 @@ export function TryoutCatalog() {
   }
 
   return (
-    <section className="page-content">
+    <section className={`page-content ${styles.screenStack}`}>
       <header className={styles.pageHeader}>
         <div>
           <p className="eyebrow">TITIK TERAMPIL / P05 / KATALOG TRYOUT</p>

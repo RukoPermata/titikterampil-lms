@@ -54,7 +54,7 @@ export function AttemptHistory() {
   });
 
   return (
-    <section className="page-content">
+    <section className={`page-content ${styles.screenStack}`}>
       <p className="eyebrow">TITIK TERAMPIL / P09 / RIWAYAT TRYOUT</p>
       <h1>Riwayat tryout</h1>
       <p className="lead">
