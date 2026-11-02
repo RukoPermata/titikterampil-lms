@@ -1,22 +1,20 @@
+/** Modul: Endpoint daftar paket tryout dari sumber data demo bersama. */
+import { listResource, postResource } from '@/src/lib/mock-api/handlers';
+
 /**
- * Modul: Route Handler API Mock Tryout
- * @author Tim Titik Terampil
- * Tanggung jawab: menyediakan endpoint data tryout dinamis yang di-fetch oleh frontend (Kriteria UTS Poin 2.2).
+ * Membaca daftar paket tryout beserta filter URL.
+ * @param {Request} request - Permintaan GET.
+ * @returns {Promise<Response>} Respons JSON daftar data.
  */
-import { NextResponse } from 'next/server';
-import { tryouts } from '@/src/data/mock';
-
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const level = searchParams.get('level');
+  return listResource('tryouts', request);
+}
 
-  const filtered = level
-    ? tryouts.filter((t) => t.level === level)
-    : tryouts;
-
-  return NextResponse.json({
-    status: 'success',
-    count: filtered.length,
-    data: filtered,
-  });
+/**
+ * Menambahkan paket tryout untuk simulasi frontend.
+ * @param {Request} request - Permintaan POST berisi JSON.
+ * @returns {Promise<Response>} Record baru atau kesalahan validasi.
+ */
+export async function POST(request) {
+  return postResource('tryouts', request);
 }

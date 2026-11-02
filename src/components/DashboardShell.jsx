@@ -59,7 +59,7 @@ export function DashboardShell({ role, children }) {
   // 5. Render navigasi dan satu area konten utama yang konsisten.
   return (
     <div className="app-shell">
-      <aside className="sidebar">
+      <aside className="sidebar" style={{ minWidth: 0 }}>
         <Link className="brand" href="/">titik<span>terampil.</span></Link>
         <p className="eyebrow">RUANG {roleLabel}</p>
         <nav aria-label="Menu utama">

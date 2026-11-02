@@ -1,22 +1,20 @@
+/** Modul: Endpoint daftar soal dari sumber data demo bersama. */
+import { listResource, postResource } from '@/src/lib/mock-api/handlers';
+
 /**
- * Modul: Route Handler API Mock Questions
- * @author Tim Titik Terampil
- * Tanggung jawab: menyediakan data soal CBT 5 tipe soal untuk diambil via Fetch API (Kriteria UTS Poin 2.2).
+ * Membaca daftar soal beserta filter URL.
+ * @param {Request} request - Permintaan GET.
+ * @returns {Promise<Response>} Respons JSON daftar data.
  */
-import { NextResponse } from 'next/server';
-import { questions } from '@/src/data/mock';
-
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const tryoutId = searchParams.get('tryoutId');
+  return listResource('questions', request);
+}
 
-  const filtered = tryoutId
-    ? questions.filter((q) => q.tryoutId === tryoutId)
-    : questions;
-
-  return NextResponse.json({
-    status: 'success',
-    count: filtered.length,
-    data: filtered,
-  });
+/**
+ * Menambahkan soal untuk simulasi frontend.
+ * @param {Request} request - Permintaan POST berisi JSON.
+ * @returns {Promise<Response>} Record baru atau kesalahan validasi.
+ */
+export async function POST(request) {
+  return postResource('questions', request);
 }

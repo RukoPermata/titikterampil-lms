@@ -1,15 +1,20 @@
-/**
- * Modul: Route Handler API Mock Vouchers
- * @author Tim Titik Terampil
- * Tanggung jawab: menyediakan data kode voucher gratis untuk diambil via Fetch API (Kriteria UTS Poin 2.2).
- */
-import { NextResponse } from 'next/server';
-import { vouchers } from '@/src/data/mock';
+/** Modul: Endpoint daftar voucher dari sumber data demo bersama. */
+import { listResource, postResource } from '@/src/lib/mock-api/handlers';
 
-export async function GET() {
-  return NextResponse.json({
-    status: 'success',
-    count: vouchers.length,
-    data: vouchers,
-  });
+/**
+ * Membaca daftar voucher beserta filter URL.
+ * @param {Request} request - Permintaan GET.
+ * @returns {Promise<Response>} Respons JSON daftar data.
+ */
+export async function GET(request) {
+  return listResource('vouchers', request);
+}
+
+/**
+ * Menambahkan voucher untuk simulasi frontend.
+ * @param {Request} request - Permintaan POST berisi JSON.
+ * @returns {Promise<Response>} Record baru atau kesalahan validasi.
+ */
+export async function POST(request) {
+  return postResource('vouchers', request);
 }
