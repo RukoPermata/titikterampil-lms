@@ -141,7 +141,9 @@ export function TryoutDetail({ tryoutId }) {
           </p>
         </div>
         <span className={`${styles.statusBadge} ${hasAccess ? styles.statusFree : styles.statusPaid}`}>
-          {hasAccess ? (isMember ? 'Akses Member' : unlocked ? 'Voucher aktif' : 'Gratis') : formatPrice(tryout.price)}
+          {hasAccess
+            ? (tryout.isFree ? 'Gratis' : isMember ? 'Akses Member' : 'Voucher aktif')
+            : formatPrice(tryout.price)}
         </span>
       </header>
 

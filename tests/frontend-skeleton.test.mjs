@@ -404,3 +404,29 @@ test('getStudentHistory hanya mengambil attempt siswa dan mengurutkan terbaru', 
   assert.equal(result.summary.active, 1);
   assert.equal(cbt.getStudentHistory([], '').status, 'error');
 });
+
+test('katalog CBT menyusun daftar tryout dari metadata paket yang tersedia', () => {
+  assert.deepEqual(
+    cbt.getPackageTryoutNames({
+      title: 'Paket A',
+      includedTryouts: ['Try Out 1', ' Try Out 2 ', ''],
+    }),
+    ['Try Out 1', 'Try Out 2']
+  );
+  assert.deepEqual(
+    cbt.getPackageTryoutNames({
+      title: 'Paket B',
+      subtests: [{ title: 'Aljabar' }, { title: 'Geometri' }],
+    }),
+    ['Aljabar', 'Geometri']
+  );
+  assert.deepEqual(cbt.getPackageTryoutNames({ title: 'Paket C' }), ['Paket C']);
+  assert.deepEqual(cbt.getPackageTryoutNames(null), []);
+});
+
+test('formatPrice menampilkan gratis dan rupiah tanpa desimal', () => {
+  assert.equal(cbt.formatPrice(0), 'Gratis');
+  assert.equal(cbt.formatPrice(-1), 'Gratis');
+  assert.equal(cbt.formatPrice(Number.NaN), 'Gratis');
+  assert.match(cbt.formatPrice(10000), /10\.000/);
+});

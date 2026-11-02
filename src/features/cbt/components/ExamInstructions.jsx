@@ -105,7 +105,7 @@ export function ExamInstructions({ tryoutId }) {
 
   return (
     <section className="page-content">
-      <p className="eyebrow">TITIK TERAMPIL / PETUNJUK UJIAN</p>
+      <p className="eyebrow">TITIK TERAMPIL / P26 / PETUNJUK UJIAN</p>
       <Link href={`/student/tryouts/${tryoutId}`}>← Kembali ke detail paket</Link>
       <h1>{tryout ? tryout.title : 'Memuat paket…'}</h1>
       <p className="lead">

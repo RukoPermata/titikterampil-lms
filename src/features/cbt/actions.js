@@ -62,6 +62,32 @@ export function formatPrice(value) {
 }
 
 /**
+ * Mengambil daftar nama tryout yang tercakup dalam sebuah paket.
+ * @param {Object} item - Paket tryout dari API atau fixture.
+ * @returns {string[]} Nama tryout; memakai metadata paket bila tersedia.
+ */
+export function getPackageTryoutNames(item) {
+  if (!item || typeof item !== 'object' || Array.isArray(item)) return [];
+
+  // 1. Prioritaskan metadata daftar tryout eksplisit.
+  if (Array.isArray(item.includedTryouts) && item.includedTryouts.length > 0) {
+    return item.includedTryouts
+      .filter((name) => typeof name === 'string' && name.trim())
+      .map((name) => name.trim());
+  }
+
+  // 2. Paket lama memakai subtes sebagai daftar tryout.
+  if (Array.isArray(item.subtests) && item.subtests.length > 0) {
+    return item.subtests
+      .map((subtest) => (typeof subtest?.title === 'string' ? subtest.title.trim() : ''))
+      .filter(Boolean);
+  }
+
+  // 3. Paket tanpa rincian tetap menampilkan dirinya sebagai satu tryout.
+  return typeof item.title === 'string' && item.title.trim() ? [item.title.trim()] : [];
+}
+
+/**
  * Memeriksa apakah voucher dapat dipakai untuk sebuah paket.
  * @param {Object} voucher - Record voucher dari API atau data contoh.
  * @param {string} tryoutId - ID paket yang ingin dibuka.
