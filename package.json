@@ -9,7 +9,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "lint": "eslint",
-    "test": "node --test tests/frontend-skeleton.test.mjs tests/mock-api.test.mjs",
+    "test": "node --test tests/frontend-skeleton.test.mjs tests/mock-api.test.mjs tests/admin-client.test.mjs",
     "test:mock-api": "node --test tests/mock-api.test.mjs"
   },
   "dependencies": {

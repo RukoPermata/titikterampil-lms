@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useDemo } from "@/src/components/DemoProvider";
-import { classes, assignments } from "@/src/data/mock";
-import { getTeacherStats_103022400061 } from "@/src/features/questions/actions";
+import { classes, assignments, questions } from "@/src/data/mock";
 
 export default function TeacherDashboardPage_103022400061() {
   const { user } = useDemo();
@@ -18,9 +17,25 @@ export default function TeacherDashboardPage_103022400061() {
     totalClasses: 0,
     totalAssignments: 0
   });
+  const [statsError, setStatsError] = useState('');
 
   useEffect(() => {
-    setStats_103022400061(getTeacherStats_103022400061());
+    const controller = new AbortController();
+    async function loadStats() {
+      try {
+        const response = await fetch('/api/grading', { signal: controller.signal, cache: 'no-store' });
+        const result = await response.json();
+        if (!response.ok || !Array.isArray(result.data)) throw new Error('Ringkasan penilaian belum dapat dimuat. Muat ulang halaman untuk mencoba lagi.');
+        if (!controller.signal.aborted) setStats_103022400061({
+          essaysWaiting: result.data.filter((item) => item.status !== 'Selesai').length,
+          totalQuestions: questions.length, totalClasses: classes.length, totalAssignments: assignments.length,
+        });
+      } catch (error) {
+        if (!controller.signal.aborted) setStatsError(error.message);
+      }
+    }
+    void loadStats();
+    return () => controller.abort();
   }, []);
 
   return (
@@ -39,6 +54,7 @@ export default function TeacherDashboardPage_103022400061() {
         </div>
       </div>
 
+      {statsError && <p role="alert">{statsError}</p>}
       <div className="dashboard-stats">
         <div className="stat-box">
           <span className="stat-label">Esai Menunggu Koreksi</span>
