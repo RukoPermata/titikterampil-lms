@@ -268,3 +268,139 @@ test('READ menolak storage rusak dan ID/email duplikat tanpa menghapus data sumb
   assert.equal(crud.isValidStoredUsers(users.map((user) => ({ ...user, createdAt: 'rusak' }))), false);
   assert.deepEqual(users, crud.INITIAL_USERS);
 });
+
+test('katalog CBT memfilter mapel dan pencarian tanpa mengubah data asal', () => {
+  const packages = [
+    { id: 'a', title: 'Tryout Matematika SMA', level: 'SMA', grade: 12, subject: 'Matematika' },
+    { id: 'b', title: 'Latihan IPA SD', level: 'SD', grade: 6, subject: 'IPA' },
+    { id: 'c', title: 'Pemahaman Bahasa SMP', level: 'SMP', grade: 9, subject: 'Bahasa Indonesia' },
+  ];
+  const before = structuredClone(packages);
+  assert.deepEqual(cbt.filterTryouts(packages, { subject: 'matematika' }).map((item) => item.id), ['a']);
+  assert.deepEqual(cbt.filterTryouts(packages, { query: 'ipa' }).map((item) => item.id), ['b']);
+  assert.deepEqual(cbt.filterTryouts(packages, { level: 'SMP', grade: '9', subject: 'Bahasa Indonesia' }).map((item) => item.id), ['c']);
+  assert.deepEqual(cbt.filterTryouts(packages, { query: 'tidak-ada' }), []);
+  assert.deepEqual(packages, before);
+});
+
+test('voucher CBT memeriksa status, masa berlaku, kuota, dan cakupan paket', () => {
+  const now = new Date('2026-11-01T10:00:00Z');
+  const voucher = {
+    code: 'TRYOUTGRATIS', status: 'Aktif', quota: 10, usedCount: 2,
+    validUntil: '2026-12-31', applicablePackages: ['demo'],
+  };
+  assert.equal(cbt.validateVoucher(voucher, 'demo', now).status, 'success');
+  assert.equal(cbt.validateVoucher({ ...voucher, status: 'Habis' }, 'demo', now).status, 'error');
+  assert.equal(cbt.validateVoucher({ ...voucher, usedCount: 10 }, 'demo', now).status, 'error');
+  assert.equal(cbt.validateVoucher({ ...voucher, validUntil: '2026-10-01' }, 'demo', now).status, 'error');
+  assert.equal(cbt.validateVoucher({ ...voucher, applicablePackages: ['utbk-snbt'] }, 'demo', now).status, 'error');
+  assert.equal(cbt.validateVoucher({ ...voucher, applicablePackages: ['all'] }, 'demo', now).status, 'success');
+});
+
+test('startAttempt membuat deadline tetap dari durasi paket', () => {
+  const result = cbt.startAttempt(
+    { id: 'demo', title: 'Tryout Demo', durationMinutes: 30, level: 'SMA', grade: 12 },
+    { studentId: 's1', now: '2026-11-01T10:00:00Z' }
+  );
+  assert.equal(result.status, 'success');
+  assert.equal(result.attempt.studentId, 's1');
+  assert.equal(result.attempt.tryoutId, 'demo');
+  assert.equal(result.attempt.deadline, '2026-11-01T10:30:00.000Z');
+  assert.equal(cbt.computeRemainingMs(result.attempt.deadline, '2026-11-01T10:10:00Z'), 20 * 60 * 1000);
+  assert.equal(cbt.formatClock(20 * 60 * 1000), '00:20:00');
+  assert.equal(cbt.startAttempt('demo', {}).status, 'error');
+  assert.equal(cbt.startAttempt({ id: 'demo', durationMinutes: 0 }, { studentId: 's1' }).status, 'error');
+});
+
+test('saveAnswer memvalidasi lima tipe soal dan menjaga attempt asal', () => {
+  const base = { id: 'a1', studentId: 's1', tryoutId: 'demo', answers: {}, flaggedQuestionIds: [] };
+  const single = { id: 'q1', type: 'single_choice', options: ['A', 'B'], correctIndex: 1 };
+  const multiple = { id: 'q2', type: 'multiple_choice', options: ['A', 'B', 'C'], correctIndices: [0, 2] };
+  const short = { id: 'q3', type: 'short_answer', correctAnswer: '12' };
+  const essay = { id: 'q4', type: 'essay', maxScore: 20 };
+
+  const singleResult = cbt.saveAnswer(base, single, 1);
+  assert.equal(singleResult.status, 'success');
+  assert.deepEqual(singleResult.attempt.answers, { q1: 1 });
+  assert.deepEqual(base.answers, {});
+
+  const multipleResult = cbt.saveAnswer(base, multiple, [2, 0, 0]);
+  assert.equal(multipleResult.status, 'error');
+  assert.deepEqual(cbt.saveAnswer(base, multiple, [2, 0]).value, [0, 2]);
+  assert.deepEqual(cbt.saveAnswer(base, multiple, []).value, []);
+
+  assert.equal(cbt.saveAnswer(base, short, '  12  ').value, '  12  ');
+  assert.equal(cbt.saveAnswer(base, essay, 'Jawaban esai').status, 'success');
+  assert.equal(cbt.saveAnswer(base, single, 5).status, 'error');
+  assert.equal(cbt.saveAnswer({ ...base, submittedAt: '2026-11-01T00:00:00Z' }, single, 0).status, 'error');
+
+  const flagged = cbt.toggleFlag(base, 'q1');
+  assert.deepEqual(flagged.attempt.flaggedQuestionIds, ['q1']);
+  assert.deepEqual(cbt.toggleFlag(flagged.attempt, 'q1').attempt.flaggedQuestionIds, []);
+});
+
+test('submitAttempt menilai objektif, menandai esai pending, dan idempoten', () => {
+  const attempt = {
+    id: 'a1', studentId: 's1', tryoutId: 'demo',
+    startedAt: '2026-11-01T10:00:00Z',
+    answers: { q1: 0, q2: [0, 2], q3: 0, q4: ' 12.0 ' },
+    flaggedQuestionIds: ['q4'],
+  };
+  const questions = [
+    { id: 'q1', type: 'single_choice', prompt: 'Satu', options: ['A', 'B'], correctIndex: 0, weight: 1, explanation: 'A benar.' },
+    { id: 'q2', type: 'multiple_choice', prompt: 'Jamak', options: ['A', 'B', 'C'], correctIndices: [0, 2], weight: 2, explanation: 'A dan C.' },
+    { id: 'q3', type: 'true_false', prompt: 'Benar salah', options: ['Benar', 'Salah'], correctIndex: 1, weight: 1, explanation: 'Salah.' },
+    { id: 'q4', type: 'short_answer', prompt: 'Isian', correctAnswer: '12', weight: 1, explanation: '12.' },
+    { id: 'q5', type: 'essay', prompt: 'Esai', maxScore: 20, explanation: 'Rubrik.' },
+  ];
+  const result = cbt.submitAttempt(attempt, questions, { now: '2026-11-01T10:10:00Z', reason: 'manual' });
+  assert.equal(result.status, 'success');
+  assert.equal(result.score, 80);
+  assert.equal(result.attempt.status, 'submitted');
+  assert.equal(result.attempt.gradingStatus, 'pending');
+  assert.equal(result.summary.correct, 3);
+  assert.equal(result.summary.wrong, 1);
+  assert.equal(result.summary.pendingEssay, 1);
+  assert.equal(result.summary.durationSeconds, 600);
+  assert.equal(cbt.submitAttempt(result.attempt, questions).status, 'error');
+
+  const review = cbt.getAttemptReview(result.attempt, questions);
+  assert.equal(review.status, 'success');
+  assert.equal(review.review.score, 80);
+  assert.deepEqual(review.review.items.map((item) => item.status), ['correct', 'correct', 'wrong', 'correct', 'pending']);
+  assert.equal(review.review.items[4].correctAnswer, null);
+  assert.equal(cbt.getAttemptReview({ ...attempt, submittedAt: null }, questions).status, 'in_progress');
+});
+
+test('submitAttempt menghitung jawaban kosong dan total bobot nol', () => {
+  const questions = [
+    { id: 'q1', type: 'single_choice', prompt: 'Satu', options: ['A', 'B'], correctIndex: 0, weight: 1 },
+    { id: 'q2', type: 'multiple_choice', prompt: 'Dua', options: ['A', 'B'], correctIndices: [0], weight: 1 },
+  ];
+  const empty = cbt.submitAttempt({ id: 'a1', studentId: 's1', startedAt: '2026-11-01T10:00:00Z', answers: {} }, questions);
+  assert.equal(empty.status, 'success');
+  assert.equal(empty.score, 0);
+  assert.equal(empty.summary.empty, 2);
+
+  const essayOnly = cbt.submitAttempt(
+    { id: 'a2', studentId: 's1', startedAt: '2026-11-01T10:00:00Z', answers: { q1: 'Esai' } },
+    [{ id: 'q1', type: 'essay', prompt: 'Esai', maxScore: 20 }]
+  );
+  assert.equal(essayOnly.score, null);
+  assert.equal(essayOnly.summary.pendingEssay, 1);
+});
+
+test('getStudentHistory hanya mengambil attempt siswa dan mengurutkan terbaru', () => {
+  const attempts = [
+    { id: 'a1', studentId: 's1', startedAt: '2026-11-01T08:00:00Z', submittedAt: '2026-11-01T08:30:00Z' },
+    { id: 'a2', studentId: 's1', startedAt: '2026-11-02T08:00:00Z', submittedAt: '2026-11-02T08:30:00Z' },
+    { id: 'a3', studentId: 's2', startedAt: '2026-11-03T08:00:00Z', submittedAt: '2026-11-03T08:30:00Z' },
+    { id: 'a4', studentId: 's1', startedAt: '2026-11-04T08:00:00Z', submittedAt: null },
+  ];
+  const result = cbt.getStudentHistory(attempts, 's1');
+  assert.equal(result.status, 'success');
+  assert.deepEqual(result.attempts.map((item) => item.id), ['a4', 'a2', 'a1']);
+  assert.equal(result.summary.completed, 2);
+  assert.equal(result.summary.active, 1);
+  assert.equal(cbt.getStudentHistory([], '').status, 'error');
+});
