@@ -98,7 +98,7 @@ export function ResultReview({ attemptId }) {
 
   if (!attempt) {
     return (
-      <section className="page-content">
+      <section className={`page-content ${styles.screenStack}`}>
         <h1>Hasil tidak ditemukan</h1>
         <p>Attempt <strong>{attemptId}</strong> tidak tersedia di penyimpanan browser ini.</p>
         <Link className="button" href="/student/history">Buka riwayat tryout</Link>
@@ -108,7 +108,7 @@ export function ResultReview({ attemptId }) {
 
   if (user?.id && attempt.studentId !== user.id) {
     return (
-      <section className="page-content">
+      <section className={`page-content ${styles.screenStack}`}>
         <h1>Hasil tidak dapat dibuka</h1>
         <p>Attempt ini bukan milik akun yang sedang aktif.</p>
         <Link className="button" href="/student/history">Kembali ke riwayat</Link>
@@ -118,7 +118,7 @@ export function ResultReview({ attemptId }) {
 
   if (reviewResult.status === 'in_progress') {
     return (
-      <section className="page-content">
+      <section className={`page-content ${styles.screenStack}`}>
         <p className="eyebrow">TITIK TERAMPIL / P08 / HASIL</p>
         <h1>Ujian belum dikumpulkan</h1>
         <p>Pembahasan baru tersedia setelah seluruh jawaban dikumpulkan.</p>
@@ -132,7 +132,7 @@ export function ResultReview({ attemptId }) {
 
   if (reviewResult.status !== 'success') {
     return (
-      <section className="page-content">
+      <section className={`page-content ${styles.screenStack}`}>
         <h1>Hasil tidak dapat dibaca</h1>
         <p>{reviewResult.message}</p>
         <Link className="button" href="/student/history">Kembali ke riwayat</Link>
@@ -160,7 +160,7 @@ export function ResultReview({ attemptId }) {
     : review.submittedAt;
 
   return (
-    <section className="page-content">
+    <section className={`page-content ${styles.screenStack}`}>
       <p className="eyebrow">TITIK TERAMPIL / P08 / HASIL & PEMBAHASAN</p>
       <Link href="/student/history">← Kembali ke riwayat</Link>
       <h1>{review.tryoutTitle}</h1>

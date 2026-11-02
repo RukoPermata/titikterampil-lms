@@ -58,7 +58,7 @@ export function TryoutDetail({ tryoutId }) {
 
   if (!tryout && !loading) {
     return (
-      <section className="page-content">
+      <section className={`page-content ${styles.screenStack}`}>
         <h1>Paket tryout tidak ditemukan</h1>
         <p>ID paket <strong>{tryoutId}</strong> belum tersedia dalam data demo.</p>
         <Link className="button" href="/student/tryouts">Kembali ke katalog</Link>
@@ -68,7 +68,7 @@ export function TryoutDetail({ tryoutId }) {
 
   if (!tryout) {
     return (
-      <section className="page-content">
+      <section className={`page-content ${styles.screenStack}`}>
         <p className="eyebrow">TITIK TERAMPIL / P06 / DETAIL PAKET</p>
         <h1>Memuat detail paket…</h1>
       </section>
@@ -130,7 +130,7 @@ export function TryoutDetail({ tryoutId }) {
   }
 
   return (
-    <section className="page-content">
+    <section className={`page-content ${styles.screenStack}`}>
       <p className="eyebrow">TITIK TERAMPIL / P06 / DETAIL PAKET</p>
       <Link href="/student/tryouts">← Kembali ke katalog</Link>
       <header className={styles.detailHeader}>

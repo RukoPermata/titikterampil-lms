@@ -1,5 +1,18 @@
 /* Modul: Gaya modul CBT peserta (P05–P09). */
 
+/* Jarak vertikal seragam antar blok pada seluruh layar CBT. */
+section.screenStack > * + * {
+  margin-top: 24px;
+}
+
+section.screenStack > a:not(.button) {
+  display: inline-block;
+}
+
+section.screenStack > dialog {
+  margin: auto;
+}
+
 .pageHeader,
 .detailHeader {
   display: flex;
@@ -37,7 +50,6 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin: 0 0 8px;
 }
 
 /* Katalog paket */
@@ -45,14 +57,13 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
-  gap: 18px;
-  margin: 18px 0 28px;
+  gap: 20px;
 }
 
 .packageCard {
   display: flex;
   flex-direction: column;
-  padding: 18px;
+  padding: 20px;
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: 15px;
@@ -74,7 +85,7 @@
 .packageHeader {
   display: flex;
   align-items: flex-start;
-  gap: 13px;
+  gap: 12px;
 }
 
 .packageIcon {
@@ -95,7 +106,7 @@
 .packageBadge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 999px;
   background: #e6f4ef;
   color: #0b7a6e;
@@ -106,7 +117,7 @@
 }
 
 .packageTitle {
-  margin: 7px 0 3px;
+  margin: 8px 0 4px;
   font-size: 1.02rem;
   line-height: 1.3;
   letter-spacing: -0.02em;
@@ -132,9 +143,9 @@
 
 .packageInfo {
   display: grid;
-  gap: 6px;
-  padding: 13px 0;
-  margin: 14px 0 0;
+  gap: 8px;
+  padding: 12px 0;
+  margin: 16px 0 0;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
@@ -170,8 +181,8 @@
 
 .packageTryouts {
   display: grid;
-  gap: 5px;
-  margin: 13px 0 14px;
+  gap: 4px;
+  margin: 16px 0;
   padding: 0;
   list-style: none;
 }
@@ -202,7 +213,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding-top: 14px;
+  padding-top: 16px;
   margin-top: auto;
   border-top: 1px solid var(--line);
 }
@@ -221,7 +232,7 @@
   justify-content: center;
   gap: 6px;
   min-height: 36px;
-  padding: 7px 13px;
+  padding: 8px 12px;
   border-radius: 7px;
   font-size: 12px;
   font-weight: 700;
@@ -260,11 +271,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
   gap: 12px;
-  margin: 22px 0;
 }
 
 .metaItem {
-  padding: 14px 16px;
+  padding: 16px;
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: 9px;
@@ -286,8 +296,7 @@
   display: grid;
   grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(130px, 1fr));
   gap: 12px;
-  padding: 18px;
-  margin: 22px 0 10px;
+  padding: 16px;
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -334,7 +343,7 @@
 }
 
 .warningText {
-  padding: 10px 14px;
+  padding: 12px 16px;
   border: 1px solid #e8c98d;
   border-radius: 8px;
   background: #fff7e4;
@@ -355,7 +364,7 @@
 }
 
 .emptyState {
-  padding: 36px;
+  padding: 32px;
   text-align: center;
 }
 
@@ -390,15 +399,15 @@
 
 .subtestList {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .subtestItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
+  gap: 16px;
+  padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbfcf8;
@@ -424,8 +433,8 @@
 
 .accessPanel {
   display: grid;
-  gap: 10px;
-  padding: 18px;
+  gap: 12px;
+  padding: 16px;
   border: 1px solid #e8c98d;
   border-radius: 9px;
   background: #fffaf0;
@@ -438,9 +447,9 @@
 
 .voucherForm {
   display: grid;
-  gap: 10px;
-  padding-top: 18px;
-  margin-top: 18px;
+  gap: 12px;
+  padding-top: 16px;
+  margin-top: 16px;
   border-top: 1px solid var(--line);
 }
 
@@ -464,11 +473,11 @@
   position: sticky;
   top: 20px;
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 .timerCard {
-  padding: 18px;
+  padding: 16px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--white);
@@ -525,14 +534,14 @@
 }
 
 .questionNavPanel h2 {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   font-size: 14px;
 }
 
 .questionGrid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 7px;
+  gap: 8px;
 }
 
 .questionNavButton {
@@ -619,7 +628,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .questionType {
@@ -634,7 +643,7 @@
 }
 
 .questionPrompt {
-  margin: 0 0 18px;
+  margin: 0 0 16px;
   font-size: 19px;
   line-height: 1.55;
   font-weight: 700;
@@ -642,7 +651,7 @@
 
 .optionList {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -652,7 +661,7 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 13px 15px;
+  padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: 9px;
   background: var(--white);
@@ -684,7 +693,7 @@
 .textAnswer {
   width: 100%;
   min-height: 48px;
-  padding: 11px 14px;
+  padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--white);
@@ -715,8 +724,8 @@ textarea.textAnswer {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .examFooterGroup {
@@ -755,15 +764,15 @@ textarea.textAnswer {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   margin-top: 20px;
 }
 
 .summaryList {
   display: grid;
   gap: 6px;
-  margin: 14px 0;
-  padding: 14px;
+  margin: 16px 0;
+  padding: 16px;
   border-radius: 8px;
   background: #f7f8f2;
   font-size: 14px;
@@ -775,11 +784,10 @@ textarea.textAnswer {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
-  margin: 22px 0;
 }
 
 .scoreMain {
-  padding: 22px;
+  padding: 24px;
   border: 1px solid #087f76;
   border-radius: 12px;
   background: #eaf8f5;
@@ -792,7 +800,7 @@ textarea.textAnswer {
 }
 
 .scoreStat {
-  padding: 18px;
+  padding: 16px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--white);
@@ -809,11 +817,10 @@ textarea.textAnswer {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 18px 0;
 }
 
 .reviewFilter {
-  padding: 8px 13px;
+  padding: 8px 12px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--white);
@@ -830,7 +837,7 @@ textarea.textAnswer {
 
 .reviewList {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 .reviewCard {
@@ -846,7 +853,7 @@ textarea.textAnswer {
   align-items: flex-start;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .reviewStatus {
@@ -882,7 +889,7 @@ textarea.textAnswer {
 }
 
 .answerBox {
-  padding: 11px 13px;
+  padding: 12px 16px;
   margin: 8px 0;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -900,7 +907,7 @@ textarea.textAnswer {
 }
 
 .explanationBox {
-  padding: 12px 14px;
+  padding: 12px 16px;
   margin-top: 12px;
   border-left: 4px solid #8caa22;
   background: #f5f7e9;
@@ -922,7 +929,7 @@ textarea.textAnswer {
 }
 
 .dataTable th {
-  padding: 13px 16px;
+  padding: 12px 16px;
   background: #f1f5e6;
   color: var(--ink);
   text-align: left;
@@ -932,7 +939,7 @@ textarea.textAnswer {
 }
 
 .dataTable td {
-  padding: 13px 16px;
+  padding: 12px 16px;
   border-top: 1px solid var(--line);
   vertical-align: middle;
 }
@@ -948,7 +955,7 @@ textarea.textAnswer {
 .tableAction {
   display: inline-flex;
   align-items: center;
-  padding: 7px 11px;
+  padding: 8px 12px;
   border: 1px solid var(--line);
   border-radius: 7px;
   background: var(--white);
@@ -969,7 +976,6 @@ textarea.textAnswer {
   align-items: flex-end;
   gap: 12px;
   padding: 16px;
-  margin: 20px 0;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--white);
@@ -984,11 +990,10 @@ textarea.textAnswer {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 18px 0;
 }
 
 .levelTab {
-  padding: 9px 16px;
+  padding: 8px 16px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--white);
@@ -1007,11 +1012,10 @@ textarea.textAnswer {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  margin: 18px 0 22px;
 }
 
 .podiumCard {
-  padding: 18px;
+  padding: 20px;
   border: 1px solid var(--line);
   border-radius: 11px;
   background: var(--white);
@@ -1026,7 +1030,7 @@ textarea.textAnswer {
 .podiumRank {
   display: inline-block;
   margin-bottom: 6px;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: 999px;
   background: #edf1e7;
   font-size: 11px;
@@ -1064,13 +1068,15 @@ textarea.textAnswer {
 }
 
 @media (max-width: 640px) {
+  section.screenStack > * { margin-bottom: 0; }
+  section.screenStack > * + * { margin-top: 20px; }
   .filterPanel { grid-template-columns: 1fr; }
   .catalogGrid { grid-template-columns: 1fr; }
   .packageCard { padding: 16px; }
   .questionGrid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .podium { grid-template-columns: 1fr; }
   .subtestItem { align-items: flex-start; }
-  .questionCard { padding: 18px 15px; }
+  .questionCard { padding: 16px; }
   .questionPrompt { font-size: 17px; }
   .timerValue { font-size: 27px; }
   .examFooter { align-items: stretch; }

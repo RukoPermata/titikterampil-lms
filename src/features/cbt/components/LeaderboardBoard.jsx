@@ -72,7 +72,7 @@ export function LeaderboardBoard() {
   const studentName = user?.name ?? '';
 
   return (
-    <section className="page-content">
+    <section className={`page-content ${styles.screenStack}`}>
       <p className="eyebrow">TITIK TERAMPIL / P25 / LEADERBOARD</p>
       <h1>Papan peringkat</h1>
       <p className="lead">
