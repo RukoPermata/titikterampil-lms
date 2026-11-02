@@ -115,4 +115,4 @@ Rincian spesifik checklist to-do dan kontrak antar-anggota dapat dilihat pada do
 ## Mock API dan kontribusi Ray
 
 Daftar endpoint, contoh fetch, dan batas penyimpanan demo tersedia di [docs/MOCK_API.md](docs/MOCK_API.md).
-Halaman latihan CRUD Ray tetap dipertahankan dan dipindahkan ke `src/app/admin/users/page.jsx`; halaman itu masih memakai localStorage sampai tahap integrasi UI.
+Halaman pengguna di `src/app/admin/users/page.jsx` kini menggunakan mock API untuk daftar, pencarian, CRUD, dan member. Dashboard admin membaca ringkasan API yang sama. Panduan alur serta pengujian tersedia di [docs/P19_MANAGEMENT_GUIDE.md](docs/P19_MANAGEMENT_GUIDE.md).
