@@ -56,7 +56,7 @@ export function VouchersTable({
     return (
       <div className={styles.emptyState}>
         <p className={styles.emptyStateTitle}>Belum ada voucher yang sesuai</p>
-        <p>Gunakan tombol "Tambah Voucher Baru" atau sesuaikan filter pencarian Anda.</p>
+        <p>Gunakan tombol &quot;Tambah Voucher Baru&quot; atau sesuaikan filter pencarian Anda.</p>
       </div>
     );
   }

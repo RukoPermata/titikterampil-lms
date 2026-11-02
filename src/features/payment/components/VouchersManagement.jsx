@@ -78,6 +78,7 @@ export function VouchersManagement() {
   }, [searchQuery, filters.status]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Sinkronisasi data voucher dari API saat filter berubah.
     loadData();
     return () => abortControllerRef.current?.abort();
   }, [loadData]);
