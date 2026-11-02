@@ -223,52 +223,241 @@ export function startAttempt(tryout, options = {}) {
 }
 
 /**
- * Menyiapkan pembaruan satu jawaban CBT.
- * Validasi yang tersedia baru tahap awal; komentar TODO menandai aturan tersisa.
- * @param {string} attemptId - ID percobaan aktif.
- * @param {string} questionId - ID soal yang dijawab.
- * @param {number} optionIndex - Indeks opsi berbasis nol.
- * @returns {Object} Kesalahan atau jawaban yang belum disimpan.
+ * Memeriksa apakah jawaban dianggap kosong.
+ * @param {unknown} value - Nilai jawaban.
+ * @returns {boolean} True bila belum diisi.
  */
-export function saveAnswer(attemptId, questionId, optionIndex) {
-  // 1. Validasi bentuk identitas dan indeks opsi.
-  if (typeof attemptId !== 'string' || !attemptId.trim() || typeof questionId !== 'string' || !questionId.trim() || !Number.isInteger(optionIndex) || optionIndex < 0) {
-    return { status: 'error', message: 'Identitas jawaban atau opsi tidak valid.' };
-  }
-
-  // 2. Siapkan perubahan satu soal tanpa menimpa jawaban lainnya.
-  const answer = { attemptId, questionId, optionIndex };
-
-  // 3. TODO: Pastikan soal milik paket, opsi tersedia dan attempt belum selesai.
-  // 4. TODO: Gabungkan jawaban ke attempt lalu simpan dengan versi skema lokal.
-  // 5. TODO: Tangani storage gagal dan beri indikator tersimpan yang akurat.
-  return { status: 'not_implemented', answer, message: 'Jawaban belum disimpan.' };
+export function isAnswerEmpty(value) {
+  if (value === undefined || value === null) return true;
+  if (Array.isArray(value)) return value.length === 0;
+  if (typeof value === 'string') return value.trim() === '';
+  return false;
 }
 
 /**
- * Menyiapkan pengumpulan dan penilaian percobaan.
- * Validasi yang tersedia baru tahap awal; komentar TODO menandai aturan tersisa.
- * @param {Object} attempt - Percobaan berisi id, answers dan submittedAt.
- * @param {Array<Object>} questions - Soal, kunci dan bobot paket yang dikerjakan.
- * @returns {Object} Kesalahan atau status belum diimplementasikan; belum menghasilkan skor.
+ * Memvalidasi dan menormalkan jawaban sesuai tipe soal.
+ * @param {Object} question - Soal yang dijawab.
+ * @param {unknown} value - Jawaban dari UI.
+ * @returns {{status: string, value?: unknown, message?: string}} Hasil validasi.
  */
-export function submitAttempt(attempt, questions = []) {
+export function validateAnswer(question, value) {
+  if (!question || typeof question !== 'object' || typeof question.id !== 'string') {
+    return { status: 'error', message: 'Soal tidak valid.' };
+  }
+  const options = Array.isArray(question.options) ? question.options : [];
+
+  if (question.type === 'single_choice' || question.type === 'true_false') {
+    if (!Number.isInteger(value) || value < 0 || value >= options.length) {
+      return { status: 'error', message: 'Pilih satu jawaban yang tersedia.' };
+    }
+    return { status: 'success', value };
+  }
+
+  if (question.type === 'multiple_choice') {
+    if (!Array.isArray(value) || new Set(value).size !== value.length ||
+      value.some((index) => !Number.isInteger(index) || index < 0 || index >= options.length)) {
+      return { status: 'error', message: 'Pilihan jawaban jamak tidak valid.' };
+    }
+    return { status: 'success', value: [...value].sort((a, b) => a - b) };
+  }
+
+  if (question.type === 'short_answer' || question.type === 'essay') {
+    if (typeof value !== 'string') {
+      return { status: 'error', message: 'Jawaban harus berupa teks.' };
+    }
+    const limit = question.type === 'essay' ? 20000 : 500;
+    if (value.length > limit) {
+      return { status: 'error', message: `Jawaban melebihi ${limit} karakter.` };
+    }
+    return { status: 'success', value };
+  }
+
+  return { status: 'error', message: 'Tipe soal tidak dikenali.' };
+}
+
+/**
+ * Menyimpan satu jawaban ke salinan attempt tanpa mengubah attempt asal.
+ * @param {Object} attempt - Attempt aktif.
+ * @param {Object} question - Soal yang dijawab.
+ * @param {unknown} value - Jawaban baru.
+ * @returns {Object} Attempt baru atau kesalahan validasi.
+ */
+export function saveAnswer(attempt, question, value) {
+  if (!attempt || typeof attempt !== 'object' || typeof attempt.id !== 'string' || !attempt.id.trim()) {
+    return { status: 'error', message: 'Attempt tidak valid.' };
+  }
+  if (attempt.submittedAt) {
+    return { status: 'error', message: 'Attempt sudah dikumpulkan.' };
+  }
+  const validated = validateAnswer(question, value);
+  if (validated.status !== 'success') return validated;
+
+  return {
+    status: 'success',
+    attempt: {
+      ...attempt,
+      answers: { ...(attempt.answers ?? {}), [question.id]: validated.value },
+    },
+    value: validated.value,
+  };
+}
+
+/**
+ * Menambah atau menghapus penanda ragu-ragu pada attempt.
+ * @param {Object} attempt - Attempt aktif.
+ * @param {string} questionId - ID soal.
+ * @returns {Object} Attempt baru atau kesalahan validasi.
+ */
+export function toggleFlag(attempt, questionId) {
+  if (!attempt || typeof attempt !== 'object' || typeof attempt.id !== 'string') {
+    return { status: 'error', message: 'Attempt tidak valid.' };
+  }
+  if (typeof questionId !== 'string' || !questionId.trim()) {
+    return { status: 'error', message: 'ID soal tidak valid.' };
+  }
+  const flags = Array.isArray(attempt.flaggedQuestionIds) ? attempt.flaggedQuestionIds : [];
+  const nextFlags = flags.includes(questionId)
+    ? flags.filter((id) => id !== questionId)
+    : [...flags, questionId];
+  return {
+    status: 'success',
+    attempt: { ...attempt, flaggedQuestionIds: nextFlags },
+  };
+}
+
+/**
+ * Menilai satu jawaban objektif atau menandainya menunggu koreksi esai.
+ * @param {Object} question - Soal yang dinilai.
+ * @param {unknown} answer - Jawaban siswa.
+ * @returns {{status: string, weight: number, correct: boolean|null}} Hasil penilaian.
+ */
+export function evaluateAnswer(question, answer) {
+  const weight = question.type === 'essay' ? Number(question.maxScore) || 0 : Number(question.weight) || 1;
+  if (question.type === 'essay') return { status: 'pending', weight: 0, correct: null };
+  if (isAnswerEmpty(answer)) return { status: 'empty', weight, correct: false };
+
+  if (question.type === 'single_choice' || question.type === 'true_false') {
+    const correct = answer === question.correctIndex;
+    return { status: correct ? 'correct' : 'wrong', weight, correct };
+  }
+
+  if (question.type === 'multiple_choice') {
+    const expected = Array.isArray(question.correctIndices) ? [...question.correctIndices].sort((a, b) => a - b) : [];
+    const actual = [...answer].sort((a, b) => a - b);
+    const correct = expected.length === actual.length && expected.every((value, index) => value === actual[index]);
+    return { status: correct ? 'correct' : 'wrong', weight, correct };
+  }
+
+  if (question.type === 'short_answer') {
+    const normalize = (value) => normalizeText(value).replace(/\s+/g, ' ');
+    const actual = normalize(answer);
+    const expected = normalize(question.correctAnswer);
+    const numericActual = Number(actual);
+    const numericExpected = Number(expected);
+    const correct = actual === expected ||
+      (Number.isFinite(numericActual) && Number.isFinite(numericExpected) && numericActual === numericExpected);
+    return { status: correct ? 'correct' : 'wrong', weight, correct };
+  }
+
+  return { status: 'wrong', weight, correct: false };
+}
+
+/**
+ * Mengumpulkan attempt dan menghitung nilai objektif secara idempoten.
+ * @param {Object} attempt - Percobaan berisi id, answers dan submittedAt.
+ * @param {Array<Object>} questions - Soal, kunci dan bobot paket.
+ * @param {Object} [options] - Opsi pengumpulan.
+ * @param {Date|string|number} [options.now] - Waktu submit.
+ * @param {string} [options.reason='manual'] - Alasan submit.
+ * @returns {Object} Attempt yang sudah dinilai atau kesalahan validasi.
+ */
+export function submitAttempt(attempt, questions = [], options = {}) {
   // 1. Pastikan percobaan dan soal tersedia.
-  if (!attempt || typeof attempt.id !== 'string' || !attempt.id.trim() || !Array.isArray(questions) || questions.length === 0) {
+  if (!attempt || typeof attempt.id !== 'string' || !attempt.id.trim() ||
+    !Array.isArray(questions) || questions.length === 0) {
     return { status: 'error', message: 'Percobaan dan daftar soal wajib tersedia.' };
   }
 
   // 2. Cegah pengumpulan ulang percobaan selesai.
-  if (attempt.submittedAt) {
-    return { status: 'error', message: 'Percobaan sudah dikumpulkan.' };
+  if (attempt.submittedAt || attempt.status === 'submitted') {
+    return { status: 'error', code: 'already_submitted', message: 'Percobaan sudah dikumpulkan.' };
   }
 
-  // 3. TODO: Validasi relasi paket/soal serta struktur jawaban dan bobot positif.
-  // 4. TODO: Jumlahkan bobot benar dan total bobot; tangani total bobot nol.
-  // 5. TODO: Hitung skor = bobot benar / total bobot * 100.
-  // 6. TODO: Simpan hasil dan submittedAt sekali sebelum menavigasi ke P08.
-  // 7. Jangan mengembalikan nilai contoh seolah penilaian sudah terjadi.
-  return { status: 'not_implemented', attemptId: attempt.id, score: null, message: 'Hasil belum dihitung atau disimpan.' };
+  const submittedAtMs = toMillis(options.now ?? Date.now());
+  if (!Number.isFinite(submittedAtMs)) {
+    return { status: 'error', message: 'Waktu pengumpulan tidak valid.' };
+  }
+
+  // 3. Nilai seluruh soal dan jumlahkan bobot objektif.
+  let earnedWeight = 0;
+  let totalWeight = 0;
+  let correctCount = 0;
+  let wrongCount = 0;
+  let emptyCount = 0;
+  let pendingEssayCount = 0;
+  const answers = attempt.answers ?? {};
+
+  const results = questions.map((question) => {
+    const answer = answers[question.id];
+    const evaluation = evaluateAnswer(question, answer);
+    if (question.type === 'essay') {
+      pendingEssayCount += 1;
+    } else {
+      totalWeight += evaluation.weight;
+      if (evaluation.status === 'correct') {
+        earnedWeight += evaluation.weight;
+        correctCount += 1;
+      } else if (evaluation.status === 'empty') {
+        emptyCount += 1;
+      } else {
+        wrongCount += 1;
+      }
+    }
+    return {
+      questionId: question.id,
+      status: evaluation.status,
+      weight: evaluation.weight,
+    };
+  });
+
+  // 4. Hindari pembagian nol dan bulatkan nilai ke dua desimal.
+  const score = totalWeight > 0
+    ? Number(((earnedWeight / totalWeight) * 100).toFixed(2))
+    : null;
+  const startedAtMs = toMillis(attempt.startedAt);
+  const durationSeconds = Number.isFinite(startedAtMs)
+    ? Math.max(0, Math.round((submittedAtMs - startedAtMs) / 1000))
+    : null;
+
+  const nextAttempt = {
+    ...attempt,
+    status: 'submitted',
+    submittedAt: new Date(submittedAtMs).toISOString(),
+    submitReason: options.reason ?? 'manual',
+    score,
+    gradingStatus: pendingEssayCount > 0 || score === null ? 'pending' : 'complete',
+    summary: {
+      total: questions.length,
+      correct: correctCount,
+      wrong: wrongCount,
+      empty: emptyCount,
+      pendingEssay: pendingEssayCount,
+      earnedWeight,
+      totalWeight,
+      durationSeconds,
+    },
+    results,
+  };
+
+  return {
+    status: 'success',
+    attempt: nextAttempt,
+    score,
+    summary: nextAttempt.summary,
+    message: pendingEssayCount > 0
+      ? 'Jawaban objektif dinilai. Esai menunggu koreksi pengajar.'
+      : 'Percobaan berhasil dikumpulkan.',
+  };
 }
 
 /**
