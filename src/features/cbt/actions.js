@@ -461,24 +461,83 @@ export function submitAttempt(attempt, questions = [], options = {}) {
 }
 
 /**
- * Menyiapkan pembacaan hasil dan pembahasan.
- * Validasi yang tersedia baru tahap awal; komentar TODO menandai aturan tersisa.
- * @param {string} attemptId - ID hasil percobaan, bukan ID paket.
- * @returns {Object} Kerangka pembahasan yang belum dimuat.
+ * Menyusun hasil dan pembahasan setiap soal dari attempt yang sudah dikumpulkan.
+ * @param {Object} attempt - Percobaan yang sudah dinilai.
+ * @param {Array<Object>} questions - Soal yang dikerjakan.
+ * @returns {Object} Status hasil, ringkasan, dan daftar pembahasan.
  */
-export function getAttemptReview(attemptId) {
-  // 1. Validasi identitas percobaan.
-  if (typeof attemptId !== 'string' || !attemptId.trim()) {
+export function getAttemptReview(attempt, questions = []) {
+  // 1. Validasi identitas attempt dan daftar soal.
+  if (!attempt || typeof attempt !== 'object' || typeof attempt.id !== 'string' ||
+    !attempt.id.trim()) {
     return { status: 'error', message: 'ID percobaan wajib diisi.' };
   }
+  if (!Array.isArray(questions)) {
+    return { status: 'error', message: 'Daftar soal tidak valid.' };
+  }
+  if (!attempt.submittedAt) {
+    return {
+      status: 'in_progress',
+      attempt,
+      message: 'Percobaan belum dikumpulkan sehingga pembahasan belum tersedia.',
+    };
+  }
 
-  // 2. Siapkan bentuk hasil yang akan dipakai halaman P08.
-  const review = { score: null, submittedAt: null, items: [] };
+  const answers = attempt.answers ?? {};
+  const flags = Array.isArray(attempt.flaggedQuestionIds) ? attempt.flaggedQuestionIds : [];
 
-  // 3. TODO: Cari attempt milik siswa aktif dan pastikan sudah dikumpulkan.
-  // 4. TODO: Gabungkan jawaban, kunci, status benar/salah dan pembahasan.
-  // 5. TODO: Bedakan hasil tidak ditemukan dengan kegagalan membaca penyimpanan.
-  return { status: 'not_implemented', attemptId, review };
+  // 2. Gabungkan jawaban, kunci, status, dan pembahasan tiap soal.
+  const items = questions.map((question, index) => {
+    const answer = answers[question.id];
+    const evaluation = evaluateAnswer(question, answer);
+    return {
+      questionId: question.id,
+      number: index + 1,
+      type: question.type,
+      prompt: question.prompt,
+      options: Array.isArray(question.options) ? question.options : [],
+      answer,
+      correctAnswer: question.type === 'essay'
+        ? null
+        : question.type === 'multiple_choice'
+          ? (Array.isArray(question.correctIndices) ? question.correctIndices : [])
+          : question.type === 'short_answer'
+            ? question.correctAnswer
+            : question.correctIndex,
+      status: question.type === 'essay' ? 'pending' : evaluation.status,
+      weight: question.type === 'essay' ? question.maxScore : question.weight,
+      explanation: question.explanation ?? '',
+      rubric: question.rubric ?? '',
+      flagged: flags.includes(question.id),
+    };
+  });
+
+  // 3. Hitung ringkasan dari item agar konsisten dengan tampilan.
+  const summary = {
+    total: items.length,
+    correct: items.filter((item) => item.status === 'correct').length,
+    wrong: items.filter((item) => item.status === 'wrong').length,
+    empty: items.filter((item) => item.status === 'empty').length,
+    pendingEssay: items.filter((item) => item.status === 'pending').length,
+    durationSeconds: attempt.summary?.durationSeconds ?? null,
+  };
+
+  return {
+    status: 'success',
+    review: {
+      attemptId: attempt.id,
+      tryoutId: attempt.tryoutId,
+      tryoutTitle: attempt.tryoutTitle ?? 'Paket tryout',
+      tryoutLevel: attempt.tryoutLevel ?? '',
+      tryoutGrade: attempt.tryoutGrade ?? '',
+      submittedAt: attempt.submittedAt,
+      score: attempt.score,
+      gradingStatus: attempt.gradingStatus ?? 'complete',
+      submitReason: attempt.submitReason ?? 'manual',
+      summary,
+      items,
+    },
+  };
 }
 
 /**
