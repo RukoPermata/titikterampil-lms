@@ -96,6 +96,16 @@ export const pages = [
     "role": "student"
   },
   {
+    "id": "P25",
+    "route": "/student/leaderboard",
+    "title": "Leaderboard",
+    "owner": "Fauzan Zulfa Muhammad (103022400032)",
+    "component": "LeaderboardPage",
+    "description": "Papan peringkat nilai terbaik peserta per jenjang.",
+    "todo": "Hubungkan agregasi nilai final per paket ketika backend tersedia.",
+    "role": "student"
+  },
+  {
     "id": "P10",
     "route": "/student/classes",
     "title": "Kelas belajar",
