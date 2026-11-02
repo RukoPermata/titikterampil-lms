@@ -73,7 +73,7 @@ export function LeaderboardBoard() {
 
   return (
     <section className="page-content">
-      <p className="eyebrow">TITIK TERAMPIL / P14 / LEADERBOARD</p>
+      <p className="eyebrow">TITIK TERAMPIL / P25 / LEADERBOARD</p>
       <h1>Papan peringkat</h1>
       <p className="lead">
         Nilai terbaik final peserta per jenjang. Gunakan tab jenjang untuk melihat peringkat lainnya.
