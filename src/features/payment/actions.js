@@ -233,4 +233,30 @@ export function formatTransactionDate(dateString) {
  * Daftar metode pembayaran simulasi demo yang didukung sistem.
  */
 export const paymentMethods = [
+  {
+    id: 'qris',
+    name: 'GoPay / QRIS',
+    category: 'e-wallet',
+    instructions: 'Pindai kode QRIS menggunakan GoPay, OVO, Dana, atau aplikasi mobile banking apa pun.',
+  },
+  {
+    id: 'bca_va',
+    name: 'BCA Virtual Account',
+    category: 'bank_transfer',
+    accountNumber: '8277 0812 3456 7890',
+    instructions: 'Transfer ke Virtual Account BCA di atas via BCA Mobile, KlikBCA, atau ATM BCA.',
+  },
+  {
+    id: 'mandiri_bill',
+    name: 'Mandiri Bill',
+    category: 'bank_transfer',
+    accountNumber: '70012 9988 7766',
+    instructions: 'Pilih Bayar/Beli -> Multipayment -> Titik Terampil lalu masukkan nomor tagihan Mandiri.',
+  },
+  {
+    id: 'shopeepay',
+    name: 'ShopeePay',
+    category: 'e-wallet',
+    instructions: 'Buka notifikasi aplikasi Shopee atau pindai kode untuk menyelesaikan verifikasi pembayaran.',
+  },
 ];
