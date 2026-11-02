@@ -9,6 +9,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useDemo } from '@/src/components/DemoProvider';
+import { useToast } from '@/src/components/Toast';
 
 /**
  * Komponen onboarding personalisasi awal siswa baru.
@@ -16,7 +17,8 @@ import { useDemo } from '@/src/components/DemoProvider';
  */
 export function OnboardingForm() {
   const router = useRouter();
-  const { user, updateUser, showToast } = useDemo();
+  const { user, updateUser } = useDemo();
+  const showToast = useToast();
 
   const isHighSchoolOrGapYear = user?.level === 'SMA' || user?.level === 'Umum';
 

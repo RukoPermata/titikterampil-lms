@@ -9,11 +9,13 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDemo } from '@/src/components/DemoProvider';
+import { useToast } from '@/src/components/Toast';
 
 function TwoFactorContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { signIn, showToast } = useDemo();
+  const { signIn } = useDemo();
+  const showToast = useToast();
 
   const role = searchParams.get('role') || 'student';
   const email = searchParams.get('email') || 'siswa@titikterampil.id';

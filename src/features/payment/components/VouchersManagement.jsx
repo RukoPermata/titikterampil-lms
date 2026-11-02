@@ -5,7 +5,7 @@
  * Tanggung jawab: rekapitulasi kode voucher, pemantauan kuota, dan pembuatan voucher promo.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useToast } from '@/src/components/DemoProvider';
+import { useToast } from '@/src/components/Toast';
 import { paymentApi, vouchersQuery } from '../api.js';
 import { VoucherForm } from './VoucherForm';
 import { VouchersTable } from './VouchersTable';

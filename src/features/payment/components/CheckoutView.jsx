@@ -6,7 +6,8 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useDemo, useToast } from '@/src/components/DemoProvider';
+import { useDemo } from '@/src/components/DemoProvider';
+import { useToast } from '@/src/components/Toast';
 import { formatRupiah } from '@/src/lib/utils';
 import { paymentApi } from '../api.js';
 import {

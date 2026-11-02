@@ -8,6 +8,7 @@ import './globals.css';
 // Token saja: komponen lama belum berubah sampai memakai variabel --tt-.
 import '@/src/styles/design-system.css';
 import { DemoProvider } from '@/src/components/DemoProvider';
+import { ToastProvider } from '@/src/components/Toast';
 
 export const metadata = {
   title: { default: 'Titik Terampil', template: '%s | Titik Terampil' },
@@ -28,7 +29,9 @@ export default function RootLayout({ children }) {
     <html lang="id">
       <body>
         <a className="skip-link" href="#main">Lewati navigasi</a>
-        <DemoProvider>{children}</DemoProvider>
+        <DemoProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </DemoProvider>
       </body>
     </html>
   );

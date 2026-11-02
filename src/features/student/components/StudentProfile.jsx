@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useDemo } from '@/src/components/DemoProvider';
+import { useToast } from '@/src/components/Toast';
 import { updateProfile } from '@/src/features/auth/actions';
 
 const gradeRanges = {
@@ -22,7 +23,8 @@ const gradeRanges = {
  * @returns {React.ReactElement} Form profil siswa.
  */
 export function StudentProfile() {
-  const { user, updateUser, showToast } = useDemo();
+  const { user, updateUser } = useDemo();
+  const showToast = useToast();
 
   // 1. Inisialisasi state form dari profil siswa aktif
   const [name, setName] = useState(user?.name || '');
