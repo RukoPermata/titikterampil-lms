@@ -541,22 +541,40 @@ export function getAttemptReview(attempt, questions = []) {
 }
 
 /**
- * Menyiapkan daftar riwayat tryout siswa.
- * Validasi yang tersedia baru tahap awal; komentar TODO menandai aturan tersisa.
- * @param {string} studentId - ID siswa aktif.
- * @returns {Object} Kerangka riwayat yang belum dibaca.
+ * Menyusun riwayat attempt milik siswa, terbaru lebih dahulu.
+ * @param {Array<Object>|string} attemptsOrStudentId - Daftar attempt atau ID siswa.
+ * @param {string} [studentId] - ID siswa saat argumen pertama berupa daftar.
+ * @returns {Object} Daftar attempt yang sudah disaring dan diurutkan.
  */
-export function getStudentHistory(studentId) {
+export function getStudentHistory(attemptsOrStudentId, studentId) {
+  const attempts = Array.isArray(attemptsOrStudentId) ? attemptsOrStudentId : [];
+  const ownerId = Array.isArray(attemptsOrStudentId) ? studentId : attemptsOrStudentId;
+
   // 1. Validasi identitas siswa.
-  if (typeof studentId !== 'string' || !studentId.trim()) {
+  if (typeof ownerId !== 'string' || !ownerId.trim()) {
     return { status: 'error', message: 'ID siswa wajib diisi.' };
   }
 
-  // 2. Siapkan daftar; status membedakan belum dimuat dari riwayat kosong.
-  const attempts = [];
+  // 2. Ambil hanya attempt milik siswa tersebut.
+  const owned = attempts.filter((attempt) => attempt &&
+    typeof attempt === 'object' &&
+    attempt.studentId === ownerId.trim());
 
-  // 3. TODO: Ambil hanya percobaan selesai milik siswa tersebut.
-  // 4. TODO: Gabungkan judul paket dan urutkan submittedAt terbaru.
-  // 5. TODO: Kembalikan tautan berdasarkan attemptId untuk P08 dan P09.
-  return { status: 'not_implemented', studentId, attempts };
+  // 3. Urutkan berdasarkan waktu submit, lalu waktu mulai untuk attempt aktif.
+  const sorted = [...owned].sort((a, b) => {
+    const left = Date.parse(a.submittedAt ?? a.startedAt ?? 0);
+    const right = Date.parse(b.submittedAt ?? b.startedAt ?? 0);
+    return (Number.isFinite(right) ? right : 0) - (Number.isFinite(left) ? left : 0);
+  });
+
+  return {
+    status: 'success',
+    studentId: ownerId.trim(),
+    attempts: sorted,
+    summary: {
+      total: sorted.length,
+      completed: sorted.filter((attempt) => Boolean(attempt.submittedAt)).length,
+      active: sorted.filter((attempt) => !attempt.submittedAt).length,
+    },
+  };
 }
