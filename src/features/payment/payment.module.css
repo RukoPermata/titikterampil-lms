@@ -1,0 +1,38 @@
+/**
+ * Modul: Styling CSS Module untuk Fitur Pembayaran dan Voucher
+ * @author Fityah Bayoediansyah Harahap (103022400085)
+ * Mematuhi token desain resmi Titik Terampil (--tt-*) dan bebas emoji slop.
+ */
+
+.container {
+  color: var(--tt-text-primary, #16332F);
+  background: var(--tt-surface-subtle, #F5F8F6);
+  padding: clamp(20px, 2.5vw, 32px);
+  min-height: 80vh;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--tt-ink, #16332F);
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: var(--tt-muted, #526862);
+  font-size: 15px;
+  max-width: 65ch;
+}
