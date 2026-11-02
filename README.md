@@ -109,8 +109,3 @@ titikterampil-lms/
    ```bash
    npm test && npm run lint && npm run build
    ```
-
-
-## Mock API dan kontribusi Ray
-
-Daftar endpoint, contoh fetch, dan batas penyimpanan demo tersedia di [docs/MOCK_API.md](docs/MOCK_API.md).
