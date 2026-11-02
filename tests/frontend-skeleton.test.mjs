@@ -26,13 +26,21 @@ const evaluation = await loadModule('src/features/evaluation/actions.js');
 const management = await loadModule('src/features/tryout-management/actions.js');
 const auth = await loadModule('src/features/auth/actions.js');
 
-test('CBT menolak submit ganda dan soal kosong tanpa menghasilkan nilai', () => {
-  const questions = [{ id: 'q1', weight: 1, correctIndex: 0, options: ['A', 'B'] }];
+test('CBT menolak submit ganda, soal kosong, dan menilai attempt sekali', () => {
+  const questions = [{
+    id: 'q1',
+    type: 'single_choice',
+    weight: 1,
+    correctIndex: 0,
+    options: ['A', 'B'],
+  }];
   assert.equal(cbt.submitAttempt({ id: 'a1', submittedAt: '2026-10-26T00:00:00Z' }, questions).status, 'error');
   assert.equal(cbt.submitAttempt({ id: 'a1' }, []).status, 'error');
-  const unfinished = cbt.submitAttempt({ id: 'a1', answers: { q1: 0 } }, questions);
-  assert.equal(unfinished.status, 'not_implemented');
-  assert.equal(unfinished.score, null);
+  const submitted = cbt.submitAttempt({ id: 'a1', studentId: 's1', answers: { q1: 0 } }, questions);
+  assert.equal(submitted.status, 'success');
+  assert.equal(submitted.score, 100);
+  assert.equal(submitted.attempt.status, 'submitted');
+  assert.equal(cbt.submitAttempt(submitted.attempt, questions).status, 'error');
 });
 
 test('penempatan kelas menolak kelas lintas jenjang dan kelas duplikat', () => {
