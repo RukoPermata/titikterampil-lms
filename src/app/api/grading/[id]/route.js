@@ -1,0 +1,22 @@
+/** Modul: Detail penilaian esai berdasarkan ID yang tersedia. */
+import { detailResource, patchResource } from '@/src/lib/mock-api/handlers';
+
+/**
+ * Membaca satu record.
+ * @param {Request} request - Permintaan GET.
+ * @param {Object} context - Konteks route berisi Promise params.
+ * @returns {Promise<Response>} Respons JSON hasil operasi.
+ */
+export async function GET(request, context) {
+  return detailResource('grading', request, context);
+}
+
+/**
+ * Memperbarui sebagian field record.
+ * @param {Request} request - Permintaan PATCH.
+ * @param {Object} context - Konteks route berisi Promise params.
+ * @returns {Promise<Response>} Respons JSON hasil operasi.
+ */
+export async function PATCH(request, context) {
+  return patchResource('grading', request, context);
+}

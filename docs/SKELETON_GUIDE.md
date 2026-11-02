@@ -42,3 +42,7 @@ Komentar dan skeleton diterapkan pada seluruh fungsi bernama di app (halaman/lay
 ## Verifikasi
 
 Jalankan npm test untuk batas input utama: submit ganda, soal kosong, bobot soal, pemetaan jenjang, nilai tugas dan pendaftaran. Jalankan npm run lint serta npm run build untuk pemeriksaan aplikasi. Pengujian ini belum membuktikan fitur CRUD, timer atau penyimpanan telah diimplementasikan.
+
+
+
+Implementasi P19 untuk latihan COTS kini berada seluruhnya di app/admin/users/page.js: data contoh, state, validasi, CRUD localStorage, form, tabel dan CSS lokal. Pencarian, filter, pagination dan modal kustom tidak menjadi fokus latihan. Lihat docs/P19_MANAGEMENT_GUIDE.md untuk urutan membangun ulang kode.

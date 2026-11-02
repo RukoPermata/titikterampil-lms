@@ -222,3 +222,41 @@ test('validateRegistration memvalidasi nomor WhatsApp dan rentang jenjang baru (
   assert.equal(goodPrefixWa.valid, true);
   assert.equal(goodPrefixWa.status, 'success');
 });
+
+
+// Fungsi validasi tetap diuji dari source halaman, tanpa membuat file logika tambahan.
+// Blok data/validasi tidak mengandung JSX, React atau akses browser.
+const pageSource = await readFile(new URL('../src/app/admin/users/page.jsx', import.meta.url), 'utf8');
+const pureCrudCode = pageSource.split('// BAGIAN 1 — DATA DAN VALIDASI')[1].split('// BAGIAN 2 — HALAMAN DAN STATE REACT')[0];
+const crud = await import('data:text/javascript;base64,' + Buffer.from(pureCrudCode + '\nexport { validateUser, isValidStoredUsers, INITIAL_USERS };').toString('base64'));
+
+test('CRUD menolak email duplikat tetapi mengizinkan email sendiri saat edit', () => {
+  const user = crud.INITIAL_USERS[2];
+  assert.match(crud.validateUser({ ...user, email: user.email.toUpperCase() }, crud.INITIAL_USERS), /Email sudah/);
+  assert.equal(crud.validateUser(user, crud.INITIAL_USERS, user.id), '');
+});
+
+test('CRUD memvalidasi jenjang dan kelas termasuk nilai jenjang tidak dikenal', () => {
+  const user = crud.INITIAL_USERS[2];
+  assert.match(crud.validateUser({ ...user, level: 'SD', grade: 12 }, []), /Jenjang/);
+  assert.match(crud.validateUser({ ...user, level: '__proto__' }, []), /Jenjang/);
+  assert.equal(crud.validateUser({ ...user, level: 'SMP', grade: 9 }, []), '');
+});
+
+test('CRUD melindungi admin aktif terakhir saat perubahan peran dan status', () => {
+  const admin = crud.INITIAL_USERS[0];
+  assert.match(crud.validateUser({ ...admin, status: 'inactive' }, crud.INITIAL_USERS, admin.id), /terakhir/);
+  assert.match(crud.validateUser({ ...admin, role: 'teacher' }, crud.INITIAL_USERS, admin.id), /terakhir/);
+  const withSecond = [...crud.INITIAL_USERS, { ...admin, id: 'a2', email: 'a2@example.com' }];
+  assert.equal(crud.validateUser({ ...admin, status: 'inactive' }, withSecond, admin.id), '');
+});
+
+test('READ menolak storage rusak dan ID/email duplikat tanpa menghapus data sumber', () => {
+  const users = structuredClone(crud.INITIAL_USERS);
+  assert.equal(crud.isValidStoredUsers(users), true);
+  assert.equal(crud.isValidStoredUsers({ users }), false);
+  assert.equal(crud.isValidStoredUsers([...users, users[0]]), false);
+  assert.equal(crud.isValidStoredUsers(users.filter((user) => user.role !== 'admin')), false);
+  assert.equal(crud.isValidStoredUsers(users.map((user) => ({ ...user, createdAt: 'rusak' }))), false);
+  assert.deepEqual(users, crud.INITIAL_USERS);
+});

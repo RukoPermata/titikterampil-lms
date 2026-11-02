@@ -1,19 +1,18 @@
+/** Modul: Kompatibilitas endpoint profil tunggal /api/user?id=... */
+import { getRecord } from '@/src/lib/mock-api/resources';
+import { json, respond } from '@/src/lib/mock-api/handlers';
+import { validateParams } from '@/src/lib/mock-api/queries';
+
 /**
- * Modul: Route Handler API Mock User Profile
- * @author Tim Titik Terampil
- * Tanggung jawab: menyediakan endpoint data profil siswa dinamis untuk konsumsi Fetch API (Kriteria UTS Poin 2.2).
+ * Membaca profil demo tanpa mengganti ID salah dengan pengguna pertama.
+ * @param {Request} request - Permintaan GET dengan id opsional.
+ * @returns {Promise<Response>} Profil yang diminta atau HTTP 404.
  */
-import { NextResponse } from 'next/server';
-import { users } from '@/src/data/mock';
-
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id') || 'student-demo';
-
-  const user = users.find((u) => u.id === id) || users[0];
-
-  return NextResponse.json({
-    status: 'success',
-    data: user,
+  return respond(async () => {
+    const params = new URL(request.url).searchParams;
+    validateParams(params, ['id']);
+    const id = params.has('id') ? params.get('id').trim() : 'student-demo';
+    return json({ status: 'success', data: await getRecord('users', id) });
   });
 }

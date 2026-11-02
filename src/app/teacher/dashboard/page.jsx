@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useDemo } from "@/src/components/DemoProvider";
 import { classes, assignments } from "@/src/data/mock";
@@ -12,16 +12,7 @@ export default function TeacherDashboardPage_103022400061() {
   const teacherName = user?.name || "Pengajar";
   const teacherEmail = user?.email || "guru@titikterampil.id";
 
-  const [stats, setStats_103022400061] = useState({
-    essaysWaiting: 0,
-    totalQuestions: 0,
-    totalClasses: 0,
-    totalAssignments: 0
-  });
-
-  useEffect(() => {
-    setStats_103022400061(getTeacherStats_103022400061());
-  }, []);
+  const [stats] = useState(() => getTeacherStats_103022400061());
 
   return (
     <section className="page-content">

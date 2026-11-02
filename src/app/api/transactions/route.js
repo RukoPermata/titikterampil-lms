@@ -1,15 +1,20 @@
-/**
- * Modul: Route Handler API Mock Transactions
- * @author Tim Titik Terampil
- * Tanggung jawab: menyediakan data transaksi pembayaran paket untuk diambil via Fetch API (Kriteria UTS Poin 2.2).
- */
-import { NextResponse } from 'next/server';
-import { transactions } from '@/src/data/mock';
+/** Modul: Endpoint daftar transaksi simulasi dari sumber data demo bersama. */
+import { listResource, postResource } from '@/src/lib/mock-api/handlers';
 
-export async function GET() {
-  return NextResponse.json({
-    status: 'success',
-    count: transactions.length,
-    data: transactions,
-  });
+/**
+ * Membaca daftar transaksi simulasi beserta filter URL.
+ * @param {Request} request - Permintaan GET.
+ * @returns {Promise<Response>} Respons JSON daftar data.
+ */
+export async function GET(request) {
+  return listResource('transactions', request);
+}
+
+/**
+ * Menambahkan transaksi simulasi untuk simulasi frontend.
+ * @param {Request} request - Permintaan POST berisi JSON.
+ * @returns {Promise<Response>} Record baru atau kesalahan validasi.
+ */
+export async function POST(request) {
+  return postResource('transactions', request);
 }

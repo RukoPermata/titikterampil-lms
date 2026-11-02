@@ -315,3 +315,8 @@ titikterampil-lms/
 6. **Standar Ekstensi Berkas**:
    - Berkas yang merender antarmuka pengguna (halaman, layout, dan komponen React) menggunakan ekstensi **`.jsx`**.
    - Berkas fungsi logika murni (`actions.js`), data contoh (`mock.js`), fungsi helper (`utils.js`), dan API Route Handlers (`route.js`) tetap menggunakan ekstensi **`.js`**.
+
+
+## Catatan migrasi kontribusi Ray
+
+Implementasi latihan CRUD pengguna tetap dipertahankan di `src/app/admin/users/page.jsx` setelah migrasi App Router ke `src/app`. Panduan latihannya tersedia di `docs/P19_MANAGEMENT_GUIDE.md`. Mock API bersama dijelaskan dalam `docs/MOCK_API.md`; integrasi halaman ke API merupakan tahap berikutnya.

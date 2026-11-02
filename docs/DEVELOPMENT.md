@@ -27,6 +27,8 @@ ID berupa string dan relasi memakai ID, bukan judul. Lihat data contoh di `src/d
 
 ## Integrasi Data Dinamis (Kriteria UTS Poin 2.2)
 
+Kontrak endpoint, contoh fetch, validasi, dan penyimpanan demo tersedia di [MOCK_API.md](./MOCK_API.md).
+
 Pengambilan data antarmuka menggunakan **Fetch API** melalui Route Handler Next.js (`src/app/api/...`):
 - `GET /api/tryouts?level={level}`: Mengambil paket latihan tryout dinamis sesuai jenjang.
 - `GET /api/leaderboard?level={level}`: Mengambil peringkat nilai terbaik peserta per jenjang.
@@ -67,3 +69,9 @@ Semua 24 halaman beserta route, pemilik dan TODO tersedia pada `src/config/pages
 ## Skeleton fungsi yang diperbarui
 
 Seluruh fungsi bernama frontend memiliki komentar tujuan, parameter dan keluaran, serta tahapan pengembangan. Fungsi modul memiliki validasi awal dan kandidat data; aturan lanjutan serta persistence tetap TODO. Baca docs/SKELETON_GUIDE.md untuk kontrak status dan cara melengkapi halaman. Jalankan npm test, npm run lint dan npm run build sebelum integrasi.
+
+## Implementasi P19
+
+
+
+Implementasi P19 untuk latihan COTS kini berada seluruhnya di app/admin/users/page.js: data contoh, state, validasi, CRUD localStorage, form, tabel dan CSS lokal. Pencarian, filter, pagination dan modal kustom tidak menjadi fokus latihan. Lihat docs/P19_MANAGEMENT_GUIDE.md untuk urutan membangun ulang kode.
