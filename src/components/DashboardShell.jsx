@@ -65,9 +65,14 @@ export function DashboardShell({ role, children }) {
         <nav aria-label="Menu utama">
           {navigation.map((page) => (
             <Link
-              aria-current={pathname === page.route ? 'page' : undefined}
-              className={pathname === page.route ? 'active' : ''}
               key={page.id}
+              aria-current={pathname === page.route ? 'page' : undefined}
+              className={
+                pathname === page.route ||
+                (page.route !== `/${role}/dashboard` && pathname.startsWith(page.route + '/'))
+                  ? 'active'
+                  : ''
+              }
               href={demoHref(page.route)}
             >
               {page.title}
