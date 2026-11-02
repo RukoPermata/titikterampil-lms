@@ -28,6 +28,15 @@ body {
   line-height: 1.65;
 }
 
+.search {
+  display: flex;
+  width: 100%;
+  padding: 10px;
+  border: solid;
+  border-color: var(--ink);
+  border-radius: 10px;
+}
+
 a { color: inherit; text-underline-offset: 5px; }
 button, input, select, textarea { font: inherit; }
 
