@@ -247,7 +247,7 @@ export function ExamRoom({ tryoutId }) {
 
   if (!attempt) {
     return (
-      <section className="page-content">
+      <section className={`page-content ${styles.screenStack}`}>
         <p className="eyebrow">TITIK TERAMPIL / RUANG UJIAN</p>
         <h1>{loading ? 'Memuat ruang ujian…' : 'Attempt tidak ditemukan'}</h1>
         <p>Kembali ke petunjuk ujian untuk memulai percobaan baru.</p>
@@ -260,7 +260,7 @@ export function ExamRoom({ tryoutId }) {
 
   if (questions.length === 0) {
     return (
-      <section className="page-content">
+      <section className={`page-content ${styles.screenStack}`}>
         <p className="eyebrow">TITIK TERAMPIL / RUANG UJIAN</p>
         <h1>Bank soal belum tersedia</h1>
         <p>Paket <strong>{tryout?.title ?? tryoutId}</strong> belum memiliki soal pada data demo.</p>
@@ -281,7 +281,7 @@ export function ExamRoom({ tryoutId }) {
     : remainingMs <= 5 * 60 * 1000 ? styles.timerWarning : '';
 
   return (
-    <section className="page-content">
+    <section className={`page-content ${styles.screenStack}`}>
       <header className={styles.pageHeader}>
         <div>
           <p className="eyebrow">TITIK TERAMPIL / P07 / RUANG UJIAN CBT</p>

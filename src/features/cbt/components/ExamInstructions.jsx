@@ -68,7 +68,7 @@ export function ExamInstructions({ tryoutId }) {
 
   if (!tryout && !loading) {
     return (
-      <section className="page-content">
+      <section className={`page-content ${styles.screenStack}`}>
         <h1>Paket tryout tidak ditemukan</h1>
         <p>ID paket <strong>{tryoutId}</strong> belum tersedia.</p>
         <Link className="button" href="/student/tryouts">Kembali ke katalog</Link>
@@ -104,7 +104,7 @@ export function ExamInstructions({ tryoutId }) {
   }
 
   return (
-    <section className="page-content">
+    <section className={`page-content ${styles.screenStack}`}>
       <p className="eyebrow">TITIK TERAMPIL / P26 / PETUNJUK UJIAN</p>
       <Link href={`/student/tryouts/${tryoutId}`}>← Kembali ke detail paket</Link>
       <h1>{tryout ? tryout.title : 'Memuat paket…'}</h1>
