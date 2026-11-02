@@ -114,4 +114,3 @@ titikterampil-lms/
 ## Mock API dan kontribusi Ray
 
 Daftar endpoint, contoh fetch, dan batas penyimpanan demo tersedia di [docs/MOCK_API.md](docs/MOCK_API.md).
-Halaman latihan CRUD Ray tetap dipertahankan dan dipindahkan ke `src/app/admin/users/page.jsx`; halaman itu masih memakai localStorage sampai tahap integrasi UI.
