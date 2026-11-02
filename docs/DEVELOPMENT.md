@@ -14,8 +14,8 @@ ID berupa string dan relasi memakai ID, bukan judul. Lihat data contoh di `src/d
 
 | Entitas | Field yang disepakati sebagai awal |
 |---|---|
-| User | id, name, role; siswa memiliki level, grade |
-| Academic | level (SD/SMP/SMA), grades (1–6/7–9/10–12) |
+| User | id, name, email, whatsapp, role; siswa memiliki level, grade, readiness, studyTargets |
+| Academic | level (SD: 4-6, SMP: 7-9, SMA: 10-12 & Gap Year, Umum) |
 | Class | id, title, level, grade, teacherId; TODO studentIds |
 | Tryout | id, title, level, grade, subject, durationMinutes; TODO questionIds, opensAt, closesAt |
 | Question | id, tryoutId, prompt, options, correctIndex, weight, explanation |
@@ -24,6 +24,19 @@ ID berupa string dan relasi memakai ID, bukan judul. Lihat data contoh di `src/d
 | Submission (belum diimplementasikan) | id, assignmentId, studentId, answer, submittedAt, score, feedback |
 
 `correctIndex` berbasis nol. Rencana skor MVP: jumlah bobot jawaban benar / jumlah bobot seluruh soal × 100, dengan penanganan total bobot nol. Jadwal menggunakan ISO 8601 dan ditampilkan dalam Asia/Jakarta. Aturan ini masih perlu validasi klien. Kunci jawaban frontend hanya layak untuk demo; nanti scoring harus pindah server.
+
+## Integrasi Data Dinamis (Kriteria UTS Poin 2.2)
+
+Kontrak endpoint, contoh fetch, validasi, dan penyimpanan demo tersedia di [MOCK_API.md](./MOCK_API.md).
+
+Pengambilan data antarmuka menggunakan **Fetch API** melalui Route Handler Next.js (`src/app/api/...`):
+- `GET /api/tryouts?level={level}`: Mengambil paket latihan tryout dinamis sesuai jenjang.
+- `GET /api/leaderboard?level={level}`: Mengambil peringkat nilai terbaik peserta per jenjang.
+Komponen dilengkapi penanganan kondisi loading dan error state UI sesuai kriteria penilaian.
+
+## Styling dan Desain Sistem
+
+Didukung penuh menggunakan **Tailwind CSS v4** yang dikombinasikan dengan token desain bersama (`globals.css`) dengan warna identitas resmi **Turquoise #25B5A9**.
 
 ## Urutan implementasi
 
@@ -56,3 +69,21 @@ Semua 24 halaman beserta route, pemilik dan TODO tersedia pada `src/config/pages
 ## Skeleton fungsi yang diperbarui
 
 Seluruh fungsi bernama frontend memiliki komentar tujuan, parameter dan keluaran, serta tahapan pengembangan. Fungsi modul memiliki validasi awal dan kandidat data; aturan lanjutan serta persistence tetap TODO. Baca docs/SKELETON_GUIDE.md untuk kontrak status dan cara melengkapi halaman. Jalankan npm test, npm run lint dan npm run build sebelum integrasi.
+
+## Implementasi P19
+
+
+
+Implementasi P19 untuk latihan COTS kini berada seluruhnya di app/admin/users/page.js: data contoh, state, validasi, CRUD localStorage, form, tabel dan CSS lokal. Pencarian, filter, pagination dan modal kustom tidak menjadi fokus latihan. Lihat docs/P19_MANAGEMENT_GUIDE.md untuk urutan membangun ulang kode.
+
+## Implementasi Engine CBT (P05–P09)
+
+Alur peserta CBT kini menggunakan komponen client di `src/features/cbt/components/`:
+
+- `TryoutCatalog` dan `TryoutDetail`: filter katalog, badge akses, subtes, dan penukaran voucher.
+- `ExamInstructions`: gerbang konfirmasi sebelum attempt dibuat.
+- `ExamRoom`: timer berbasis deadline, lima tipe soal, navigasi nomor, penanda ragu-ragu, autosave, dan submit idempoten.
+- `ResultReview`: skor objektif, status pending esai, dan pembahasan per soal.
+- `AttemptHistory` dan `LeaderboardBoard`: riwayat attempt lokal serta papan peringkat per jenjang.
+
+Penyimpanan attempt dan akses voucher memakai `src/features/cbt/attempt-store.js` dengan `localStorage`. Data ini hanya untuk demo frontend; validasi kepemilikan, penyimpanan jawaban, dan penilaian final tetap perlu dipindahkan ke server pada tahap backend.
