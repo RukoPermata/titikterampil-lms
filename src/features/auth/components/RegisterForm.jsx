@@ -9,6 +9,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useDemo } from '@/src/components/DemoProvider';
+import { useToast } from '@/src/components/Toast';
 import { validateRegistration, saveRegisteredUser } from '../actions';
 
 const GRADE_OPTIONS = {
@@ -38,7 +39,8 @@ function EyeOffIcon() {
 
 export function RegisterForm() {
   const router = useRouter();
-  const { signIn, showToast } = useDemo();
+  const { signIn } = useDemo();
+  const showToast = useToast();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

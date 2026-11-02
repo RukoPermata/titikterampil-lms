@@ -9,6 +9,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useDemo } from '@/src/components/DemoProvider';
+import { useToast } from '@/src/components/Toast';
 import { authenticateUser } from '../actions';
 
 function EyeIcon() {
@@ -31,7 +32,8 @@ function EyeOffIcon() {
 
 export function LoginForm() {
   const router = useRouter();
-  const { signIn, showToast } = useDemo();
+  const { signIn } = useDemo();
+  const showToast = useToast();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
