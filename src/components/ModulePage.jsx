@@ -1,3 +1,4 @@
+'use client'
 /**
  * Modul: Pratinjau bersama untuk kerangka halaman MVP
  * @author Tim Titik Terampil; koordinator integrasi: Kaisar dan Rayazka
@@ -25,7 +26,7 @@ const listCollections = {
  * @param {string} [props.recordId] - ID entitas untuk pratinjau halaman detail.
  * @returns {React.ReactElement} Data contoh, catatan implementasi atau pesan tidak ditemukan.
  */
-export function ModulePage({ pageId, recordId }) {
+export function ModulePage({ pageId, recordId, session }) {
   // TODO: Pemilik halaman mengganti pratinjau ini dengan UI dan logika modulnya.
   // 1. Baca metadata dan tangani ID halaman yang belum terdaftar.
   const page = findPage(pageId);
@@ -89,7 +90,13 @@ export function ModulePage({ pageId, recordId }) {
       )}
 
       <div className="grid">
-        {list.map((item, index) => (
+        {list.filter((v, i) => {
+          if (pageId === "P10") {
+            if (v.level === session.level) return true
+            else return false
+          }
+          return true
+        }).map((item, index) => (
           <article className="panel" key={item.id || item.level}>
             <p className="eyebrow">DATA CONTOH {String(index + 1).padStart(2, '0')}</p>
             <h2>{item.title || item.name || item.level || item.prompt}</h2>
